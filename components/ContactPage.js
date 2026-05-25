@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Nav from './Nav';
 import Footer from './Footer';
 import PageIcon from './PageIcon';
@@ -13,6 +13,14 @@ export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [bookingAnswers, setBookingAnswers] = useState(null);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('df-booking-answers');
+      if (raw) setBookingAnswers(JSON.parse(raw));
+    } catch {}
+  }, []);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -30,6 +38,7 @@ export default function ContactPage() {
       topic: fd.get('topic'),
       message: fd.get('message'),
       _hp: fd.get('_hp') || '',
+      ...(bookingAnswers ? { answers: bookingAnswers } : {}),
     };
 
     try {
@@ -40,6 +49,7 @@ export default function ContactPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.ok) {
+        try { sessionStorage.removeItem('df-booking-answers'); } catch {}
         setSubmitted(true);
       } else {
         const key = data?.error || 'send_failed';
@@ -78,6 +88,28 @@ export default function ContactPage() {
             <div className="form-thanks" role="status">✓ {c.f.thanks}</div>
           ) : (
             <form className="form" onSubmit={onSubmit} noValidate>
+              {bookingAnswers && bookingAnswers.some((a) => a.selected.length > 0) && (
+                <div className="booking-summary">
+                  <div className="booking-summary-head">
+                    <span>{c.f.summaryLabel}</span>
+                    <button
+                      type="button"
+                      className="booking-summary-clear"
+                      onClick={() => { setBookingAnswers(null); try { sessionStorage.removeItem('df-booking-answers'); } catch {} }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  {bookingAnswers.filter((a) => a.selected.length > 0).map((a, i) => (
+                    <div key={i} className="booking-summary-row">
+                      <div className="booking-summary-q">{a.q}</div>
+                      <div className="booking-summary-opts">
+                        {a.selected.map((opt) => <span key={opt} className="booking-summary-tag">{opt}</span>)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="row">
                 <div className={`field ${fieldErrors.name ? 'field-error' : ''}`}>
                   <label htmlFor="name">{c.f.name}</label>
