@@ -686,6 +686,40 @@ button { font: inherit; color: inherit; cursor: pointer; }
   transition: background .15s, border-color .15s;
 }
 .field input[type="file"]::file-selector-button:hover { background: #1a1a1a; border-color: #3a3a3a; }
+.booking-summary {
+  border: 1px solid rgba(124, 92, 255, 0.3);
+  border-radius: var(--radius);
+  background: rgba(124, 92, 255, 0.05);
+  padding: 16px 18px;
+  display: grid; gap: 12px;
+}
+.booking-summary-head {
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--font-mono), ui-monospace, monospace; font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--accent);
+}
+.booking-summary-clear {
+  background: transparent; border: 0;
+  color: var(--fg-mute); font-size: 12px;
+  padding: 2px 6px; border-radius: 999px;
+  transition: color .15s, background .15s;
+}
+.booking-summary-clear:hover { color: var(--fg); background: var(--line-strong); }
+.booking-summary-row { display: grid; gap: 5px; }
+.booking-summary-q {
+  font-size: 12px; color: var(--fg-dim); line-height: 1.4;
+}
+.booking-summary-opts { display: flex; flex-wrap: wrap; gap: 5px; }
+.booking-summary-tag {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px;
+  border: 1px solid rgba(124, 92, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(124, 92, 255, 0.10);
+  font-size: 12px; color: var(--accent);
+}
+
 .hp-field {
   position: absolute !important;
   left: -9999px !important; top: -9999px !important;
@@ -711,6 +745,150 @@ button { font: inherit; color: inherit; cursor: pointer; }
   color: var(--fg-dim); font-size: 15px; line-height: 1.6;
 }
 .legal-lines li { padding: 2px 0; }
+
+/* ========== Booking flow modal ========== */
+.bflow-backdrop {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(10, 10, 10, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: bflow-fade-in 0.2s ease-out both;
+}
+@keyframes bflow-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.bflow-modal {
+  position: relative;
+  background: var(--bg-elev);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  padding: 40px 44px 36px;
+  max-width: 580px; width: 100%;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.55);
+  animation: bflow-slide-up 0.25s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes bflow-slide-up {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (max-width: 620px) {
+  .bflow-modal { padding: 32px 24px 28px; }
+}
+
+.bflow-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 32px; height: 32px; border-radius: 999px;
+  border: 1px solid var(--line-strong); background: transparent;
+  color: var(--fg-mute); font-size: 13px;
+  display: grid; place-items: center;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.bflow-close:hover { color: var(--fg); border-color: var(--line-strong); background: var(--bg-card); }
+
+.bflow-header { margin-bottom: 28px; }
+
+.bflow-kicker {
+  font-family: var(--font-mono), ui-monospace, monospace; font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.18em;
+  color: var(--accent); display: block; margin-bottom: 14px;
+}
+
+.bflow-progress-bar {
+  display: flex; gap: 6px; margin-bottom: 10px;
+}
+.bflow-seg {
+  flex: 1; height: 3px; border-radius: 3px;
+  background: var(--line-strong);
+  transition: background 0.3s;
+}
+.bflow-seg-active { background: var(--accent); }
+
+.bflow-step-label {
+  font-family: var(--font-mono), ui-monospace, monospace; font-size: 11px;
+  color: var(--fg-mute); letter-spacing: 0.1em;
+}
+
+.bflow-question {
+  font-size: clamp(18px, 3vw, 24px);
+  font-weight: 600; letter-spacing: -0.02em;
+  line-height: 1.25; margin: 0 0 6px;
+  text-wrap: balance;
+}
+
+.bflow-hint {
+  font-size: 13px; color: var(--fg-mute);
+  margin: 0 0 22px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.04em;
+}
+
+.bflow-opts {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin-bottom: 32px;
+}
+
+.bflow-opt {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--bg);
+  font-size: 14px; font-weight: 400;
+  color: var(--fg-dim);
+  transition: border-color .18s, background .18s, color .18s, transform .15s;
+  cursor: pointer;
+}
+.bflow-opt:hover {
+  border-color: var(--accent);
+  color: var(--fg);
+  background: rgba(124, 92, 255, 0.06);
+  transform: translateY(-1px);
+}
+.bflow-opt-on {
+  border-color: var(--accent);
+  background: rgba(124, 92, 255, 0.12);
+  color: var(--fg);
+}
+.bflow-opt-on:hover { transform: translateY(-1px); }
+
+.bflow-check {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  font-size: 10px; color: var(--accent);
+  flex-shrink: 0;
+  transition: background .18s, border-color .18s;
+}
+.bflow-opt-on .bflow-check {
+  background: var(--accent); border-color: var(--accent);
+  color: white;
+}
+
+.bflow-actions {
+  display: flex; align-items: center;
+  justify-content: flex-end; gap: 12px;
+}
+
+.bflow-btn-back {
+  padding: 11px 20px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 14px; font-weight: 500; color: var(--fg-dim);
+  transition: color .15s, border-color .15s, background .15s;
+}
+.bflow-btn-back:hover { color: var(--fg); border-color: #3a3a3a; background: var(--bg-card); }
+
+.bflow-btn-next {
+  padding: 11px 24px;
+  border: 0; border-radius: 999px;
+  background: var(--accent); color: white;
+  font-size: 14px; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: background .2s, transform .15s;
+}
+.bflow-btn-next:hover { background: #8b6dff; transform: translateY(-1px); }
 
 /* ========== Animations (SMIL helpers + CSS) ========== */
 .kw-person { transform-box: fill-box; transform-origin: center; }

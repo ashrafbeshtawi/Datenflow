@@ -35,17 +35,50 @@ function validate(body) {
   return errors;
 }
 
+function formatAnswersText(answers) {
+  if (!Array.isArray(answers) || answers.length === 0) return '';
+  const lines = ['\nVorqualifizierung:'];
+  for (const { q, selected } of answers) {
+    if (!Array.isArray(selected) || selected.length === 0) continue;
+    lines.push(`  ${q}`);
+    lines.push(`  → ${selected.join(', ')}`);
+  }
+  return lines.length > 1 ? lines.join('\n') : '';
+}
+
 function formatText(b) {
+  const answersBlock = formatAnswersText(b.answers);
   return [
     `Name:    ${b.name}`,
     `Firma:   ${b.company}`,
     `E-Mail:  ${b.email}`,
     `Telefon: ${b.phone || '-'}`,
     `Thema:   ${b.topic}`,
+    ...(answersBlock ? [answersBlock] : []),
     '',
     'Nachricht:',
     b.message,
   ].join('\n');
+}
+
+function formatAnswersHtml(answers, esc) {
+  if (!Array.isArray(answers) || answers.length === 0) return '';
+  const rows = answers
+    .filter(({ selected }) => Array.isArray(selected) && selected.length > 0)
+    .map(({ q, selected }) => `
+      <tr>
+        <td style="padding:6px 0 2px;color:#555;font-size:13px">${esc(q)}</td>
+      </tr>
+      <tr>
+        <td style="padding:0 0 10px">
+          ${selected.map((s) => `<span style="display:inline-block;margin:2px 4px 2px 0;padding:2px 10px;background:#f0eeff;border-radius:999px;font-size:12px;color:#5a3fbf">${esc(s)}</span>`).join('')}
+        </td>
+      </tr>`)
+    .join('');
+  if (!rows) return '';
+  return `
+    <h3 style="margin:20px 0 8px">Vorqualifizierung</h3>
+    <table style="border-collapse:collapse;width:100%">${rows}</table>`;
 }
 
 function formatHtml(b) {
@@ -60,6 +93,7 @@ function formatHtml(b) {
         <tr><td style="padding:4px 12px 4px 0"><b>Telefon:</b></td><td>${esc(b.phone || '-')}</td></tr>
         <tr><td style="padding:4px 12px 4px 0"><b>Thema:</b></td><td>${esc(b.topic)}</td></tr>
       </table>
+      ${formatAnswersHtml(b.answers, esc)}
       <h3 style="margin:20px 0 8px">Nachricht</h3>
       <p style="white-space:pre-wrap;margin:0">${esc(b.message)}</p>
     </div>

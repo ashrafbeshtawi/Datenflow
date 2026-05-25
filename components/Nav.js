@@ -6,7 +6,7 @@ import Logomark from './Logomark';
 import { useLangContext } from './LangProvider';
 
 export default function Nav({ current = 'home' }) {
-  const { lang, setLang, t } = useLangContext();
+  const { lang, setLang, t, openBookingFlow } = useLangContext();
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -40,13 +40,15 @@ export default function Nav({ current = 'home' }) {
             <button className={lang === 'de' ? 'active' : ''} onClick={() => setLang('de')}>DE</button>
             <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
           </div>
-          <a href="/contact" className="btn btn-primary">{t.nav.cta}<span aria-hidden>→</span></a>
+          <button type="button" className="btn btn-primary" onClick={openBookingFlow}>
+            {t.nav.cta}<span aria-hidden>→</span>
+          </button>
         </div>
 
         <div className="nav-mobile-bar">
-          <a href="/contact" className="btn btn-primary nav-cta-mobile">
+          <button type="button" className="btn btn-primary nav-cta-mobile" onClick={openBookingFlow}>
             {t.nav.cta}<span aria-hidden>→</span>
-          </a>
+          </button>
           <button
             type="button"
             className="nav-toggle"

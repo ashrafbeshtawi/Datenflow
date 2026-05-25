@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { SCENES, ICONS } from './Scenes';
+import { useLangContext } from './LangProvider';
 
 const SLIDE_KEYS = ['docs', 'chat', 'sec', 'custom'];
 const AUTO_MS = 7000;
 
 export default function Showcase({ t }) {
+  const { openBookingFlow } = useLangContext();
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [hovering, setHovering] = useState(false);
@@ -62,7 +64,7 @@ export default function Showcase({ t }) {
           </h1>
           <p className="case-lede" key={'lede-' + idx}>{slide.lede}</p>
           <div className="case-cta">
-            <a href="/contact" className="btn btn-accent btn-lg">{t.primary}<span aria-hidden>→</span></a>
+            <button type="button" className="btn btn-accent btn-lg" onClick={openBookingFlow}>{t.primary}<span aria-hidden>→</span></button>
             <a href="/services" className="btn btn-lg">{t.secondary}</a>
           </div>
           <div className="case-metrics" key={'m-' + idx}>
