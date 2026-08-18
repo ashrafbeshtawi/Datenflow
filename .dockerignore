@@ -1,11 +1,16 @@
-node_modules
-.next
+# Keep the prod image lean and free of local state/secrets
 .git
 .github
 .idea
-.claude
-.gitignore
-.dockerignore
-Dockerfile
-npm-debug.log
-.DS_Store
+var
+vendor
+drivers
+tests
+node_modules
+docker-compose.yaml
+.env
+.env.example
+.env.local
+.env.*.local
+*.md
+.phpunit.cache
