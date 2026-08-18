@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ t.karriere.title }} — Datenflow{% endblock %}
+
+{% block body %}
+<section class="section page-head">
+    <div class="wrap wrap-narrow">
+        <p class="kicker">{{ t.karriere.kicker }}</p>
+        <h1>{{ t.karriere.title }}</h1>
+        <p class="section-sub">{{ t.karriere.sub }}</p>
+        {% with {checks: t.karriere.checks} %}{% include 'partials/_checks.html.twig' %}{% endwith %}
+    </div>
+</section>
+
+<section class="section">
+    <div class="wrap wrap-narrow">
+        <div class="card intro-card">
+            <h2 class="card-h">{{ t.karriere.intro_heading }}</h2>
+            <p>{{ t.karriere.intro_body }}</p>
+        </div>
+
+        {% if sent|default(false) %}
+            <p class="form-success" role="status">{{ t.karriere.f.thanks }}</p>
+        {% else %}
+        {% set old = old|default({}) %}
+        {% set errors = errors|default({}) %}
+        {% if errors is not empty %}
+            <p class="form-error-summary" role="alert">{{ t.form_errors[error_key|default('validation')] }}</p>
+        {% endif %}
+        <form class="form-card" method="post" action="{{ path('karriere') }}" enctype="multipart/form-data">
+            <div class="field-row">
+                <label>{{ t.karriere.f.name }} *
+                    <input type="text" name="name" required maxlength="200" value="{{ old.name|default('') }}" {{ errors.name is defined ? 'aria-invalid="true"' }}>
+                </label>
+                <label>{{ t.karriere.f.email }} *
+                    <input type="email" name="email" required maxlength="320" value="{{ old.email|default('') }}" {{ errors.email is defined ? 'aria-invalid="true"' }}>
+                </label>
+            </div>
+            <label>{{ t.karriere.f.role }}
+                <select name="role">
+                    {% for opt in t.karriere.f.role_opts %}
+                        <option value="{{ opt }}" {{ old.role|default('') == opt ? 'selected' }}>{{ opt }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>{{ t.karriere.f.portfolio }}
+                <input type="url" name="portfolio" maxlength="500" value="{{ old.portfolio|default('') }}">
+            </label>
+            <label>{{ t.karriere.f.cv }}
+                <input type="file" name="cv" accept=".pdf,.doc,.docx">
+            </label>
+            <label>{{ t.karriere.f.message }} *
+                <textarea name="message" required rows="5" maxlength="5000" placeholder="{{ t.karriere.f.message_ph }}" {{ errors.message is defined ? 'aria-invalid="true"' }}>{{ old.message|default('') }}</textarea>
+            </label>
+            {% include 'partials/_form_protect.html.twig' %}
+            <button class="btn btn-primary" type="submit">{{ t.karriere.f.submit }}</button>
+        </form>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

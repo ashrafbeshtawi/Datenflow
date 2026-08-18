@@ -1,0 +1,498 @@
+<?php
+
+namespace App\Content;
+
+/**
+ * All site copy, DE + EN. Plain language for non-IT readers — no jargon.
+ */
+final class SiteCopy
+{
+    public static function for(string $locale): array
+    {
+        return self::COPY[$locale === 'en' ? 'en' : 'de'];
+    }
+
+    private const COPY = [
+        'de' => [
+            'meta' => [
+                'title' => 'Datenflow — IT-Lösungen für kleine und mittlere Unternehmen',
+                'description' => 'Digitale Lösungen, Automatisierung und KI für Logistik, Gastronomie und Dienstleister — verständlich erklärt, ohne Fachchinesisch. Erstgespräch kostenlos.',
+            ],
+            'nav' => [
+                'home' => 'Start',
+                'services' => 'Leistungen',
+                'process' => 'So arbeiten wir',
+                'faq' => 'Häufige Fragen',
+                'contact' => 'Kontakt',
+                'cta' => 'Gespräch buchen',
+            ],
+            'hero' => [
+                'eyebrow' => 'IT-Agentur für kleine und mittlere Unternehmen',
+                'title_pre' => 'Gute IT muss nicht',
+                'title_em' => 'kompliziert sein.',
+                'lede' => 'Wir bauen digitale Lösungen für Logistik, Gastronomie und Dienstleister — Abläufe automatisieren, Zettelwirtschaft abschaffen, KI sinnvoll einsetzen. Verständlich erklärt, Schritt für Schritt umgesetzt.',
+                'primary' => 'Kostenloses Gespräch buchen',
+                'secondary' => 'Was wir machen',
+                'checks' => ['Erstgespräch kostenlos', 'Festpreise statt Überraschungen', 'Wir sprechen Ihre Sprache — kein IT-Deutsch'],
+            ],
+            'industries' => [
+                'kicker' => 'Für wen wir arbeiten',
+                'title' => 'Wir kennen Ihren Alltag.',
+                'sub' => 'Keine Lösungen von der Stange für „irgendein Unternehmen“ — sondern Werkzeuge für Betriebe wie Ihren.',
+                'items' => [
+                    [
+                        'icon' => 'truck',
+                        'title' => 'Logistik & Transport',
+                        'tagline' => 'Weniger Zettel, mehr Überblick.',
+                        'body' => 'Lieferscheine digital statt auf Papier, Touren und Aufträge auf einen Blick, Kunden werden automatisch informiert, wo ihre Lieferung steht.',
+                        'examples' => ['Digitale Lieferscheine', 'Tourenübersicht', 'Automatische Kundeninfo'],
+                    ],
+                    [
+                        'icon' => 'plate',
+                        'title' => 'Gastronomie & Hotellerie',
+                        'tagline' => 'Mehr Zeit für Ihre Gäste.',
+                        'body' => 'Reservierungen laufen online rund um die Uhr, die Speisekarte pflegen Sie selbst in Minuten, Bestellungen und Dienstpläne organisieren sich fast von allein.',
+                        'examples' => ['Online-Reservierung', 'Digitale Speisekarte', 'Dienstplan-Hilfe'],
+                    ],
+                    [
+                        'icon' => 'briefcase',
+                        'title' => 'Dienstleistung & Handwerk',
+                        'tagline' => 'Termine, Angebote, Rechnungen — automatisch.',
+                        'body' => 'Kunden buchen Termine online, Angebote und Rechnungen entstehen aus Vorlagen statt aus Handarbeit, nichts geht mehr in der Ablage verloren.',
+                        'examples' => ['Online-Terminbuchung', 'Angebote per Klick', 'Kundenverwaltung'],
+                    ],
+                ],
+            ],
+            'services' => [
+                'kicker' => 'Leistungen',
+                'title' => 'Vier Dinge, die wir richtig gut können.',
+                'sub' => 'Sie müssen nicht wissen, wie es technisch funktioniert. Sie müssen nur sagen, was Sie im Alltag Zeit und Nerven kostet — den Rest übernehmen wir.',
+                'items' => [
+                    [
+                        'icon' => 'automation',
+                        'title' => 'Abläufe automatisieren',
+                        'body' => 'Was Sie heute von Hand abtippen, weiterleiten oder ausdrucken, erledigt künftig der Computer: Rechnungen, Lieferscheine, Terminbestätigungen, Erinnerungen. Sie behalten die Kontrolle — die Routinearbeit fällt weg.',
+                        'examples' => ['Rechnungen automatisch erstellen', 'Daten ohne Abtippen übertragen', 'Erinnerungen an Kunden senden'],
+                    ],
+                    [
+                        'icon' => 'ai',
+                        'title' => 'KI, die im Alltag hilft',
+                        'body' => 'Ein digitaler Assistent, der Kundenfragen beantwortet, Reservierungen annimmt oder Dokumente vorsortiert — rund um die Uhr, auch wenn bei Ihnen niemand ans Telefon gehen kann. Und wenn KI für Sie nichts bringt, sagen wir das ehrlich.',
+                        'examples' => ['Fragen automatisch beantworten', 'Anfragen vorsortieren', 'Texte und Dokumente zusammenfassen'],
+                    ],
+                    [
+                        'icon' => 'custom',
+                        'title' => 'Individuelle Software',
+                        'body' => 'Wenn Excel-Listen und Standard-Programme nicht mehr reichen: Wir bauen das Werkzeug, das genau zu Ihrem Betrieb passt — nicht umgekehrt. Einfach zu bedienen, auf Deutsch, mit Einweisung für Ihr Team.',
+                        'examples' => ['Verwaltung nach Maß', 'Alles an einem Ort statt Tool-Chaos', 'Funktioniert auf Handy und PC'],
+                    ],
+                    [
+                        'icon' => 'support',
+                        'title' => 'Beratung & laufende Betreuung',
+                        'body' => 'Wir erklären in normaler Sprache, was sich für Ihren Betrieb lohnt — und was nicht. Nach der Umsetzung lassen wir Sie nicht allein: Wir bleiben erreichbar, halten alles am Laufen und helfen, wenn etwas klemmt.',
+                        'examples' => ['Ehrliche Empfehlung statt Verkaufsgespräch', 'Schulung für Ihr Team', 'Feste Ansprechpartner'],
+                    ],
+                ],
+            ],
+            'process' => [
+                'kicker' => 'So arbeiten wir',
+                'title' => 'Vom ersten Gespräch zur fertigen Lösung — ohne Risiko.',
+                'sub' => 'Die ersten beiden Schritte kosten Sie nichts. Danach entscheiden Sie bei jedem Schritt selbst, ob es weitergeht.',
+                'steps' => [
+                    [
+                        'num' => '1',
+                        'title' => 'Kostenloses Erstgespräch',
+                        'body' => 'Sie erzählen, wir hören zu: Was kostet Sie im Alltag am meisten Zeit? 30 Minuten, telefonisch oder per Video — ohne Verkaufsdruck.',
+                        'time' => '30 Minuten · kostenlos',
+                    ],
+                    [
+                        'num' => '2',
+                        'title' => 'Wir schauen uns Ihre Abläufe an',
+                        'body' => 'Wir analysieren in wenigen Tagen, wo Sie am meisten gewinnen können. Sie bekommen einen verständlichen Vorschlag mit Festpreis — kein Kleingedrucktes.',
+                        'time' => 'wenige Tage · kostenlos',
+                    ],
+                    [
+                        'num' => '3',
+                        'title' => 'Umsetzung Schritt für Schritt',
+                        'body' => 'Wir bauen in kleinen Etappen. Sie sehen regelmäßig den Fortschritt und können jederzeit mitreden — keine monatelange Funkstille.',
+                        'time' => 'je nach Projekt',
+                    ],
+                    [
+                        'num' => '4',
+                        'title' => 'Übergabe & Betreuung',
+                        'body' => 'Ihr Team bekommt eine Einweisung in normaler Sprache. Danach bleiben wir erreichbar und kümmern uns darum, dass alles läuft.',
+                        'time' => 'laufend',
+                    ],
+                ],
+            ],
+            'faq' => [
+                'kicker' => 'Häufige Fragen',
+                'title' => 'Was Kunden uns am Anfang fragen.',
+                'items' => [
+                    [
+                        'q' => 'Ich kenne mich mit IT nicht aus — ist das ein Problem?',
+                        'a' => 'Überhaupt nicht, das ist der Normalfall bei uns. Sie müssen nur Ihren Betrieb kennen. Wir erklären alles in normaler Sprache und Sie entscheiden erst, wenn Sie es wirklich verstanden haben.',
+                    ],
+                    [
+                        'q' => 'Was kostet das?',
+                        'a' => 'Das Erstgespräch und die Analyse Ihrer Abläufe sind kostenlos. Danach bekommen Sie ein Angebot mit Festpreis. Es gibt keine versteckten Kosten und keine Verpflichtung, das Angebot anzunehmen.',
+                    ],
+                    [
+                        'q' => 'Wie lange dauert so etwas?',
+                        'a' => 'Kleine Automatisierungen sind oft in ein bis zwei Wochen einsatzbereit. Größere Projekte bauen wir in Etappen — Sie sehen jede Etappe fertig, bevor die nächste beginnt.',
+                    ],
+                    [
+                        'q' => 'Muss ich neue Geräte oder Programme kaufen?',
+                        'a' => 'Meistens nicht. Wir bauen wo immer möglich auf dem auf, was Sie schon haben — Ihre Kasse, Ihre Buchhaltung, Ihre E-Mails. Falls doch etwas Neues nötig ist, sagen wir es vorher klar dazu.',
+                    ],
+                    [
+                        'q' => 'Was passiert mit unseren Daten?',
+                        'a' => 'Ihre Daten bleiben Ihre Daten. Wir arbeiten nach DSGVO, hosten in Deutschland oder der EU und geben nichts an Dritte weiter. Auf Wunsch unterschreiben wir vor dem ersten Gespräch eine Vertraulichkeitsvereinbarung.',
+                    ],
+                    [
+                        'q' => 'Lohnt sich KI für einen kleinen Betrieb überhaupt?',
+                        'a' => 'Oft ja — aber nicht immer. Wenn eine einfache Automatisierung ohne KI reicht, empfehlen wir die. Wir verkaufen Lösungen, die sich rechnen, keine Schlagworte.',
+                    ],
+                ],
+            ],
+            'cta_band' => [
+                'title' => 'Erzählen Sie uns, was Sie Zeit kostet.',
+                'body' => 'Ein kostenloses Gespräch, 30 Minuten, ohne Verkaufsdruck. Danach wissen Sie, was möglich ist — und was es kosten würde.',
+                'button' => 'Kostenloses Gespräch buchen',
+            ],
+            'booking' => [
+                'kicker' => 'Gespräch buchen',
+                'title' => 'Buchen Sie Ihr kostenloses Erstgespräch.',
+                'body' => 'Sagen Sie uns kurz, worum es geht, und wann wir Sie am besten erreichen. Wir melden uns innerhalb von 24 Stunden mit einem Terminvorschlag.',
+                'checks' => ['Antwort innerhalb von 24 Stunden', '30 Minuten, telefonisch oder per Video', 'Kostenlos und unverbindlich'],
+                'f' => [
+                    'name' => 'Ihr Name',
+                    'company' => 'Firma',
+                    'email' => 'E-Mail',
+                    'phone' => 'Telefon (optional)',
+                    'preferred_date' => 'Wunschtermin (optional)',
+                    'preferred_time' => 'Wann erreichen wir Sie am besten?',
+                    'time_opts' => ['Vormittags (8–12 Uhr)', 'Nachmittags (12–17 Uhr)', 'Abends (17–19 Uhr)'],
+                    'message' => 'Worum geht es? (Pflichtfeld)',
+                    'message_ph' => 'Ein paar Sätze reichen: Was kostet Sie gerade Zeit oder Nerven? Zum Beispiel: „Wir schreiben alle Lieferscheine noch von Hand.“',
+                    'message_hint' => 'Bitte beschreiben Sie kurz Ihr Anliegen — so können wir uns auf das Gespräch vorbereiten.',
+                    'submit' => 'Gespräch anfragen',
+                    'thanks' => 'Danke! Wir melden uns innerhalb von 24 Stunden mit einem Terminvorschlag.',
+                ],
+            ],
+            'contact' => [
+                'kicker' => 'Kontakt',
+                'title' => 'So erreichen Sie uns.',
+                'body' => 'Am schnellsten geht es über ein kostenloses Erstgespräch — oder Sie schreiben uns direkt.',
+                'phone' => '+49 1590 8408815',
+                'email' => 'kontakt@datenflow.de',
+                'address' => ['Datenflow', 'Elsenstraße 62', '12059 Berlin'],
+                'f' => [
+                    'name' => 'Ihr Name',
+                    'company' => 'Firma (optional)',
+                    'email' => 'E-Mail',
+                    'message' => 'Ihre Nachricht',
+                    'message_ph' => 'Was möchten Sie uns mitteilen?',
+                    'submit' => 'Nachricht senden',
+                    'thanks' => 'Danke für Ihre Nachricht — wir melden uns innerhalb von 24 Stunden.',
+                ],
+            ],
+            'karriere' => [
+                'kicker' => 'Karriere',
+                'title' => 'Bei Datenflow arbeiten.',
+                'sub' => 'Wir suchen Menschen, die echte Probleme gerne lösen. Ein paar Sätze reichen — wir melden uns innerhalb einer Woche.',
+                'intro_heading' => 'Wer wir sind',
+                'intro_body' => 'Kleines Team, hohe Eigenverantwortung. Hybrid (Berlin / remote in der EU), Vollzeit oder Teilzeit. Jeder Code, den wir abliefern, geht durch Code-Review.',
+                'checks' => ['Bewerbung in 3–5 Sätzen reicht', 'Antwort innerhalb einer Woche', 'Kein 5-stufiges Interview'],
+                'f' => [
+                    'name' => 'Name',
+                    'email' => 'E-Mail',
+                    'role' => 'Worauf bewerben Sie sich?',
+                    'role_opts' => ['Software Engineering', 'AI / ML Engineering', 'DevOps / Plattform', 'Initiativbewerbung'],
+                    'portfolio' => 'Portfolio / GitHub / LinkedIn (optional)',
+                    'cv' => 'Lebenslauf (PDF, DOC, DOCX — optional, max. 8 MB)',
+                    'message' => 'Erzählen Sie kurz von sich',
+                    'message_ph' => 'Was machen Sie aktuell, was möchten Sie bei uns machen?',
+                    'submit' => 'Bewerbung senden',
+                    'thanks' => 'Danke — wir lesen jede Bewerbung selbst und melden uns innerhalb einer Woche.',
+                ],
+            ],
+            'form_errors' => [
+                'validation' => 'Bitte prüfen Sie die markierten Felder.',
+                'rate_limit' => 'Zu viele Versuche — bitte versuchen Sie es später erneut.',
+                'send_failed' => 'Versand fehlgeschlagen. Bitte versuchen Sie es später erneut oder rufen Sie uns an.',
+                'required' => 'Dieses Feld ist ein Pflichtfeld.',
+                'invalid_email' => 'Bitte geben Sie eine gültige E-Mail-Adresse an.',
+                'cv_too_large' => 'Datei zu groß — maximal 8 MB.',
+                'cv_invalid_type' => 'Bitte PDF, DOC oder DOCX hochladen.',
+            ],
+            'footer' => [
+                'blurb' => 'IT-Lösungen für kleine und mittlere Unternehmen — Logistik, Gastronomie, Dienstleistung.',
+                'copy' => '© 2026 Datenflow — Berlin',
+                'links' => [
+                    ['label' => 'Impressum', 'route' => 'impressum'],
+                    ['label' => 'Datenschutz', 'route' => 'datenschutz'],
+                    ['label' => 'Karriere', 'route' => 'karriere'],
+                ],
+            ],
+            'impressum' => [
+                'kicker' => 'Impressum',
+                'title' => 'Impressum.',
+                'sub' => 'Angaben gemäß § 5 TMG.',
+                'sections' => [
+                    ['heading' => 'Anbieter', 'lines' => ['Datenflow', 'Inhaber: Mohammad Beshtawi', 'Elsenstraße 62', '12059 Berlin', 'Deutschland']],
+                    ['heading' => 'Kontakt', 'lines' => ['Telefon: +49 1590 8408815', 'E-Mail: kontakt@datenflow.de']],
+                    ['heading' => 'Umsatzsteuer-ID', 'lines' => ['Umsatzsteuer-Identifikationsnummer gemäß § 27 a UStG: DE461699659']],
+                    ['heading' => 'Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV', 'lines' => ['Mohammad Beshtawi', 'Elsenstraße 62', '12059 Berlin']],
+                    ['heading' => 'Haftungsausschluss', 'lines' => ['Die Inhalte dieser Seiten wurden mit größtmöglicher Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte übernehmen wir jedoch keine Gewähr. Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen.']],
+                ],
+            ],
+            'datenschutz' => [
+                'kicker' => 'Datenschutz',
+                'title' => 'Datenschutzerklärung.',
+                'sub' => 'Diese Hinweise informieren Sie über Art, Umfang und Zweck der Verarbeitung personenbezogener Daten auf dieser Website. Bitte beachten Sie: Dies ist ein generischer Platzhalter — bitte vor Veröffentlichung durch eine juristische Fachperson prüfen lassen.',
+                'sections' => [
+                    ['heading' => '1. Verantwortlicher', 'lines' => ['Verantwortlich für die Datenverarbeitung auf dieser Website im Sinne der DSGVO ist Datenflow, Inhaber: Mohammad Beshtawi, Elsenstraße 62, 12059 Berlin. Kontakt: kontakt@datenflow.de.']],
+                    ['heading' => '2. Zugriffsdaten und Hosting', 'lines' => ['Beim Aufruf dieser Website werden technische Zugriffsdaten verarbeitet (IP-Adresse, Datum und Uhrzeit, aufgerufene URL, Referer-URL, User-Agent). Diese Daten dienen ausschließlich der Bereitstellung und Sicherheit der Website (Art. 6 Abs. 1 lit. f DSGVO). Hosting erfolgt in Berlin.']],
+                    ['heading' => '3. Cookies', 'lines' => ['Diese Website setzt nur technisch notwendige Cookies (z. B. zur Speicherung Ihrer Sprachauswahl). Tracking- oder Analyse-Cookies werden nicht ohne Ihre ausdrückliche Einwilligung gesetzt.']],
+                    ['heading' => '4. Kontaktaufnahme und Terminbuchung', 'lines' => ['Wenn Sie uns über ein Formular oder per E-Mail erreichen, werden Ihre Angaben zur Bearbeitung der Anfrage verarbeitet (Art. 6 Abs. 1 lit. b und f DSGVO) und nach Erledigung gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.']],
+                    ['heading' => '5. Bewerbungen', 'lines' => ['Im Rahmen einer Bewerbung verarbeiten wir Ihre Daten zur Durchführung des Bewerbungsverfahrens (Art. 6 Abs. 1 lit. b DSGVO i. V. m. § 26 BDSG). Nach Abschluss des Verfahrens werden die Daten nach sechs Monaten gelöscht, sofern Sie nicht in eine längere Speicherung einwilligen.']],
+                    ['heading' => '6. Ihre Rechte', 'lines' => ['Sie haben das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21). Sie können sich jederzeit bei einer Aufsichtsbehörde beschweren.']],
+                    ['heading' => '7. Änderungen', 'lines' => ['Wir behalten uns vor, diese Datenschutzerklärung anzupassen, um sie an geänderte Rechtslagen oder Funktionsumfänge der Website anzupassen. Stand: August 2026.']],
+                ],
+            ],
+        ],
+
+        'en' => [
+            'meta' => [
+                'title' => 'Datenflow — IT solutions for small and mid-size businesses',
+                'description' => 'Digital solutions, automation and AI for logistics, hospitality and service businesses — explained in plain language. Free first consultation.',
+            ],
+            'nav' => [
+                'home' => 'Home',
+                'services' => 'Services',
+                'process' => 'How we work',
+                'faq' => 'FAQ',
+                'contact' => 'Contact',
+                'cta' => 'Book a call',
+            ],
+            'hero' => [
+                'eyebrow' => 'IT agency for small and mid-size businesses',
+                'title_pre' => 'Good IT doesn\'t have to be',
+                'title_em' => 'complicated.',
+                'lede' => 'We build digital solutions for logistics, hospitality and service businesses — automating routine work, replacing paper chaos, and putting AI to sensible use. Explained in plain language, delivered step by step.',
+                'primary' => 'Book a free call',
+                'secondary' => 'What we do',
+                'checks' => ['First call is free', 'Fixed prices, no surprises', 'We speak your language — not tech jargon'],
+            ],
+            'industries' => [
+                'kicker' => 'Who we work for',
+                'title' => 'We know your day-to-day.',
+                'sub' => 'No off-the-shelf solutions for "some company" — tools for businesses like yours.',
+                'items' => [
+                    [
+                        'icon' => 'truck',
+                        'title' => 'Logistics & transport',
+                        'tagline' => 'Less paper, more overview.',
+                        'body' => 'Delivery notes go digital instead of on paper, tours and orders at a glance, customers are informed automatically about where their delivery is.',
+                        'examples' => ['Digital delivery notes', 'Tour overview', 'Automatic customer updates'],
+                    ],
+                    [
+                        'icon' => 'plate',
+                        'title' => 'Hospitality & hotels',
+                        'tagline' => 'More time for your guests.',
+                        'body' => 'Reservations run online around the clock, you update the menu yourself in minutes, orders and staff schedules almost organise themselves.',
+                        'examples' => ['Online reservations', 'Digital menu', 'Scheduling help'],
+                    ],
+                    [
+                        'icon' => 'briefcase',
+                        'title' => 'Services & trades',
+                        'tagline' => 'Appointments, quotes, invoices — automatic.',
+                        'body' => 'Customers book appointments online, quotes and invoices come from templates instead of manual work, and nothing gets lost in the filing pile anymore.',
+                        'examples' => ['Online appointment booking', 'Quotes in one click', 'Customer management'],
+                    ],
+                ],
+            ],
+            'services' => [
+                'kicker' => 'Services',
+                'title' => 'Four things we do really well.',
+                'sub' => 'You don\'t need to know how it works technically. Just tell us what eats your time day-to-day — we take care of the rest.',
+                'items' => [
+                    [
+                        'icon' => 'automation',
+                        'title' => 'Automating routine work',
+                        'body' => 'What you type, forward or print by hand today gets done by the computer: invoices, delivery notes, appointment confirmations, reminders. You stay in control — the busywork disappears.',
+                        'examples' => ['Invoices created automatically', 'Data transferred without retyping', 'Reminders sent to customers'],
+                    ],
+                    [
+                        'icon' => 'ai',
+                        'title' => 'AI that helps day-to-day',
+                        'body' => 'A digital assistant that answers customer questions, takes reservations or pre-sorts documents — around the clock, even when nobody can pick up the phone. And if AI isn\'t worth it for you, we\'ll say so honestly.',
+                        'examples' => ['Questions answered automatically', 'Inquiries pre-sorted', 'Documents summarised'],
+                    ],
+                    [
+                        'icon' => 'custom',
+                        'title' => 'Custom software',
+                        'body' => 'When spreadsheets and off-the-shelf programs stop being enough: we build the tool that fits your business exactly — not the other way around. Easy to use, with training for your team.',
+                        'examples' => ['Administration built to fit', 'Everything in one place instead of tool chaos', 'Works on phone and PC'],
+                    ],
+                    [
+                        'icon' => 'support',
+                        'title' => 'Advice & ongoing support',
+                        'body' => 'We explain in plain language what pays off for your business — and what doesn\'t. After launch we don\'t disappear: we stay reachable, keep things running and help when something sticks.',
+                        'examples' => ['Honest recommendations, not a sales pitch', 'Training for your team', 'A fixed contact person'],
+                    ],
+                ],
+            ],
+            'process' => [
+                'kicker' => 'How we work',
+                'title' => 'From first call to working solution — without risk.',
+                'sub' => 'The first two steps cost you nothing. After that, you decide at every step whether to continue.',
+                'steps' => [
+                    [
+                        'num' => '1',
+                        'title' => 'Free first call',
+                        'body' => 'You talk, we listen: what costs you the most time day-to-day? 30 minutes, by phone or video — no sales pressure.',
+                        'time' => '30 minutes · free',
+                    ],
+                    [
+                        'num' => '2',
+                        'title' => 'We look at how you work',
+                        'body' => 'Within a few days we analyse where you stand to gain the most. You get an understandable proposal with a fixed price — no fine print.',
+                        'time' => 'a few days · free',
+                    ],
+                    [
+                        'num' => '3',
+                        'title' => 'Built step by step',
+                        'body' => 'We build in small stages. You see progress regularly and can weigh in at any time — no months of radio silence.',
+                        'time' => 'depends on the project',
+                    ],
+                    [
+                        'num' => '4',
+                        'title' => 'Handover & support',
+                        'body' => 'Your team gets a walkthrough in plain language. After that we stay reachable and make sure everything keeps running.',
+                        'time' => 'ongoing',
+                    ],
+                ],
+            ],
+            'faq' => [
+                'kicker' => 'FAQ',
+                'title' => 'What customers ask us at the start.',
+                'items' => [
+                    ['q' => 'I don\'t know anything about IT — is that a problem?', 'a' => 'Not at all — that\'s the normal case for us. You only need to know your business. We explain everything in plain language, and you only decide once you\'ve truly understood it.'],
+                    ['q' => 'What does it cost?', 'a' => 'The first call and the analysis of your workflows are free. After that you get a fixed-price quote. There are no hidden costs and no obligation to accept.'],
+                    ['q' => 'How long does it take?', 'a' => 'Small automations are often ready in one to two weeks. Larger projects are built in stages — you see each stage finished before the next one starts.'],
+                    ['q' => 'Do I have to buy new devices or programs?', 'a' => 'Usually not. Wherever possible we build on what you already have — your till, your bookkeeping, your email. If something new really is needed, we say so clearly up front.'],
+                    ['q' => 'What happens to our data?', 'a' => 'Your data stays your data. We work GDPR-compliant, host in Germany or the EU and pass nothing to third parties. On request we sign an NDA before the first call.'],
+                    ['q' => 'Is AI even worth it for a small business?', 'a' => 'Often yes — but not always. If a simple automation without AI does the job, that\'s what we recommend. We sell solutions that pay off, not buzzwords.'],
+                ],
+            ],
+            'cta_band' => [
+                'title' => 'Tell us what costs you time.',
+                'body' => 'A free 30-minute call, no sales pressure. Afterwards you\'ll know what\'s possible — and what it would cost.',
+                'button' => 'Book a free call',
+            ],
+            'booking' => [
+                'kicker' => 'Book a call',
+                'title' => 'Book your free first consultation.',
+                'body' => 'Tell us briefly what it\'s about and when we can best reach you. We\'ll get back within 24 hours with a time suggestion.',
+                'checks' => ['Reply within 24 hours', '30 minutes, by phone or video', 'Free and non-binding'],
+                'f' => [
+                    'name' => 'Your name',
+                    'company' => 'Company',
+                    'email' => 'Email',
+                    'phone' => 'Phone (optional)',
+                    'preferred_date' => 'Preferred date (optional)',
+                    'preferred_time' => 'When can we best reach you?',
+                    'time_opts' => ['Mornings (8am–12pm)', 'Afternoons (12–5pm)', 'Evenings (5–7pm)'],
+                    'message' => 'What is it about? (required)',
+                    'message_ph' => 'A few sentences are enough: what costs you time or nerves right now? For example: "We still write all delivery notes by hand."',
+                    'message_hint' => 'Please describe your request briefly — it helps us prepare for the call.',
+                    'submit' => 'Request a call',
+                    'thanks' => 'Thank you! We\'ll get back within 24 hours with a time suggestion.',
+                ],
+            ],
+            'contact' => [
+                'kicker' => 'Contact',
+                'title' => 'How to reach us.',
+                'body' => 'The fastest way is a free first call — or write to us directly.',
+                'phone' => '+49 1590 8408815',
+                'email' => 'kontakt@datenflow.de',
+                'address' => ['Datenflow', 'Elsenstraße 62', '12059 Berlin'],
+                'f' => [
+                    'name' => 'Your name',
+                    'company' => 'Company (optional)',
+                    'email' => 'Email',
+                    'message' => 'Your message',
+                    'message_ph' => 'What would you like to tell us?',
+                    'submit' => 'Send message',
+                    'thanks' => 'Thanks for your message — we\'ll reply within 24 hours.',
+                ],
+            ],
+            'karriere' => [
+                'kicker' => 'Careers',
+                'title' => 'Work with Datenflow.',
+                'sub' => 'We\'re looking for people who like solving real problems. A few sentences are enough — we reply within a week.',
+                'intro_heading' => 'Who we are',
+                'intro_body' => 'Small team, high autonomy. Hybrid (Berlin / EU remote), full-time or part-time. Every line of code we ship goes through code review.',
+                'checks' => ['3–5 sentences is enough', 'Reply within a week', 'No 5-round interviews'],
+                'f' => [
+                    'name' => 'Name',
+                    'email' => 'Email',
+                    'role' => 'What are you applying for?',
+                    'role_opts' => ['Software engineering', 'AI / ML engineering', 'DevOps / platform', 'Open application'],
+                    'portfolio' => 'Portfolio / GitHub / LinkedIn (optional)',
+                    'cv' => 'Résumé (PDF, DOC, DOCX — optional, max 8 MB)',
+                    'message' => 'Tell us a bit about yourself',
+                    'message_ph' => 'What do you do today, what would you like to do here?',
+                    'submit' => 'Send application',
+                    'thanks' => 'Thanks — we read every application ourselves and respond within a week.',
+                ],
+            ],
+            'form_errors' => [
+                'validation' => 'Please check the highlighted fields.',
+                'rate_limit' => 'Too many attempts — please try again later.',
+                'send_failed' => 'Sending failed. Please try again later or give us a call.',
+                'required' => 'This field is required.',
+                'invalid_email' => 'Please enter a valid email address.',
+                'cv_too_large' => 'File too large — 8 MB maximum.',
+                'cv_invalid_type' => 'Please upload PDF, DOC or DOCX.',
+            ],
+            'footer' => [
+                'blurb' => 'IT solutions for small and mid-size businesses — logistics, hospitality, services.',
+                'copy' => '© 2026 Datenflow — Berlin',
+                'links' => [
+                    ['label' => 'Imprint', 'route' => 'impressum'],
+                    ['label' => 'Privacy', 'route' => 'datenschutz'],
+                    ['label' => 'Careers', 'route' => 'karriere'],
+                ],
+            ],
+            'impressum' => [
+                'kicker' => 'Imprint',
+                'title' => 'Imprint.',
+                'sub' => 'Information pursuant to § 5 TMG (German Telemedia Act).',
+                'sections' => [
+                    ['heading' => 'Provider', 'lines' => ['Datenflow', 'Owner: Mohammad Beshtawi', 'Elsenstraße 62', '12059 Berlin', 'Germany']],
+                    ['heading' => 'Contact', 'lines' => ['Phone: +49 1590 8408815', 'Email: kontakt@datenflow.de']],
+                    ['heading' => 'VAT ID', 'lines' => ['VAT identification number pursuant to § 27 a UStG: DE461699659']],
+                    ['heading' => 'Responsible for content under § 18 (2) MStV', 'lines' => ['Mohammad Beshtawi', 'Elsenstraße 62', '12059 Berlin']],
+                    ['heading' => 'Disclaimer', 'lines' => ['The contents of these pages have been compiled with the greatest possible care. We assume no liability, however, for the accuracy, completeness or topicality of the content. As a service provider, we are responsible for our own content under § 7 (1) TMG. Under §§ 8 – 10 TMG, we are not obliged to monitor transmitted or stored third-party information.']],
+                ],
+            ],
+            'datenschutz' => [
+                'kicker' => 'Privacy',
+                'title' => 'Privacy policy.',
+                'sub' => 'This notice describes how personal data is processed on this website. Note: this is a generic placeholder — please have it reviewed by qualified counsel before publishing.',
+                'sections' => [
+                    ['heading' => '1. Controller', 'lines' => ['The controller within the meaning of the GDPR is Datenflow, Owner: Mohammad Beshtawi, Elsenstraße 62, 12059 Berlin. Contact: kontakt@datenflow.de.']],
+                    ['heading' => '2. Access data and hosting', 'lines' => ['When you visit this website, technical access data is processed (IP address, date and time, requested URL, referrer URL, user agent). This data is used solely to provide and secure the website (Art. 6 (1) (f) GDPR). Hosting is in Berlin.']],
+                    ['heading' => '3. Cookies', 'lines' => ['This website only uses technically necessary cookies (e.g. to store your language choice). Tracking or analytics cookies are not set without your explicit consent.']],
+                    ['heading' => '4. Contact and call booking', 'lines' => ['If you contact us via a form or by email, your data will be processed for the purpose of handling your request (Art. 6 (1) (b) and (f) GDPR) and deleted once the matter is closed, unless legal retention obligations apply.']],
+                    ['heading' => '5. Job applications', 'lines' => ['When you apply for a job, we process your data to carry out the application procedure (Art. 6 (1) (b) GDPR in conjunction with § 26 BDSG). Once the procedure is complete, the data is deleted after six months unless you consent to longer storage.']],
+                    ['heading' => '6. Your rights', 'lines' => ['You have the right to access (Art. 15 GDPR), rectification (Art. 16), erasure (Art. 17), restriction (Art. 18), data portability (Art. 20) and objection (Art. 21). You may also lodge a complaint with a supervisory authority at any time.']],
+                    ['heading' => '7. Changes', 'lines' => ['We reserve the right to update this privacy notice in line with changes to the law or the website\'s features. Last updated: August 2026.']],
+                ],
+            ],
+        ],
+    ];
+}
