@@ -1,12 +1,20 @@
-node_modules/
-.next/
-out/
-build/
-.env*.local
-.env
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###
+
+# project
 .DS_Store
-*.tsbuildinfo
-next-env.d.ts
-test-results/
-playwright-report/
-playwright/.cache/
+.idea/
+/drivers/
