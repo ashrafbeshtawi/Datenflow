@@ -11,6 +11,16 @@ class HomepageTest extends PantherTestCase
         $client = static::createPantherClient();
         $client->request('GET', '/');
 
-        self::assertSelectorTextContains('h1', 'Datenflow');
+        self::assertSelectorTextContains('h1', 'kompliziert');
+        self::assertSelectorIsVisible('.hero .btn-primary');
+    }
+
+    public function testBookingCtaLeadsToBookingForm(): void
+    {
+        $client = static::createPantherClient();
+        $client->request('GET', '/');
+        $client->clickLink('Kostenloses Gespräch buchen');
+
+        self::assertSelectorIsVisible('form textarea[name="message"]');
     }
 }

@@ -1,0 +1,6 @@
+{% from 'macros.html.twig' import icon %}
+<ul class="checks">
+    {% for check in checks %}
+        <li>{{ icon('check') }} {{ check }}</li>
+    {% endfor %}
+</ul>
