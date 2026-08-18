@@ -36,8 +36,8 @@ Then open:
 - **Website:** http://localhost:8080
 - **Mailpit** (catches all dev mail): http://localhost:8025
 
-Composer dependencies are installed automatically inside the `php` container on first boot.
-Committed dev defaults live in `.env.dist`; for local overrides or secrets create `.env` / `.env.local` (both gitignored).
+On first boot the `php` container installs Composer dependencies and creates your local
+`.env` from `.env.example` (`.env` is gitignored — real values go there, never into git).
 
 ## Running tests
 

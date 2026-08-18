@@ -20,6 +20,9 @@ ENV APP_ENV=prod
 
 COPY . /app
 
+# Empty .env satisfies Symfony's Dotenv; all real values MUST come from
+# runtime env vars — a missing one fails loudly instead of using dev defaults.
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --no-scripts \
+ && touch .env \
  && mkdir -p var \
  && chown -R www-data:www-data var
