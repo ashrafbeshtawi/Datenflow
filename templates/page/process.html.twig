@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ t.process.title }} — Datenflow{% endblock %}
+
+{% block body %}
+<section class="section page-head">
+    <div class="wrap">
+        <p class="kicker">{{ t.process.kicker }}</p>
+        <h1>{{ t.process.title }}</h1>
+        <p class="section-sub">{{ t.process.sub }}</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="wrap">
+        <ol class="steps">
+            {% for step in t.process.steps %}
+                <li class="step">
+                    <span class="step-num">{{ step.num }}</span>
+                    <div>
+                        <h2 class="card-h">{{ step.title }}</h2>
+                        <p>{{ step.body }}</p>
+                        <p class="step-time">{{ step.time }}</p>
+                    </div>
+                </li>
+            {% endfor %}
+        </ol>
+    </div>
+</section>
+
+{% include 'partials/_cta_band.html.twig' %}
+{% endblock %}

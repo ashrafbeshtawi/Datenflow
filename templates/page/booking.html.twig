@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ t.booking.title }} — Datenflow{% endblock %}
+
+{% block body %}
+<section class="section page-head">
+    <div class="wrap wrap-narrow">
+        <p class="kicker">{{ t.booking.kicker }}</p>
+        <h1>{{ t.booking.title }}</h1>
+        <p class="section-sub">{{ t.booking.body }}</p>
+        {% with {checks: t.booking.checks} %}{% include 'partials/_checks.html.twig' %}{% endwith %}
+    </div>
+</section>
+
+<section class="section">
+    <div class="wrap wrap-narrow">
+        {% if sent|default(false) %}
+            <p class="form-success" role="status">{{ t.booking.f.thanks }}</p>
+        {% else %}
+        {% set old = old|default({}) %}
+        {% set errors = errors|default({}) %}
+        {% if errors is not empty %}
+            <p class="form-error-summary" role="alert">{{ t.form_errors[error_key|default('validation')] }}</p>
+        {% endif %}
+        <form class="form-card" method="post" action="{{ path('booking') }}">
+            <div class="field-row">
+                <label>{{ t.booking.f.name }} *
+                    <input type="text" name="name" required maxlength="200" value="{{ old.name|default('') }}" {{ errors.name is defined ? 'aria-invalid="true"' }}>
+                </label>
+                <label>{{ t.booking.f.company }}
+                    <input type="text" name="company" maxlength="200" value="{{ old.company|default('') }}">
+                </label>
+            </div>
+            <div class="field-row">
+                <label>{{ t.booking.f.email }} *
+                    <input type="email" name="email" required maxlength="320" value="{{ old.email|default('') }}" {{ errors.email is defined ? 'aria-invalid="true"' }}>
+                </label>
+                <label>{{ t.booking.f.phone }}
+                    <input type="tel" name="phone" maxlength="50" value="{{ old.phone|default('') }}">
+                </label>
+            </div>
+            <div class="field-row">
+                <label>{{ t.booking.f.preferred_date }}
+                    <input type="date" name="preferred_date" value="{{ old.preferred_date|default('') }}">
+                </label>
+                <label>{{ t.booking.f.preferred_time }}
+                    <select name="preferred_time">
+                        {% for opt in t.booking.f.time_opts %}
+                            <option value="{{ opt }}" {{ old.preferred_time|default('') == opt ? 'selected' }}>{{ opt }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <label>{{ t.booking.f.message }}
+                <textarea name="message" required rows="5" maxlength="5000" placeholder="{{ t.booking.f.message_ph }}" {{ errors.message is defined ? 'aria-invalid="true"' }}>{{ old.message|default('') }}</textarea>
+                <small class="field-hint">{{ t.booking.f.message_hint }}</small>
+            </label>
+            {% block form_extra %}{% endblock %}
+            <button class="btn btn-primary btn-lg" type="submit">{{ t.booking.f.submit }}</button>
+        </form>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ t.faq.title }} — Datenflow{% endblock %}
+
+{% block body %}
+<section class="section page-head">
+    <div class="wrap">
+        <p class="kicker">{{ t.faq.kicker }}</p>
+        <h1>{{ t.faq.title }}</h1>
+    </div>
+</section>
+
+<section class="section">
+    <div class="wrap wrap-narrow">
+        {% for item in t.faq.items %}
+            <details class="faq-item" {{ loop.first ? 'open' }}>
+                <summary>{{ item.q }}</summary>
+                <p>{{ item.a }}</p>
+            </details>
+        {% endfor %}
+    </div>
+</section>
+
+{% include 'partials/_cta_band.html.twig' %}
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+{% from 'macros.html.twig' import icon %}
+
+{% block title %}{{ t.contact.title }} — Datenflow{% endblock %}
+
+{% block body %}
+<section class="section page-head">
+    <div class="wrap">
+        <p class="kicker">{{ t.contact.kicker }}</p>
+        <h1>{{ t.contact.title }}</h1>
+        <p class="section-sub">{{ t.contact.body }}</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="wrap contact-grid">
+        <div class="contact-info">
+            <p><strong>{{ lang == 'en' ? 'Phone' : 'Telefon' }}</strong><br>
+                <a href="tel:{{ t.contact.phone|replace({' ': ''}) }}">{{ t.contact.phone }}</a></p>
+            <p><strong>E-Mail</strong><br>
+                <a href="mailto:{{ t.contact.email }}">{{ t.contact.email }}</a></p>
+            <p><strong>{{ lang == 'en' ? 'Address' : 'Adresse' }}</strong><br>
+                {{ t.contact.address|join(', ') }}</p>
+            <a class="btn btn-primary" href="{{ path('booking') }}">{{ t.nav.cta }}</a>
+        </div>
+
+        <div>
+            {% if sent|default(false) %}
+                <p class="form-success" role="status">{{ t.contact.f.thanks }}</p>
+            {% else %}
+            {% set old = old|default({}) %}
+            {% set errors = errors|default({}) %}
+            {% if errors is not empty %}
+                <p class="form-error-summary" role="alert">{{ t.form_errors[error_key|default('validation')] }}</p>
+            {% endif %}
+            <form class="form-card" method="post" action="{{ path('contact') }}">
+                <div class="field-row">
+                    <label>{{ t.contact.f.name }} *
+                        <input type="text" name="name" required maxlength="200" value="{{ old.name|default('') }}" {{ errors.name is defined ? 'aria-invalid="true"' }}>
+                    </label>
+                    <label>{{ t.contact.f.company }}
+                        <input type="text" name="company" maxlength="200" value="{{ old.company|default('') }}">
+                    </label>
+                </div>
+                <label>{{ t.contact.f.email }} *
+                    <input type="email" name="email" required maxlength="320" value="{{ old.email|default('') }}" {{ errors.email is defined ? 'aria-invalid="true"' }}>
+                </label>
+                <label>{{ t.contact.f.message }} *
+                    <textarea name="message" required rows="5" maxlength="5000" placeholder="{{ t.contact.f.message_ph }}" {{ errors.message is defined ? 'aria-invalid="true"' }}>{{ old.message|default('') }}</textarea>
+                </label>
+                {% block form_extra %}{% endblock %}
+                <button class="btn btn-primary" type="submit">{{ t.contact.f.submit }}</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

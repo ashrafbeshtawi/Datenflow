@@ -1,23 +1,72 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
+<html lang="{{ lang|default('de') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ t.meta.title }}{% endblock %}</title>
+    <meta name="description" content="{% block description %}{{ t.meta.description }}{% endblock %}">
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <link rel="stylesheet" href="{{ asset('css/site.css') }}">
+</head>
+<body>
 
-        {% block javascripts %}
-        {% endblock %}
+<a class="skip-link" href="#main">{{ lang == 'en' ? 'Skip to content' : 'Zum Inhalt springen' }}</a>
 
-        {% set frankenphp_hot_reload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
-        {% if frankenphp_hot_reload %}
-        <meta name="frankenphp-hot-reload:url" content="{{ frankenphp_hot_reload }}">
-        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
-        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
-        {% endif %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-    </body>
+<header class="site-header">
+    <div class="wrap header-inner">
+        <a class="brand" href="{{ path('home') }}" aria-label="Datenflow — {{ t.nav.home }}">
+            {% from 'macros.html.twig' import icon %}
+            <span class="brand-mark">{{ icon('leaf') }}</span>
+            <span class="brand-name">Datenflow</span>
+        </a>
+
+        <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-hidden="true">
+        <label for="nav-toggle" class="burger" aria-label="{{ lang == 'en' ? 'Menu' : 'Menü' }}">
+            <span></span><span></span><span></span>
+        </label>
+        <nav class="site-nav" aria-label="{{ lang == 'en' ? 'Main navigation' : 'Hauptnavigation' }}">
+            <a href="{{ path('home') }}">{{ t.nav.home }}</a>
+            <a href="{{ path('services') }}">{{ t.nav.services }}</a>
+            <a href="{{ path('process') }}">{{ t.nav.process }}</a>
+            <a href="{{ path('faq') }}">{{ t.nav.faq }}</a>
+            <a href="{{ path('contact') }}">{{ t.nav.contact }}</a>
+            <span class="lang-switch">
+                <a href="{{ path('lang_switch', {locale: 'de'}) }}" class="{{ lang == 'de' ? 'active' }}" lang="de">DE</a>
+                <span aria-hidden="true">·</span>
+                <a href="{{ path('lang_switch', {locale: 'en'}) }}" class="{{ lang == 'en' ? 'active' }}" lang="en">EN</a>
+            </span>
+            <a class="btn btn-primary nav-cta" href="{{ path('booking') }}">{{ t.nav.cta }}</a>
+        </nav>
+    </div>
+</header>
+
+<main id="main">
+    {% block body %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+    <div class="wrap footer-grid">
+        <div>
+            <p class="footer-brand">Datenflow</p>
+            <p class="footer-blurb">{{ t.footer.blurb }}</p>
+        </div>
+        <div>
+            <p class="footer-head">{{ t.nav.contact }}</p>
+            <p><a href="tel:{{ t.contact.phone|replace({' ': ''}) }}">{{ t.contact.phone }}</a><br>
+               <a href="mailto:{{ t.contact.email }}">{{ t.contact.email }}</a></p>
+            <p>{{ t.contact.address|join(', ') }}</p>
+        </div>
+        <div>
+            <p class="footer-head">{{ lang == 'en' ? 'Legal & more' : 'Rechtliches & mehr' }}</p>
+            <p>
+            {% for link in t.footer.links %}
+                <a href="{{ path(link.route) }}">{{ link.label }}</a>{% if not loop.last %}<br>{% endif %}
+            {% endfor %}
+            </p>
+        </div>
+    </div>
+    <div class="wrap footer-copy">{{ t.footer.copy }}</div>
+</footer>
+
+</body>
 </html>
