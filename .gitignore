@@ -19,5 +19,5 @@
 .idea/
 /drivers/
 
-# local env overrides — committed defaults live in .env.dist
+# local env values — create from .env.example (docker compose does it on first boot)
 /.env
