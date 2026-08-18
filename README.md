@@ -19,7 +19,7 @@ The website of **Datenflow** ([datenflow.de](https://datenflow.de)) — an IT ag
 | Templating | Twig |
 | Database | PostgreSQL 18 |
 | Mail | Symfony Mailer (Mailpit in dev) |
-| Containers | Docker + docker-compose |
+| Containers | Docker + docker-compose (single Apache+PHP web container) |
 | Tests | PHPUnit (unit/functional) + Panther/Chromium (E2E) |
 | CI | GitHub Actions |
 
@@ -37,6 +37,7 @@ Then open:
 - **Mailpit** (catches all dev mail): http://localhost:8025
 
 Composer dependencies are installed automatically inside the `php` container on first boot.
+Committed dev defaults live in `.env.dist`; for local overrides or secrets create `.env` / `.env.local` (both gitignored).
 
 ## Running tests
 
@@ -55,7 +56,7 @@ First E2E run on a fresh machine: `vendor/bin/bdi detect drivers` to download a 
 ```
 .
 ├── config/            # Symfony bundle + service configuration
-├── docker/            # php-fpm + nginx images/config
+├── docker/            # Apache+PHP image and vhost config
 ├── public/            # web root (index.php)
 ├── src/
 │   └── Controller/    # page + form controllers

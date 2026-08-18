@@ -2,11 +2,11 @@
 
 ## Docker
 
-`docker compose up -d --build` — build and start the full stack (php, nginx, postgres, mailpit)
+`docker compose up -d --build` — build and start the full stack (apache+php, postgres, mailpit)
 `docker compose down` — stop the stack
 `docker compose down -v` — stop and wipe the database volume
-`docker compose logs -f php` — tail PHP logs
-`docker compose exec php sh` — shell into the PHP container
+`docker compose logs -f php` — tail Apache/PHP logs
+`docker compose exec php bash` — shell into the web container
 `docker compose exec php composer install` — reinstall dependencies inside the container
 
 ## Symfony console
