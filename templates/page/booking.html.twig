@@ -55,7 +55,7 @@
                 <textarea name="message" required rows="5" maxlength="5000" placeholder="{{ t.booking.f.message_ph }}" {{ errors.message is defined ? 'aria-invalid="true"' }}>{{ old.message|default('') }}</textarea>
                 <small class="field-hint">{{ t.booking.f.message_hint }}</small>
             </label>
-            {% block form_extra %}{% endblock %}
+            {% include 'partials/_form_protect.html.twig' %}
             <button class="btn btn-primary btn-lg" type="submit">{{ t.booking.f.submit }}</button>
         </form>
         {% endif %}

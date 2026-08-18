@@ -22,7 +22,13 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html {
+    scroll-padding-top: 6rem; /* keep scrolled-to elements clear of the sticky header */
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+}
 
 body {
     margin: 0;
@@ -518,6 +524,15 @@ img, svg { max-width: 100%; }
     font-weight: 400;
     color: var(--ink-soft);
     font-size: 0.85rem;
+}
+
+/* Honeypot field — visually gone, still in the DOM for bots */
+.hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
 }
 
 .form-success {

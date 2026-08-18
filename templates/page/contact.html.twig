@@ -48,7 +48,7 @@
                 <label>{{ t.contact.f.message }} *
                     <textarea name="message" required rows="5" maxlength="5000" placeholder="{{ t.contact.f.message_ph }}" {{ errors.message is defined ? 'aria-invalid="true"' }}>{{ old.message|default('') }}</textarea>
                 </label>
-                {% block form_extra %}{% endblock %}
+                {% include 'partials/_form_protect.html.twig' %}
                 <button class="btn btn-primary" type="submit">{{ t.contact.f.submit }}</button>
             </form>
             {% endif %}

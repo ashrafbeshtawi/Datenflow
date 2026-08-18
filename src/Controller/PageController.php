@@ -91,6 +91,10 @@ class PageController extends AbstractController
     {
         $lang = self::localeOf($request);
 
-        return $this->render($template, $context + ['t' => SiteCopy::for($lang), 'lang' => $lang]);
+        return $this->render($template, $context + [
+            't' => SiteCopy::for($lang),
+            'lang' => $lang,
+            'sent' => $request->query->getBoolean('sent'),
+        ]);
     }
 }
