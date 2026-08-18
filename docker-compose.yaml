@@ -1,6 +1,9 @@
 services:
   php:
-    build: docker/php
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: base
     ports:
       - "8080:80"
     volumes:
