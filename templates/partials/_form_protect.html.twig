@@ -1,0 +1,3 @@
+{# Honeypot (hidden from humans) + CSRF token — include inside every form. #}
+<input type="text" name="_hp" value="" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+<input type="hidden" name="_token" value="{{ csrf_token('inquiry') }}">
