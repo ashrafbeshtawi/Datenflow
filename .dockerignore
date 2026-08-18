@@ -1,0 +1,15 @@
+# Keep the prod image lean and free of local state/secrets
+.git
+.github
+.idea
+var
+vendor
+drivers
+tests
+node_modules
+docker-compose.yaml
+.env
+.env.local
+.env.*.local
+*.md
+.phpunit.cache
