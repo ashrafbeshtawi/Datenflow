@@ -8,7 +8,7 @@ services:
       - "8080:80"
     volumes:
       - .:/app
-    command: sh -c "[ -f .env ] || cp .env.example .env; composer install --no-interaction && apache2-foreground"
+    command: sh -c "[ -f .env ] || cp .env.example .env; composer install --no-interaction && bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration && apache2-foreground"
     environment:
       DATABASE_URL: "postgresql://app:app@database:5432/app?serverVersion=18&charset=utf8"
       MAILER_DSN: "smtp://mailer:1025"
