@@ -36,6 +36,7 @@ final class SiteCopy
                 'secondary' => 'Was wir machen',
                 'checks' => ['Erstgespräch kostenlos', 'Festpreise statt Überraschungen', 'Wir sprechen Ihre Sprache — kein IT-Deutsch'],
             ],
+            'teasers' => ['more' => 'Mehr erfahren'],
             'industries' => [
                 'kicker' => 'Für wen wir arbeiten',
                 'title' => 'Wir kennen Ihren Alltag.',
@@ -313,6 +314,7 @@ final class SiteCopy
                 'secondary' => 'What we do',
                 'checks' => ['First call is free', 'Fixed prices, no surprises', 'We speak your language — not tech jargon'],
             ],
+            'teasers' => ['more' => 'Learn more'],
             'industries' => [
                 'kicker' => 'Who we work for',
                 'title' => 'We know your day-to-day.',

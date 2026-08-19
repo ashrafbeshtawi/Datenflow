@@ -25,6 +25,31 @@
     </div>
 </section>
 
+<section class="section">
+    <div class="wrap">
+        <div class="card-grid cols-3">
+            <article class="card">
+                <span class="card-icon">{{ icon('custom') }}</span>
+                <h2 class="card-h">{{ t.nav.services }}</h2>
+                <p>{{ t.industries.sub }}</p>
+                <p class="section-more"><a class="btn btn-ghost" href="{{ path('services') }}">{{ t.teasers.more }}</a></p>
+            </article>
+            <article class="card">
+                <span class="card-icon">{{ icon('support') }}</span>
+                <h2 class="card-h">{{ t.nav.process }}</h2>
+                <p>{{ t.process.sub }}</p>
+                <p class="section-more"><a class="btn btn-ghost" href="{{ path('process') }}">{{ t.teasers.more }}</a></p>
+            </article>
+            <article class="card">
+                <span class="card-icon">{{ icon('check') }}</span>
+                <h2 class="card-h">{{ t.nav.pricing }}</h2>
+                <p>{{ t.pricing.sub }}</p>
+                <p class="section-more"><a class="btn btn-ghost" href="{{ path('pricing') }}">{{ t.teasers.more }}</a></p>
+            </article>
+        </div>
+    </div>
+</section>
+
 {% include 'partials/_cta_band.html.twig' %}
 
 {% endblock %}
