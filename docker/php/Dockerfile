@@ -29,3 +29,6 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progre
  && touch .env \
  && mkdir -p var \
  && chown -R www-data:www-data var
+
+# Apply pending DB migrations before serving — keeps schema in sync on every deploy.
+CMD ["sh", "-c", "bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration && apache2-foreground"]
