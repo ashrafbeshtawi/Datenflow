@@ -15,7 +15,7 @@ final class SiteCopy
     private const COPY = [
         'de' => [
             'meta' => [
-                'title' => 'Datenflow — IT-Lösungen für kleine und mittlere Unternehmen',
+                'title' => 'Datenflow — IT-Lösungen',
                 'description' => 'Digitale Lösungen, Automatisierung und KI für Logistik, Gastronomie und Dienstleister — verständlich erklärt, ohne Fachchinesisch. Erstgespräch kostenlos.',
             ],
             'nav' => [
@@ -27,10 +27,10 @@ final class SiteCopy
                 'cta' => 'Gespräch buchen',
             ],
             'hero' => [
-                'eyebrow' => 'IT-Agentur für kleine und mittlere Unternehmen',
+                'eyebrow' => 'IT-Agentur aus Berlin',
                 'title_pre' => 'Gute IT muss nicht',
                 'title_em' => 'kompliziert sein.',
-                'lede' => 'Wir bauen digitale Lösungen für Logistik, Gastronomie und Dienstleister — Abläufe automatisieren, Zettelwirtschaft abschaffen, KI sinnvoll einsetzen. Verständlich erklärt, Schritt für Schritt umgesetzt.',
+                'lede' => 'Wir bauen digitale Lösungen für Logistik, Gastronomie und Dienstleister — individuelle Websites und Web-Shops erstellen, Abläufe automatisieren, Zettelwirtschaft abschaffen, KI sinnvoll einsetzen. Verständlich erklärt, Schritt für Schritt umgesetzt.',
                 'primary' => 'Kostenloses Gespräch buchen',
                 'secondary' => 'Was wir machen',
                 'checks' => ['Erstgespräch kostenlos', 'Festpreise statt Überraschungen', 'Wir sprechen Ihre Sprache — kein IT-Deutsch'],
@@ -56,7 +56,7 @@ final class SiteCopy
                     ],
                     [
                         'icon' => 'briefcase',
-                        'title' => 'Dienstleistung & Handwerk',
+                        'title' => 'Dienstleistung, Handwerk & Kosmetik',
                         'tagline' => 'Termine, Angebote, Rechnungen — automatisch.',
                         'body' => 'Kunden buchen Termine online, Angebote und Rechnungen entstehen aus Vorlagen statt aus Handarbeit, nichts geht mehr in der Ablage verloren.',
                         'examples' => ['Online-Terminbuchung', 'Angebote per Klick', 'Kundenverwaltung'],
@@ -124,6 +124,32 @@ final class SiteCopy
                         'time' => 'laufend',
                     ],
                 ],
+            ],
+            'pricing' => [
+                'kicker' => 'Preise',
+                'title' => 'Ein passendes Modell für jeden.',
+                'sub' => 'Ob fertige Lösung oder Maßanfertigung — Sie zahlen so, wie es zu Ihrem Betrieb passt.',
+                'ready_title' => 'Fertige Lösung von uns nutzen',
+                'ready_sub' => 'Unsere fertigen Produkte können Sie sofort einsetzen — Sie wählen nur, wie Sie zahlen möchten.',
+                'options' => [
+                    [
+                        'title' => 'Einmal kaufen',
+                        'tagline' => 'Einmal zahlen, für immer nutzen.',
+                        'body' => 'Sie zahlen einmalig und das komplette Produkt gehört Ihnen — es läuft auf Ihrem eigenen Server.',
+                    ],
+                    [
+                        'title' => 'Monatlich mieten',
+                        'tagline' => 'Fester Preis pro Monat.',
+                        'body' => 'Wir kümmern uns um Betrieb, Wartung und Updates — Sie zahlen eine feste Monatsmiete und können jederzeit kündigen.',
+                    ],
+                    [
+                        'title' => 'Pro Bestellung zahlen',
+                        'tagline' => 'Keine Grundkosten.',
+                        'body' => 'Sie zahlen nur einen kleinen Betrag pro Bestellung — ideal zum Ausprobieren und für den Start.',
+                    ],
+                ],
+                'custom_title' => 'Individuelle Lösung',
+                'custom_body' => 'Passt keine fertige Lösung? Wir bauen eine, die genau zu Ihrem Betrieb passt — mit Festpreis-Angebot nach der kostenlosen Analyse.',
             ],
             'faq' => [
                 'kicker' => 'Häufige Fragen',
@@ -227,7 +253,7 @@ final class SiteCopy
                 'cv_invalid_type' => 'Bitte PDF, DOC oder DOCX hochladen.',
             ],
             'footer' => [
-                'blurb' => 'IT-Lösungen für kleine und mittlere Unternehmen — Logistik, Gastronomie, Dienstleistung.',
+                'blurb' => 'IT-Lösungen — Logistik, Gastronomie, Dienstleistung, Kosmetik.',
                 'copy' => '© 2026 Datenflow — Berlin',
                 'links' => [
                     ['label' => 'Impressum', 'route' => 'impressum'],
@@ -265,7 +291,7 @@ final class SiteCopy
 
         'en' => [
             'meta' => [
-                'title' => 'Datenflow — IT solutions for small and mid-size businesses',
+                'title' => 'Datenflow — IT solutions',
                 'description' => 'Digital solutions, automation and AI for logistics, hospitality and service businesses — explained in plain language. Free first consultation.',
             ],
             'nav' => [
@@ -277,10 +303,10 @@ final class SiteCopy
                 'cta' => 'Book a call',
             ],
             'hero' => [
-                'eyebrow' => 'IT agency for small and mid-size businesses',
+                'eyebrow' => 'IT agency from Berlin',
                 'title_pre' => 'Good IT doesn\'t have to be',
                 'title_em' => 'complicated.',
-                'lede' => 'We build digital solutions for logistics, hospitality and service businesses — automating routine work, replacing paper chaos, and putting AI to sensible use. Explained in plain language, delivered step by step.',
+                'lede' => 'We build digital solutions for logistics, hospitality and service businesses — building custom websites and web shops, automating routine work, replacing paper chaos, and putting AI to sensible use. Explained in plain language, delivered step by step.',
                 'primary' => 'Book a free call',
                 'secondary' => 'What we do',
                 'checks' => ['First call is free', 'Fixed prices, no surprises', 'We speak your language — not tech jargon'],
@@ -306,7 +332,7 @@ final class SiteCopy
                     ],
                     [
                         'icon' => 'briefcase',
-                        'title' => 'Services & trades',
+                        'title' => 'Services, trades & beauty',
                         'tagline' => 'Appointments, quotes, invoices — automatic.',
                         'body' => 'Customers book appointments online, quotes and invoices come from templates instead of manual work, and nothing gets lost in the filing pile anymore.',
                         'examples' => ['Online appointment booking', 'Quotes in one click', 'Customer management'],
@@ -374,6 +400,32 @@ final class SiteCopy
                         'time' => 'ongoing',
                     ],
                 ],
+            ],
+            'pricing' => [
+                'kicker' => 'Pricing',
+                'title' => 'A model that fits everyone.',
+                'sub' => 'Ready-made solution or custom build — you pay the way that suits your business.',
+                'ready_title' => 'Use one of our ready-made solutions',
+                'ready_sub' => 'Our ready-made products work out of the box — you just choose how to pay.',
+                'options' => [
+                    [
+                        'title' => 'Buy once',
+                        'tagline' => 'Pay once, use forever.',
+                        'body' => 'One payment and the full product is yours — running on your own server.',
+                    ],
+                    [
+                        'title' => 'Rent monthly',
+                        'tagline' => 'Fixed price per month.',
+                        'body' => 'We handle hosting, maintenance and updates — you pay a fixed monthly rent and can cancel anytime.',
+                    ],
+                    [
+                        'title' => 'Pay per order',
+                        'tagline' => 'No base costs.',
+                        'body' => 'You only pay a small amount per order — ideal for trying things out and getting started.',
+                    ],
+                ],
+                'custom_title' => 'Custom solution',
+                'custom_body' => 'No ready-made solution fits? We build one specifically for your business — with a fixed-price quote after the free analysis.',
             ],
             'faq' => [
                 'kicker' => 'FAQ',
@@ -459,7 +511,7 @@ final class SiteCopy
                 'cv_invalid_type' => 'Please upload PDF, DOC or DOCX.',
             ],
             'footer' => [
-                'blurb' => 'IT solutions for small and mid-size businesses — logistics, hospitality, services.',
+                'blurb' => 'IT solutions — logistics, hospitality, services, beauty.',
                 'copy' => '© 2026 Datenflow — Berlin',
                 'links' => [
                     ['label' => 'Imprint', 'route' => 'impressum'],
