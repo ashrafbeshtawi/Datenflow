@@ -31,4 +31,6 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progre
  && chown -R www-data:www-data var
 
 # Apply pending DB migrations before serving — keeps schema in sync on every deploy.
-CMD ["sh", "-c", "bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration && apache2-foreground"]
+# The console runs as root and writes cache into var/, so hand var/ back to
+# www-data afterwards or Apache workers can't write the prod cache (500s).
+CMD ["sh", "-c", "bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration && chown -R www-data:www-data var && apache2-foreground"]
