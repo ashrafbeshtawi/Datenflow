@@ -23,6 +23,7 @@ class PagesTest extends WebTestCase
         yield 'home' => ['/', 'kompliziert'];
         yield 'services' => ['/services', 'Vier Dinge'];
         yield 'process' => ['/process', 'Vom ersten Gespräch'];
+        yield 'pricing' => ['/preise', 'Ein passendes Modell'];
         yield 'faq' => ['/faq', 'Was Kunden uns'];
         yield 'booking' => ['/termin', 'kostenloses Erstgespräch'];
         yield 'contact' => ['/contact', 'So erreichen Sie uns'];

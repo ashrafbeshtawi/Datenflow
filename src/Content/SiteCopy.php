@@ -22,6 +22,7 @@ final class SiteCopy
                 'home' => 'Start',
                 'services' => 'Leistungen',
                 'process' => 'So arbeiten wir',
+                'pricing' => 'Preise',
                 'faq' => 'Häufige Fragen',
                 'contact' => 'Kontakt',
                 'cta' => 'Gespräch buchen',
@@ -211,7 +212,7 @@ final class SiteCopy
                 'title' => 'So erreichen Sie uns.',
                 'body' => 'Am schnellsten geht es über ein kostenloses Erstgespräch — oder Sie schreiben uns direkt.',
                 'phone' => '+49 1590 8408815',
-                'email' => 'kontakt@datenflow.de',
+                'email' => 'contact@datenflow.de',
                 'address' => ['Datenflow', 'Elsenstraße 62', '12059 Berlin'],
                 'f' => [
                     'name' => 'Ihr Name',
@@ -267,7 +268,7 @@ final class SiteCopy
                 'sub' => 'Angaben gemäß § 5 TMG.',
                 'sections' => [
                     ['heading' => 'Anbieter', 'lines' => ['Datenflow', 'Inhaber: Mohammad Beshtawi', 'Elsenstraße 62', '12059 Berlin', 'Deutschland']],
-                    ['heading' => 'Kontakt', 'lines' => ['Telefon: +49 1590 8408815', 'E-Mail: kontakt@datenflow.de']],
+                    ['heading' => 'Kontakt', 'lines' => ['Telefon: +49 1590 8408815', 'E-Mail: contact@datenflow.de']],
                     ['heading' => 'Umsatzsteuer-ID', 'lines' => ['Umsatzsteuer-Identifikationsnummer gemäß § 27 a UStG: DE461699659']],
                     ['heading' => 'Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV', 'lines' => ['Mohammad Beshtawi', 'Elsenstraße 62', '12059 Berlin']],
                     ['heading' => 'Haftungsausschluss', 'lines' => ['Die Inhalte dieser Seiten wurden mit größtmöglicher Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte übernehmen wir jedoch keine Gewähr. Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen.']],
@@ -278,7 +279,7 @@ final class SiteCopy
                 'title' => 'Datenschutzerklärung.',
                 'sub' => 'Diese Hinweise informieren Sie über Art, Umfang und Zweck der Verarbeitung personenbezogener Daten auf dieser Website. Bitte beachten Sie: Dies ist ein generischer Platzhalter — bitte vor Veröffentlichung durch eine juristische Fachperson prüfen lassen.',
                 'sections' => [
-                    ['heading' => '1. Verantwortlicher', 'lines' => ['Verantwortlich für die Datenverarbeitung auf dieser Website im Sinne der DSGVO ist Datenflow, Inhaber: Mohammad Beshtawi, Elsenstraße 62, 12059 Berlin. Kontakt: kontakt@datenflow.de.']],
+                    ['heading' => '1. Verantwortlicher', 'lines' => ['Verantwortlich für die Datenverarbeitung auf dieser Website im Sinne der DSGVO ist Datenflow, Inhaber: Mohammad Beshtawi, Elsenstraße 62, 12059 Berlin. Kontakt: contact@datenflow.de.']],
                     ['heading' => '2. Zugriffsdaten und Hosting', 'lines' => ['Beim Aufruf dieser Website werden technische Zugriffsdaten verarbeitet (IP-Adresse, Datum und Uhrzeit, aufgerufene URL, Referer-URL, User-Agent). Diese Daten dienen ausschließlich der Bereitstellung und Sicherheit der Website (Art. 6 Abs. 1 lit. f DSGVO). Hosting erfolgt in Berlin.']],
                     ['heading' => '3. Cookies', 'lines' => ['Diese Website setzt nur technisch notwendige Cookies (z. B. zur Speicherung Ihrer Sprachauswahl). Tracking- oder Analyse-Cookies werden nicht ohne Ihre ausdrückliche Einwilligung gesetzt.']],
                     ['heading' => '4. Kontaktaufnahme und Terminbuchung', 'lines' => ['Wenn Sie uns über ein Formular oder per E-Mail erreichen, werden Ihre Angaben zur Bearbeitung der Anfrage verarbeitet (Art. 6 Abs. 1 lit. b und f DSGVO) und nach Erledigung gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.']],
@@ -298,6 +299,7 @@ final class SiteCopy
                 'home' => 'Home',
                 'services' => 'Services',
                 'process' => 'How we work',
+                'pricing' => 'Pricing',
                 'faq' => 'FAQ',
                 'contact' => 'Contact',
                 'cta' => 'Book a call',
@@ -469,7 +471,7 @@ final class SiteCopy
                 'title' => 'How to reach us.',
                 'body' => 'The fastest way is a free first call — or write to us directly.',
                 'phone' => '+49 1590 8408815',
-                'email' => 'kontakt@datenflow.de',
+                'email' => 'contact@datenflow.de',
                 'address' => ['Datenflow', 'Elsenstraße 62', '12059 Berlin'],
                 'f' => [
                     'name' => 'Your name',
@@ -525,7 +527,7 @@ final class SiteCopy
                 'sub' => 'Information pursuant to § 5 TMG (German Telemedia Act).',
                 'sections' => [
                     ['heading' => 'Provider', 'lines' => ['Datenflow', 'Owner: Mohammad Beshtawi', 'Elsenstraße 62', '12059 Berlin', 'Germany']],
-                    ['heading' => 'Contact', 'lines' => ['Phone: +49 1590 8408815', 'Email: kontakt@datenflow.de']],
+                    ['heading' => 'Contact', 'lines' => ['Phone: +49 1590 8408815', 'Email: contact@datenflow.de']],
                     ['heading' => 'VAT ID', 'lines' => ['VAT identification number pursuant to § 27 a UStG: DE461699659']],
                     ['heading' => 'Responsible for content under § 18 (2) MStV', 'lines' => ['Mohammad Beshtawi', 'Elsenstraße 62', '12059 Berlin']],
                     ['heading' => 'Disclaimer', 'lines' => ['The contents of these pages have been compiled with the greatest possible care. We assume no liability, however, for the accuracy, completeness or topicality of the content. As a service provider, we are responsible for our own content under § 7 (1) TMG. Under §§ 8 – 10 TMG, we are not obliged to monitor transmitted or stored third-party information.']],
@@ -536,7 +538,7 @@ final class SiteCopy
                 'title' => 'Privacy policy.',
                 'sub' => 'This notice describes how personal data is processed on this website. Note: this is a generic placeholder — please have it reviewed by qualified counsel before publishing.',
                 'sections' => [
-                    ['heading' => '1. Controller', 'lines' => ['The controller within the meaning of the GDPR is Datenflow, Owner: Mohammad Beshtawi, Elsenstraße 62, 12059 Berlin. Contact: kontakt@datenflow.de.']],
+                    ['heading' => '1. Controller', 'lines' => ['The controller within the meaning of the GDPR is Datenflow, Owner: Mohammad Beshtawi, Elsenstraße 62, 12059 Berlin. Contact: contact@datenflow.de.']],
                     ['heading' => '2. Access data and hosting', 'lines' => ['When you visit this website, technical access data is processed (IP address, date and time, requested URL, referrer URL, user agent). This data is used solely to provide and secure the website (Art. 6 (1) (f) GDPR). Hosting is in Berlin.']],
                     ['heading' => '3. Cookies', 'lines' => ['This website only uses technically necessary cookies (e.g. to store your language choice). Tracking or analytics cookies are not set without your explicit consent.']],
                     ['heading' => '4. Contact and call booking', 'lines' => ['If you contact us via a form or by email, your data will be processed for the purpose of handling your request (Art. 6 (1) (b) and (f) GDPR) and deleted once the matter is closed, unless legal retention obligations apply.']],
