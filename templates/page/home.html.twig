@@ -25,52 +25,6 @@
     </div>
 </section>
 
-<section class="section">
-    <div class="wrap">
-        <p class="kicker">{{ t.process.kicker }}</p>
-        <h2>{{ t.process.title }}</h2>
-        <p class="section-sub">{{ t.process.sub }}</p>
-
-        <ol class="steps">
-            {% for step in t.process.steps %}
-                <li class="step">
-                    <span class="step-num">{{ step.num }}</span>
-                    <div>
-                        <h3>{{ step.title }}</h3>
-                        <p>{{ step.body }}</p>
-                        <p class="step-time">{{ step.time }}</p>
-                    </div>
-                </li>
-            {% endfor %}
-        </ol>
-    </div>
-</section>
-
-<section class="section section-tinted">
-    <div class="wrap">
-        <p class="kicker">{{ t.pricing.kicker }}</p>
-        <h2>{{ t.pricing.title }}</h2>
-        <p class="section-sub">{{ t.pricing.sub }}</p>
-
-        <h3>{{ t.pricing.ready_title }}</h3>
-        <p class="section-sub">{{ t.pricing.ready_sub }}</p>
-        <div class="card-grid cols-3">
-            {% for opt in t.pricing.options %}
-                <article class="card">
-                    <h4 class="card-h">{{ opt.title }}</h4>
-                    <p class="card-tagline">{{ opt.tagline }}</p>
-                    <p>{{ opt.body }}</p>
-                </article>
-            {% endfor %}
-        </div>
-
-        <div class="card" style="margin-top: 1.5rem;">
-            <h3 class="card-h">{{ t.pricing.custom_title }}</h3>
-            <p>{{ t.pricing.custom_body }}</p>
-        </div>
-    </div>
-</section>
-
 {% include 'partials/_cta_band.html.twig' %}
 
 {% endblock %}
