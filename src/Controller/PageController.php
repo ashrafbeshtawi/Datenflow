@@ -29,6 +29,12 @@ class PageController extends AbstractController
         return $this->renderPage($request, 'page/process.html.twig');
     }
 
+    #[Route('/preise', name: 'pricing')]
+    public function pricing(Request $request): Response
+    {
+        return $this->renderPage($request, 'page/pricing.html.twig');
+    }
+
     #[Route('/faq', name: 'faq')]
     public function faq(Request $request): Response
     {

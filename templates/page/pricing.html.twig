@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ t.pricing.title }} — Datenflow{% endblock %}
+
+{% block body %}
+<section class="section page-head">
+    <div class="wrap">
+        <p class="kicker">{{ t.pricing.kicker }}</p>
+        <h1>{{ t.pricing.title }}</h1>
+        <p class="section-sub">{{ t.pricing.sub }}</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="wrap">
+        <h2>{{ t.pricing.ready_title }}</h2>
+        <p class="section-sub">{{ t.pricing.ready_sub }}</p>
+        <div class="card-grid cols-3">
+            {% for opt in t.pricing.options %}
+                <article class="card">
+                    <h3 class="card-h">{{ opt.title }}</h3>
+                    <p class="card-tagline">{{ opt.tagline }}</p>
+                    <p>{{ opt.body }}</p>
+                </article>
+            {% endfor %}
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+            <h2 class="card-h">{{ t.pricing.custom_title }}</h2>
+            <p>{{ t.pricing.custom_body }}</p>
+        </div>
+    </div>
+</section>
+
+{% include 'partials/_cta_band.html.twig' %}
+{% endblock %}
