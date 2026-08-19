@@ -9,55 +9,12 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Fixed project name so the compose network is deterministically kiwelt_default
+  COMPOSE_PROJECT_NAME: kiwelt
+
 jobs:
   tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    services:
-      postgres:
-        image: postgres:18-alpine
-        env:
-          POSTGRES_DB: app
-          POSTGRES_USER: app
-          POSTGRES_PASSWORD: app
-        ports:
-          - 5433:5432
-        options: >-
-          --health-cmd "pg_isready -U app -d app"
-          --health-interval 3s
-          --health-timeout 3s
-          --health-retries 20
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Create .env from template
-        run: cp .env.example .env
-
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.5'
-          extensions: intl, pdo_pgsql, zip
-          coverage: none
-
-      - name: Install Composer dependencies
-        uses: ramsey/composer-install@v3
-
-      - name: Prepare test database
-        run: |
-          php bin/console doctrine:database:create --if-not-exists --env=test
-          php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --env=test
-
-      - name: Unit + Functional tests
-        run: vendor/bin/phpunit --testsuite Unit,Functional
-
-      - name: E2E tests (Panther / Chromium)
-        run: |
-          vendor/bin/bdi detect drivers
-          vendor/bin/phpunit --testsuite E2E
-
-  docker:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -80,16 +37,61 @@ jobs:
           docker compose logs php
           exit 1
 
-      - name: Dump compose logs on failure
+      - name: Install Chromium for E2E tests (Panther)
+        run: docker compose exec -T php sh -c "apt-get update && apt-get install -y --no-install-recommends chromium chromium-driver"
+
+      - name: Prepare test database
+        run: |
+          docker compose exec -T php bin/console doctrine:database:create --if-not-exists --env=test
+          docker compose exec -T php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --env=test
+
+      - name: PHPUnit inside the container
+        run: >
+          docker compose exec -T
+          -e PANTHER_NO_SANDBOX=1
+          -e PANTHER_CHROME_ARGUMENTS=--disable-dev-shm-usage
+          php vendor/bin/phpunit
+
+      # The dev stack (target: base) never runs the prod CMD — boot the real
+      # prod image against the same database so migration/permission bugs
+      # (root-owned var/cache, missing env, broken CMD) fail CI, not prod.
+      - name: Smoke-test the prod image
+        run: |
+          docker build -f docker/php/Dockerfile --target prod -t kiwelt-prod .
+          docker run -d --name prod-smoke --network kiwelt_default -p 8081:80 \
+            -e APP_SECRET=ci-smoke-secret \
+            -e DEFAULT_URI=http://localhost:8081 \
+            -e DATABASE_URL="postgresql://app:app@database:5432/app?serverVersion=18&charset=utf8" \
+            -e MAILER_DSN=null://null \
+            -e MAIL_FROM=ci@example.com \
+            -e MAIL_TO_CONTACT=ci@example.com \
+            -e MAIL_TO_KARRIERE=ci@example.com \
+            kiwelt-prod
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8081 > /dev/null; then
+              echo "prod image serves"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "prod image did not serve in time" >&2
+          docker logs prod-smoke
+          exit 1
+
+      - name: Dump logs on failure
         if: failure()
-        run: docker compose logs
+        run: |
+          docker compose logs
+          docker logs prod-smoke 2>/dev/null || true
 
       - name: Tear down
         if: always()
-        run: docker compose down -v
+        run: |
+          docker rm -f prod-smoke 2>/dev/null || true
+          docker compose down -v
 
   publish:
-    needs: [tests, docker]
+    needs: [tests]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
