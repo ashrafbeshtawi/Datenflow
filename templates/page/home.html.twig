@@ -27,47 +27,6 @@
 
 <section class="section">
     <div class="wrap">
-        <p class="kicker">{{ t.industries.kicker }}</p>
-        <h2>{{ t.industries.title }}</h2>
-        <p class="section-sub">{{ t.industries.sub }}</p>
-
-        <div class="card-grid cols-3">
-            {% for item in t.industries.items %}
-                <article class="card">
-                    <span class="card-icon">{{ icon(item.icon) }}</span>
-                    <h3>{{ item.title }}</h3>
-                    <p class="card-tagline">{{ item.tagline }}</p>
-                    <p>{{ item.body }}</p>
-                    <ul class="tag-list">
-                        {% for ex in item.examples %}<li>{{ ex }}</li>{% endfor %}
-                    </ul>
-                </article>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-
-<section class="section section-tinted">
-    <div class="wrap">
-        <p class="kicker">{{ t.services.kicker }}</p>
-        <h2>{{ t.services.title }}</h2>
-        <p class="section-sub">{{ t.services.sub }}</p>
-
-        <div class="card-grid cols-2">
-            {% for item in t.services.items %}
-                <article class="card">
-                    <span class="card-icon">{{ icon(item.icon) }}</span>
-                    <h3>{{ item.title }}</h3>
-                    <p>{{ item.body }}</p>
-                </article>
-            {% endfor %}
-        </div>
-        <p class="section-more"><a class="btn btn-ghost" href="{{ path('services') }}">{{ t.hero.secondary }}</a></p>
-    </div>
-</section>
-
-<section class="section">
-    <div class="wrap">
         <p class="kicker">{{ t.process.kicker }}</p>
         <h2>{{ t.process.title }}</h2>
         <p class="section-sub">{{ t.process.sub }}</p>
