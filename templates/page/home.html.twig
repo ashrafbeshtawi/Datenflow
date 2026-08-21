@@ -16,11 +16,7 @@
             {% with {checks: t.hero.checks} %}{% include 'partials/_checks.html.twig' %}{% endwith %}
         </div>
         <div class="hero-art" aria-hidden="true">
-            <svg viewBox="0 0 400 400" class="blob">
-                <path fill="var(--sage)" opacity="0.45" d="M320 80c40 50 50 130 15 185s-115 85-185 65S30 240 40 165 115 35 190 35c55 0 95 5 130 45z"/>
-                <path fill="var(--moss)" opacity="0.18" d="M300 130c30 40 35 105 5 150s-95 65-150 50S55 250 65 190 130 85 190 85c45 0 82 10 110 45z"/>
-            </svg>
-            <div class="hero-leaf">{{ icon('leaf') }}</div>
+            <div class="hero-art-bg"></div>
         </div>
     </div>
 </section>
