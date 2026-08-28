@@ -2,9 +2,12 @@
 
 namespace App\Controller;
 
+use App\Booking\SlotFinder;
 use App\Content\SiteCopy;
 use App\Entity\Inquiry;
+use App\Entity\Setting;
 use App\Mail\InquiryMailer;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,8 +24,6 @@ class InquiryController extends AbstractController
         'company' => 200,
         'email' => 320,
         'phone' => 50,
-        'preferred_date' => 50,
-        'preferred_time' => 100,
         'role' => 100,
         'portfolio' => 500,
         'message' => 5000,
@@ -40,13 +41,15 @@ class InquiryController extends AbstractController
         private readonly InquiryMailer $mailer,
         private readonly RateLimiterFactory $formSubmitLimiter,
         private readonly LoggerInterface $logger,
+        private readonly SlotFinder $slots,
     ) {
     }
 
     #[Route('/termin', name: 'booking_submit', methods: ['POST'])]
     public function booking(Request $request): Response
     {
-        return $this->handle($request, 'booking', 'page/booking.html.twig', ['company', 'phone', 'preferred_date', 'preferred_time']);
+        // Message is optional here — the picked slot is the point of the form.
+        return $this->handle($request, 'booking', 'page/booking.html.twig', ['company', 'phone'], ['name', 'email']);
     }
 
     #[Route('/contact', name: 'contact_submit', methods: ['POST'])]
@@ -61,7 +64,7 @@ class InquiryController extends AbstractController
         return $this->handle($request, 'karriere', 'page/karriere.html.twig', ['role', 'portfolio']);
     }
 
-    private function handle(Request $request, string $type, string $template, array $extraFields): Response
+    private function handle(Request $request, string $type, string $template, array $extraFields, array $required = ['name', 'email', 'message']): Response
     {
         // Honeypot: bots that fill the hidden field get a fake success and no signal.
         if (trim($request->request->getString('_hp')) !== '') {
@@ -76,7 +79,7 @@ class InquiryController extends AbstractController
             return $this->renderError($request, $template, 'validation', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $errors = $this->validate($request);
+        $errors = $this->validate($request, $required);
 
         $attachment = null;
         if ($type === 'karriere') {
@@ -86,10 +89,17 @@ class InquiryController extends AbstractController
             }
         }
 
-        if ($errors !== []) {
-            $errorKey = count($errors) === 1 && isset($errors['cv']) ? $errors['cv'] : 'validation';
+        $startsAt = null;
+        $callType = null;
+        if ($type === 'booking') {
+            $errors = array_merge($errors, $this->validateBooking($request, $startsAt, $callType));
+        }
 
-            return $this->renderError($request, $template, $errorKey, Response::HTTP_UNPROCESSABLE_ENTITY, $errors);
+        if ($errors !== []) {
+            // Errors with their own summary text win over the generic one.
+            $special = array_intersect($errors, ['slot_taken', 'phone_required', 'cv_too_large', 'cv_invalid_type']);
+
+            return $this->renderError($request, $template, $special !== [] ? reset($special) : 'validation', Response::HTTP_UNPROCESSABLE_ENTITY, $errors);
         }
 
         $payload = [];
@@ -106,12 +116,21 @@ class InquiryController extends AbstractController
             trim($request->request->getString('email')),
             trim($request->request->getString('message')),
             $payload,
+            $startsAt,
+            $callType,
         );
-        $this->em->persist($inquiry);
-        $this->em->flush();
 
         try {
-            $this->mailer->send($inquiry, $attachment);
+            $this->em->persist($inquiry);
+            $this->em->flush();
+        } catch (UniqueConstraintViolationException) {
+            // Someone else grabbed the slot between render and submit.
+            return $this->renderError($request, $template, 'slot_taken', Response::HTTP_UNPROCESSABLE_ENTITY, ['starts_at' => 'slot_taken']);
+        }
+
+        try {
+            $meetLink = $callType === 'video' ? $this->em->find(Setting::class, Setting::MEET_LINK)?->getValue() : null;
+            $this->mailer->send($inquiry, $attachment, PageController::localeOf($request), $meetLink);
         } catch (\Throwable $e) {
             // Lead is already persisted — surface the failure so the visitor can call instead.
             $this->logger->error('Inquiry mail failed', ['type' => $type, 'inquiry' => $inquiry->getId(), 'error' => $e->getMessage()]);
@@ -123,10 +142,10 @@ class InquiryController extends AbstractController
     }
 
     /** @return array<string, string> field => reason */
-    private function validate(Request $request): array
+    private function validate(Request $request, array $required): array
     {
         $errors = [];
-        foreach (['name', 'email', 'message'] as $field) {
+        foreach ($required as $field) {
             if (trim($request->request->getString($field)) === '') {
                 $errors[$field] = 'required';
             }
@@ -139,6 +158,29 @@ class InquiryController extends AbstractController
             if (mb_strlen($request->request->getString($field)) > $max) {
                 $errors[$field] = 'too_long';
             }
+        }
+
+        return $errors;
+    }
+
+    /** Booking-only rules: valid open slot, call type, phone number for phone calls. */
+    private function validateBooking(Request $request, ?\DateTimeImmutable &$startsAt, ?string &$callType): array
+    {
+        $errors = [];
+
+        $callType = $request->request->getString('call_type');
+        if (!in_array($callType, ['video', 'phone'], true)) {
+            $errors['call_type'] = 'required';
+            $callType = null;
+        } elseif ($callType === 'phone' && trim($request->request->getString('phone')) === '') {
+            $errors['phone'] = 'phone_required';
+        }
+
+        $at = \DateTimeImmutable::createFromFormat('!Y-m-d H:i', $request->request->getString('starts_at'), new \DateTimeZone(SlotFinder::TZ));
+        if ($at === false || !$this->slots->isBookable($at)) {
+            $errors['starts_at'] = 'slot_taken';
+        } else {
+            $startsAt = $at;
         }
 
         return $errors;
@@ -171,13 +213,18 @@ class InquiryController extends AbstractController
     {
         $lang = PageController::localeOf($request);
 
-        return $this->render($template, [
+        $context = [
             't' => SiteCopy::for($lang),
             'lang' => $lang,
             'old' => $request->request->all(),
             'errors' => $errors ?: ['form' => $errorKey],
             'error_key' => $errorKey,
             'section' => null,
-        ], new Response(status: $status));
+        ];
+        if ($template === 'page/booking.html.twig') {
+            $context['grid'] = $this->slots->week($request->request->getString('week') ?: null);
+        }
+
+        return $this->render($template, $context, new Response(status: $status));
     }
 }

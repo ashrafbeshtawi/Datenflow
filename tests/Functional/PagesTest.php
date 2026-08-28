@@ -46,13 +46,14 @@ class PagesTest extends WebTestCase
         }
     }
 
-    public function testBookingFormHasMandatoryMessageField(): void
+    public function testBookingFormShowsSlotGrid(): void
     {
         $client = static::createClient();
         $client->request('GET', '/termin');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorExists('form textarea[name="message"][required]');
+        self::assertSelectorExists('form .slot-nav');
+        self::assertSelectorExists('form input[name="call_type"][value="video"]');
     }
 
     public function testLegacyToolsUrlRedirectsToServices(): void

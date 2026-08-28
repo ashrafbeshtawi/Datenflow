@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 112" role="img">
+    <!-- Placeholder until the real photo lands here (same filename, or update booking.html.twig). -->
+    <circle cx="56" cy="56" r="56" fill="#DCE5D4"/>
+    <text x="56" y="71" font-family="Georgia, serif" font-size="40" fill="#2B4534" text-anchor="middle">MB</text>
+</svg>

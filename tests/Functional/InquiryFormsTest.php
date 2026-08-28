@@ -6,6 +6,7 @@ use App\Entity\Inquiry;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class InquiryFormsTest extends WebTestCase
@@ -20,44 +21,91 @@ class InquiryFormsTest extends WebTestCase
     public function testBookingSubmissionPersistsAndMails(): void
     {
         $email = uniqid('booking-').'@example.com';
+        [, $slot] = $this->openBookingWeek();
 
-        $this->client->request('GET', '/termin');
-        $this->client->submitForm('Gespräch anfragen', [
+        $this->client->submitForm('Termin buchen', [
             'name' => 'Maria Muster',
             'company' => 'Muster Logistik GmbH',
             'email' => $email,
-            'phone' => '030 1234567',
-            'preferred_date' => '2026-09-01',
+            'starts_at' => $slot,
+            'call_type' => 'video',
             'message' => 'Wir schreiben alle Lieferscheine noch von Hand.',
         ]);
 
-        self::assertEmailCount(1);
-        $mail = self::getMailerMessage();
-        self::assertStringContainsString('Terminanfrage', $mail->getSubject());
-        self::assertStringContainsString('Lieferscheine', $mail->getTextBody());
+        // Internal notification + client confirmation.
+        self::assertEmailCount(2);
+        [$internal, $confirmation] = self::getMailerMessages();
+        self::assertStringContainsString('Terminbuchung', $internal->getSubject());
+        self::assertStringContainsString('Terminbestätigung', $confirmation->getSubject());
+        self::assertStringContainsString('meet.google.com', $confirmation->getTextBody());
 
         self::assertResponseRedirects('/termin?sent=1');
         $this->client->followRedirect();
-        self::assertSelectorTextContains('.form-success', 'Danke');
+        self::assertSelectorTextContains('.form-success', 'Termin gebucht');
 
         $inquiry = $this->findInquiry($email);
         self::assertSame('booking', $inquiry->getType());
-        self::assertSame('2026-09-01', $inquiry->getPayload()['preferred_date']);
+        self::assertSame($slot, $inquiry->getStartsAt()->format('Y-m-d H:i'));
+        self::assertSame('video', $inquiry->getCallType());
+        self::assertSame(Inquiry::STATUS_CONFIRMED, $inquiry->getStatus());
     }
 
-    public function testBookingWithoutMessageIsRejected(): void
+    public function testBookedSlotRendersDisabledAndCannotBeRebooked(): void
     {
-        $crawler = $this->client->request('GET', '/termin');
+        [$crawler, $slot] = $this->openBookingWeek();
+        $this->bookDirectly($slot);
+
+        // The slot is still rendered, but no longer selectable.
+        $crawler2 = $this->client->request('GET', '/termin?week='.$this->futureWeek());
+        self::assertSame(0, $crawler2->filter(sprintf('input[name="starts_at"][value="%s"]', $slot))->count());
+        self::assertGreaterThan(0, $crawler2->filter('.slot-gone')->count());
+
+        // Forcing the taken slot through anyway is rejected.
         $this->client->request('POST', '/termin', [
-            'name' => 'Maria Muster',
-            'email' => 'maria@example.com',
+            'name' => 'Zu Spät',
+            'email' => 'spaet@example.com',
+            'starts_at' => $slot,
+            'call_type' => 'video',
             'message' => '',
             '_token' => $crawler->filter('input[name="_token"]')->attr('value'),
         ]);
 
         self::assertResponseStatusCodeSame(422);
+        self::assertSelectorTextContains('.form-error-summary', 'nicht mehr verfügbar');
+        self::assertEmailCount(0);
+    }
+
+    public function testPhoneCallRequiresPhoneNumber(): void
+    {
+        [, $slot] = $this->openBookingWeek();
+
+        $this->client->submitForm('Termin buchen', [
+            'name' => 'Maria Muster',
+            'email' => 'maria@example.com',
+            'starts_at' => $slot,
+            'call_type' => 'phone',
+            'phone' => '',
+        ]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorTextContains('.form-error-summary', 'Telefonnummer');
+        self::assertSelectorExists('input[name="phone"][aria-invalid="true"]');
+        self::assertEmailCount(0);
+    }
+
+    public function testBookingWithoutSlotIsRejected(): void
+    {
+        $crawler = $this->client->request('GET', '/termin');
+        $this->client->request('POST', '/termin', [
+            'name' => 'Maria Muster',
+            'email' => 'maria@example.com',
+            'call_type' => 'video',
+            'message' => 'Hallo',
+            '_token' => $crawler->filter('input[name="_token"]')->attr('value'),
+        ]);
+
+        self::assertResponseStatusCodeSame(422);
         self::assertSelectorExists('.form-error-summary');
-        self::assertSelectorExists('textarea[name="message"][aria-invalid="true"]');
         // Old values survive the round trip.
         self::assertSelectorExists('input[name="name"][value="Maria Muster"]');
         self::assertEmailCount(0);
@@ -81,7 +129,7 @@ class InquiryFormsTest extends WebTestCase
     public function testHoneypotGetsFakeSuccessWithoutSideEffects(): void
     {
         $this->client->request('GET', '/termin');
-        $this->client->submitForm('Gespräch anfragen', [
+        $this->client->submitForm('Termin buchen', [
             'name' => 'Bot',
             'email' => 'bot@example.com',
             'message' => 'spam',
@@ -161,6 +209,44 @@ class InquiryFormsTest extends WebTestCase
         self::assertResponseStatusCodeSame(422);
         self::assertSelectorTextContains('.form-error-summary', 'PDF');
         self::assertEmailCount(0);
+    }
+
+    /** Monday of a week comfortably past the 24h lead time and inside the 4-week horizon. */
+    private function futureWeek(): string
+    {
+        return (new \DateTimeImmutable('monday next week', new \DateTimeZone('Europe/Berlin')))
+            ->modify('+1 week')->format('Y-m-d');
+    }
+
+    /**
+     * Opens the booking page on a future week and picks a random free slot.
+     * Random because the test DB is not reset between runs — earlier runs'
+     * bookings stay taken until the horizon rolls past them.
+     *
+     * @return array{0: Crawler, 1: string}
+     */
+    private function openBookingWeek(): array
+    {
+        $crawler = $this->client->request('GET', '/termin?week='.$this->futureWeek());
+        $radios = $crawler->filter('input[name="starts_at"]');
+        self::assertGreaterThan(0, $radios->count(), 'No free slots rendered');
+
+        return [$crawler, $radios->eq(random_int(0, $radios->count() - 1))->attr('value')];
+    }
+
+    private function bookDirectly(string $slot): void
+    {
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $em->persist(new Inquiry(
+            'booking',
+            'Erste Bucherin',
+            uniqid('first-').'@example.com',
+            '',
+            [],
+            new \DateTimeImmutable($slot, new \DateTimeZone('Europe/Berlin')),
+            'video',
+        ));
+        $em->flush();
     }
 
     private function findInquiry(string $email): Inquiry
