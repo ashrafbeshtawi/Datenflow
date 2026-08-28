@@ -21,7 +21,7 @@ class PagesTest extends WebTestCase
     public static function pageProvider(): iterable
     {
         yield 'home' => ['/', 'kompliziert'];
-        yield 'services' => ['/services', 'Vier Dinge'];
+        yield 'services' => ['/services', 'Wir kennen Ihren Alltag'];
         yield 'process' => ['/process', 'Vom ersten Gespräch'];
         yield 'pricing' => ['/preise', 'Ein passendes Modell'];
         yield 'faq' => ['/faq', 'Was Kunden uns'];

@@ -1,24 +1,46 @@
 {% extends 'base.html.twig' %}
 {% from 'macros.html.twig' import icon %}
 
-{% block title %}{{ t.services.title }} — Datenflow{% endblock %}
+{% block title %}{{ t.nav.services }} — Datenflow{% endblock %}
 
 {% block body %}
 <section class="section page-head">
     <div class="wrap">
-        <p class="kicker">{{ t.services.kicker }}</p>
-        <h1>{{ t.services.title }}</h1>
-        <p class="section-sub">{{ t.services.sub }}</p>
+        <p class="kicker">{{ t.industries.kicker }}</p>
+        <h1>{{ t.industries.title }}</h1>
+        <p class="section-sub">{{ t.industries.sub }}</p>
     </div>
 </section>
 
 <section class="section">
     <div class="wrap">
+        <div class="card-grid cols-3">
+            {% for item in t.industries.items %}
+                <article class="card">
+                    <span class="card-icon">{{ icon(item.icon) }}</span>
+                    <h2 class="card-h">{{ item.title }}</h2>
+                    <p class="card-tagline">{{ item.tagline }}</p>
+                    <p>{{ item.body }}</p>
+                    <ul class="tag-list">
+                        {% for ex in item.examples %}<li>{{ ex }}</li>{% endfor %}
+                    </ul>
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section section-tinted">
+    <div class="wrap">
+        <p class="kicker">{{ t.services.kicker }}</p>
+        <h2>{{ t.services.title }}</h2>
+        <p class="section-sub">{{ t.services.sub }}</p>
+
         <div class="card-grid cols-2">
             {% for item in t.services.items %}
                 <article class="card">
                     <span class="card-icon">{{ icon(item.icon) }}</span>
-                    <h2 class="card-h">{{ item.title }}</h2>
+                    <h3 class="card-h">{{ item.title }}</h3>
                     <p>{{ item.body }}</p>
                     <ul class="tag-list">
                         {% for ex in item.examples %}<li>{{ ex }}</li>{% endfor %}
