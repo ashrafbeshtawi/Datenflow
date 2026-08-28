@@ -4,6 +4,8 @@ namespace App\Booking;
 
 use App\Entity\AvailabilityRule;
 use App\Entity\Inquiry;
+use DateTimeImmutable;
+use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
@@ -23,28 +25,31 @@ class SlotFinder
     }
 
     /**
-     * Week grid for the booking page. $weekParam is any 'Y-m-d' inside the wanted
-     * week; out-of-range or invalid values clamp to the allowed booking window.
+     * Builds the week grid for the booking page. $weekParam is any 'Y-m-d' inside
+     * the wanted week; out-of-range or invalid values clamp to the booking window.
      *
-     * @return array{weekStart: string, days: \DateTimeImmutable[], times: string[], slots: array<string, string>, prev: ?string, next: ?string}
+     * @return array{weekStart: string, days: DateTimeImmutable[], times: string[], slots: array<string, string>, prev: ?string, next: ?string}
      */
-    public function week(?string $weekParam): array
+    public function buildWeekGrid(?string $weekParam): array
     {
         $now = $this->now();
         $firstMonday = $now->modify('monday this week')->setTime(0, 0);
         $lastMonday = $firstMonday->modify('+'.(self::HORIZON_WEEKS - 1).' weeks');
 
+        // Clamp the requested week into [current week, last week of the horizon].
         $monday = $firstMonday;
-        if ($weekParam !== null && ($parsed = \DateTimeImmutable::createFromFormat('!Y-m-d', $weekParam, new \DateTimeZone(self::TZ))) !== false) {
+        if ($weekParam !== null && ($parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $weekParam, new DateTimeZone(self::TZ))) !== false) {
             $monday = min(max($parsed->modify('monday this week'), $firstMonday), $lastMonday);
         }
 
         $rulesByDay = $this->rulesByWeekday();
         $taken = $this->takenSlots($monday, $monday->modify('+7 days'));
+        // Slot keys are 'Y-m-d H:i', which sorts chronologically — so a plain
+        // string comparison against this cutoff is a time comparison.
         $cutoff = $now->modify('+'.self::LEAD_HOURS.' hours')->format('Y-m-d H:i');
 
         $days = [];
-        $times = [];
+        $times = []; // used as a set: ksort + array_keys below yield sorted distinct times
         $slots = [];
         foreach ($rulesByDay as $weekday => $rules) {
             $day = $monday->modify('+'.($weekday - 1).' days');
@@ -53,6 +58,7 @@ class SlotFinder
                 foreach ($this->slotTimes($rule) as $time) {
                     $times[$time] = true;
                     $key = $day->format('Y-m-d').' '.$time;
+                    // 'gone' = already booked/blocked, or closer than the lead time.
                     $slots[$key] = isset($taken[$key]) || $key <= $cutoff ? 'gone' : 'free';
                 }
             }
@@ -75,7 +81,7 @@ class SlotFinder
      * friendly error — the race between two submits is settled by the DB's
      * partial unique index.
      */
-    public function isBookable(\DateTimeImmutable $at): bool
+    public function isBookable(DateTimeImmutable $at): bool
     {
         $now = $this->now();
         if ($at < $now->modify('+'.self::LEAD_HOURS.' hours')) {
@@ -123,7 +129,7 @@ class SlotFinder
     }
 
     /** @return array<string, true> keyed by 'Y-m-d H:i' */
-    private function takenSlots(\DateTimeImmutable $from, \DateTimeImmutable $to): array
+    private function takenSlots(DateTimeImmutable $from, DateTimeImmutable $to): array
     {
         $rows = $this->em->createQuery(
             'SELECT i.startsAt FROM '.Inquiry::class.' i
@@ -140,8 +146,8 @@ class SlotFinder
         return $taken;
     }
 
-    public function now(): \DateTimeImmutable
+    public function now(): DateTimeImmutable
     {
-        return new \DateTimeImmutable('now', new \DateTimeZone(self::TZ));
+        return new DateTimeImmutable('now', new DateTimeZone(self::TZ));
     }
 }

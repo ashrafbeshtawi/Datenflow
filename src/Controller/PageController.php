@@ -46,7 +46,7 @@ class PageController extends AbstractController
     public function booking(Request $request, SlotFinder $slots): Response
     {
         return $this->renderPage($request, 'page/booking.html.twig', [
-            'grid' => $slots->week($request->query->getString('week') ?: null),
+            'grid' => $slots->buildWeekGrid($request->query->getString('week') ?: null),
         ]);
     }
 

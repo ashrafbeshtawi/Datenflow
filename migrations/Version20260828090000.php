@@ -16,6 +16,9 @@ final class Version20260828090000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        // WITHOUT TIME ZONE is deliberate: all times are naive Europe/Berlin
+        // wall-clock values (single-timezone business, see SlotFinder). A 09:00
+        // slot stays 09:00 on the wall clock across DST switches.
         $this->addSql('ALTER TABLE inquiry ADD starts_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL');
         $this->addSql('ALTER TABLE inquiry ADD call_type VARCHAR(10) DEFAULT NULL');
         $this->addSql("ALTER TABLE inquiry ADD status VARCHAR(20) DEFAULT 'confirmed' NOT NULL");
@@ -29,7 +32,7 @@ final class Version20260828090000 extends AbstractMigration
         foreach ([1, 2, 3, 4, 5] as $weekday) {
             $this->addSql("INSERT INTO availability_rule (weekday, start_time, end_time) VALUES ($weekday, '09:00', '17:00')");
         }
-        $this->addSql("INSERT INTO setting (name, value) VALUES ('meet_link', 'https://meet.google.com/replace-me')");
+        $this->addSql("INSERT INTO setting (name, value) VALUES ('meet_link', 'https://meet.google.com/jre-kcoc-swk')");
     }
 
     public function down(Schema $schema): void
