@@ -36,12 +36,24 @@ class SlotFinder
         $firstMonday = $now->modify('monday this week')->setTime(0, 0);
         $lastMonday = $firstMonday->modify('+'.(self::HORIZON_WEEKS - 1).' weeks');
 
-        // Clamp the requested week into [current week, last week of the horizon].
-        $monday = $firstMonday;
         if ($weekParam !== null && ($parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $weekParam, new DateTimeZone(self::TZ))) !== false) {
-            $monday = min(max($parsed->modify('monday this week'), $firstMonday), $lastMonday);
+            // Clamp the requested week into [current week, last week of the horizon].
+            return $this->assembleWeek(min(max($parsed->modify('monday this week'), $firstMonday), $lastMonday), $firstMonday, $lastMonday, $now);
         }
 
+        // No explicit week: land on the first week that still has a free slot,
+        // so visitors never open the page on a fully booked (or past) week.
+        $grid = $this->assembleWeek($firstMonday, $firstMonday, $lastMonday, $now);
+        while (!in_array('free', $grid['slots'], true) && $grid['next'] !== null) {
+            $grid = $this->assembleWeek(new DateTimeImmutable($grid['next'], new DateTimeZone(self::TZ)), $firstMonday, $lastMonday, $now);
+        }
+
+        return $grid;
+    }
+
+    /** @return array{weekStart: string, days: DateTimeImmutable[], times: string[], slots: array<string, string>, prev: ?string, next: ?string} */
+    private function assembleWeek(DateTimeImmutable $monday, DateTimeImmutable $firstMonday, DateTimeImmutable $lastMonday, DateTimeImmutable $now): array
+    {
         $rulesByDay = $this->rulesByWeekday();
         $taken = $this->takenSlots($monday, $monday->modify('+7 days'));
         // Slot keys are 'Y-m-d H:i', which sorts chronologically — so a plain

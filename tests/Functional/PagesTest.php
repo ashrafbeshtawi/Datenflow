@@ -49,11 +49,18 @@ class PagesTest extends WebTestCase
     public function testBookingFormShowsSlotGrid(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/termin');
+        $monday = (new \DateTimeImmutable('monday next week', new \DateTimeZone('Europe/Berlin')))->modify('+1 week');
+        $crawler = $client->request('GET', '/termin?week='.$monday->format('Y-m-d'));
 
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('form .slot-nav');
         self::assertSelectorExists('form input[name="call_type"][value="video"]');
+
+        // Regression: Twig must render the naive Berlin dates unshifted. With the
+        // server on UTC and no twig date timezone, every header moved back a day.
+        $firstHeader = $crawler->filter('.slot-grid th')->first()->text();
+        self::assertStringContainsString('Mo', $firstHeader);
+        self::assertStringContainsString($monday->format('d.m.'), $firstHeader);
     }
 
     public function testLegacyToolsUrlRedirectsToServices(): void

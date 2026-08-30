@@ -123,4 +123,25 @@ class Inquiry
     {
         return $this->status;
     }
+
+    /** Cancelling frees the slot: the partial unique index only covers confirmed rows. */
+    public function cancel(): void
+    {
+        $this->status = self::STATUS_CANCELLED;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function setEmail(string $email): void
+    {
+        $this->email = $email;
+    }
+
+    public function setMessage(string $message): void
+    {
+        $this->message = $message;
+    }
 }

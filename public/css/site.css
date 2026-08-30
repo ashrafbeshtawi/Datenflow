@@ -673,6 +673,11 @@ img, svg { max-width: 100%; }
 
 @media (max-width: 55rem) { .booking-grid { grid-template-columns: 1fr; } }
 
+/* Intro column: heading + checks + person card beside the form. */
+.booking-intro h1 { font-size: clamp(1.9rem, 3vw, 2.5rem); }
+.booking-intro .section-sub { margin-bottom: 1.25rem; }
+.booking-intro .checks { display: grid; gap: 0.4rem; margin-bottom: 1.75rem; }
+
 .person-card {
     background: var(--white);
     border: 1px solid var(--greige-light);
@@ -680,8 +685,6 @@ img, svg { max-width: 100%; }
     padding: 2rem;
     box-shadow: var(--shadow);
     text-align: center;
-    position: sticky;
-    top: 6rem;
 }
 
 .person-card img {
@@ -736,9 +739,57 @@ img, svg { max-width: 100%; }
     text-decoration: line-through;
 }
 
+/* Collapsed by default: 7 time rows, the label toggles the rest (pure CSS). */
+.slot-expand:not(:checked) ~ .slot-grid tbody tr:nth-child(n+8) { display: none; }
+
+.slot-expand-label {
+    display: inline-block;
+    margin-top: 0.6rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--steel);
+    cursor: pointer;
+}
+.slot-expand-label:hover { color: var(--slate); }
+.slot-expand-label .less { display: none; }
+.slot-expand:checked ~ .slot-expand-label .more { display: none; }
+.slot-expand:checked ~ .slot-expand-label .less { display: inline; }
+
 .call-type { display: flex; flex-wrap: wrap; gap: 0.6rem 1.8rem; }
+/* .form-card label sets display:grid; this must win for the radio rows */
+.form-card .radio-inline,
 .radio-inline { display: flex; align-items: center; gap: 0.5rem; font-weight: 400; color: var(--charcoal); }
+.form-card .radio-inline input,
 .radio-inline input { width: auto; accent-color: var(--steel); }
+.radio-inline .bi { color: var(--steel); font-size: 1.1rem; }
+
+/* ---------- Admin ---------- */
+
+.admin-section { margin-bottom: 3rem; }
+.admin-section h2 { font-size: 1.35rem; }
+
+.admin-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.admin-table th,
+.admin-table td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--greige-light); vertical-align: top; }
+.admin-table th { color: var(--charcoal-deep); }
+
+.admin-inline-form { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: end; }
+.admin-inline-form label { display: grid; gap: 0.25rem; font-size: 0.85rem; font-weight: 600; color: var(--charcoal-deep); }
+.admin-inline-form input,
+.admin-inline-form select {
+    font: inherit;
+    padding: 0.4rem 0.6rem;
+    border: 1.5px solid var(--greige-light);
+    border-radius: 0.5rem;
+    background: var(--off-white);
+}
+
+.btn-sm { padding: 0.3rem 0.9rem; font-size: 0.85rem; }
+.btn-danger { background: #C0603C; color: #fff; }
+.btn-danger:hover { background: #A24E2E; color: #fff; }
+
+.status-cancelled { color: #A24E2E; font-weight: 600; }
+.status-confirmed { color: var(--steel); font-weight: 600; }
 
 /* ---------- Contact ---------- */
 

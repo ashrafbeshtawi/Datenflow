@@ -46,3 +46,8 @@ php bin/console doctrine:migrations:migrate -n --allow-no-migration --env=test
 vendor/bin/phpunit --testsuite Unit,Functional
 vendor/bin/phpunit --testsuite E2E
 ```
+
+## Admin
+
+`open http://localhost:8080/admin` — admin panel (HTTP Basic, password = `ADMIN_PASSWORD` from .env, user name ignored)
+Manage inquiries (edit/cancel), weekly availability, one-off slot blocks and the Google Meet link.

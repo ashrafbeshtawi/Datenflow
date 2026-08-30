@@ -2,23 +2,25 @@
 
 {% block title %}{{ t.booking.title }} — Datenflow{% endblock %}
 
-{% block body %}
-<section class="section page-head">
-    <div class="wrap wrap-narrow">
-        <p class="kicker">{{ t.booking.kicker }}</p>
-        <h1>{{ t.booking.title }}</h1>
-        <p class="section-sub">{{ t.booking.body }}</p>
-        {% with {checks: t.booking.checks} %}{% include 'partials/_checks.html.twig' %}{% endwith %}
-    </div>
-</section>
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
+{% endblock %}
 
+{% block body %}
 <section class="section">
     <div class="wrap booking-grid">
-        <aside class="person-card">
-            <img src="{{ asset('img/mohammad-beshtawi.svg') }}" alt="{{ t.booking.person.photo_alt }}" width="112" height="112">
-            <h2>{{ t.booking.person.name }}</h2>
-            <p class="person-role">{{ t.booking.person.role }}</p>
-            <p>{{ t.booking.person.blurb }}</p>
+        <aside class="booking-intro">
+            <p class="kicker">{{ t.booking.kicker }}</p>
+            <h1>{{ t.booking.title }}</h1>
+            <p class="section-sub">{{ t.booking.body }}</p>
+            {% with {checks: t.booking.checks} %}{% include 'partials/_checks.html.twig' %}{% endwith %}
+
+            <div class="person-card">
+                <img src="{{ asset('img/mohammad-beshtawi.svg') }}" alt="{{ t.booking.person.photo_alt }}" width="112" height="112">
+                <h2>{{ t.booking.person.name }}</h2>
+                <p class="person-role">{{ t.booking.person.role }}</p>
+                <p>{{ t.booking.person.blurb }}</p>
+            </div>
         </aside>
 
         <div>
@@ -52,6 +54,7 @@
                         <p class="field-hint">{{ t.booking.slot.empty }}</p>
                     {% else %}
                     <div class="slot-scroll">
+                        <input type="checkbox" id="slot-expand" class="slot-expand" {{ old.starts_at|default('') ? 'checked' }} hidden>
                         <table class="slot-grid">
                             <thead>
                                 <tr>
@@ -82,6 +85,12 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                        {% if grid.times|length > 7 %}
+                            <label for="slot-expand" class="slot-expand-label">
+                                <span class="more">{{ t.booking.slot.more }} ▾</span>
+                                <span class="less">{{ t.booking.slot.less }} ▴</span>
+                            </label>
+                        {% endif %}
                     </div>
                     {% endif %}
                     <input type="hidden" name="week" value="{{ grid.weekStart }}">
@@ -90,9 +99,11 @@
                 <fieldset>
                     <legend>{{ t.booking.f.call_type }} *</legend>
                     <div class="call-type">
+                        {% set call_icons = {video: 'bi-camera-video', phone: 'bi-telephone'} %}
                         {% for value, label in t.booking.f.call_opts %}
                             <label class="radio-inline">
                                 <input type="radio" name="call_type" value="{{ value }}" required {{ old.call_type|default('video') == value ? 'checked' }}>
+                                <i class="bi {{ call_icons[value] }}" aria-hidden="true"></i>
                                 {{ label }}
                             </label>
                         {% endfor %}
