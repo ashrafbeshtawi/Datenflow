@@ -2,6 +2,11 @@
 framework:
     secret: '%env(APP_SECRET)%'
 
+    # Cache busting: asset() appends ?<version> to css/js/img URLs, so browsers
+    # pick up changed files instead of serving a stale cache. Bump on release.
+    assets:
+        version: '2026-08-30.1'
+
     # Note that the session will be started ONLY if you read or write from it.
     session: true
 

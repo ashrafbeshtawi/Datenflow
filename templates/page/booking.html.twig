@@ -12,8 +12,6 @@
         <aside class="booking-intro">
             <p class="kicker">{{ t.booking.kicker }}</p>
             <h1>{{ t.booking.title }}</h1>
-            <p class="section-sub">{{ t.booking.body }}</p>
-            {% with {checks: t.booking.checks} %}{% include 'partials/_checks.html.twig' %}{% endwith %}
 
             <div class="person-card">
                 <img src="{{ asset('img/mohammad-beshtawi.svg') }}" alt="{{ t.booking.person.photo_alt }}" width="112" height="112">
@@ -21,6 +19,9 @@
                 <p class="person-role">{{ t.booking.person.role }}</p>
                 <p>{{ t.booking.person.blurb }}</p>
             </div>
+
+            <p class="section-sub">{{ t.booking.body }}</p>
+            {% with {checks: t.booking.checks} %}{% include 'partials/_checks.html.twig' %}{% endwith %}
         </aside>
 
         <div>
@@ -99,12 +100,11 @@
                 <fieldset>
                     <legend>{{ t.booking.f.call_type }} *</legend>
                     <div class="call-type">
-                        {% set call_icons = {video: 'bi-camera-video', phone: 'bi-telephone'} %}
+                        {% set call_icons = {video: 'bi-camera-video-fill', phone: 'bi-telephone-fill'} %}
                         {% for value, label in t.booking.f.call_opts %}
-                            <label class="radio-inline">
+                            <label class="call-pill">
                                 <input type="radio" name="call_type" value="{{ value }}" required {{ old.call_type|default('video') == value ? 'checked' }}>
-                                <i class="bi {{ call_icons[value] }}" aria-hidden="true"></i>
-                                {{ label }}
+                                <span><i class="bi {{ call_icons[value] }}" aria-hidden="true"></i>{{ label }}</span>
                             </label>
                         {% endfor %}
                     </div>
