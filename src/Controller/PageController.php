@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Booking\SlotFinder;
 use App\Content\SiteCopy;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -42,9 +43,11 @@ class PageController extends AbstractController
     }
 
     #[Route('/termin', name: 'booking')]
-    public function booking(Request $request): Response
+    public function booking(Request $request, SlotFinder $slots): Response
     {
-        return $this->renderPage($request, 'page/booking.html.twig');
+        return $this->renderPage($request, 'page/booking.html.twig', [
+            'grid' => $slots->buildWeekGrid($request->query->getString('week') ?: null),
+        ]);
     }
 
     #[Route('/contact', name: 'contact')]

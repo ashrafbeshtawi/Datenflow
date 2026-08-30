@@ -662,6 +662,84 @@ img, svg { max-width: 100%; }
     font-weight: 600;
 }
 
+/* ---------- Booking ---------- */
+
+.booking-grid {
+    display: grid;
+    grid-template-columns: 0.7fr 1.3fr;
+    gap: 2.5rem;
+    align-items: start;
+}
+
+@media (max-width: 55rem) { .booking-grid { grid-template-columns: 1fr; } }
+
+.person-card {
+    background: var(--white);
+    border: 1px solid var(--greige-light);
+    border-radius: var(--r-card);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    text-align: center;
+    position: sticky;
+    top: 6rem;
+}
+
+.person-card img {
+    width: 7rem;
+    height: 7rem;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--silver-2);
+    margin-bottom: 1rem;
+}
+
+.person-card h2 { font-size: 1.4rem; margin-bottom: 0.15rem; }
+.person-role { color: var(--ink-soft); font-weight: 600; margin-bottom: 0.8rem; }
+
+.form-card fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 0.8rem; }
+.form-card legend { font-weight: 600; font-size: 0.95rem; color: var(--charcoal-deep); padding: 0; }
+
+.slot-nav { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.slot-nav a { font-weight: 600; color: var(--steel); text-decoration: none; }
+.slot-nav a:hover { color: var(--slate); }
+
+.slot-scroll { overflow-x: auto; }
+
+.slot-grid { border-collapse: separate; border-spacing: 0.35rem; width: 100%; }
+.slot-grid th { font-size: 0.85rem; color: var(--charcoal-deep); line-height: 1.3; padding-bottom: 0.25rem; }
+.slot-grid td { padding: 0; min-width: 3.6rem; }
+
+.slot { display: block; cursor: pointer; }
+.slot input { position: absolute; opacity: 0; pointer-events: none; }
+
+.slot span,
+.slot-gone {
+    display: block;
+    text-align: center;
+    padding: 0.4rem 0.3rem;
+    border-radius: 0.5rem;
+    border: 1.5px solid var(--greige-light);
+    background: var(--off-white);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--charcoal-deep);
+}
+
+.slot:hover span { border-color: var(--steel); }
+.slot input:checked + span { background: var(--steel); border-color: var(--steel-hover); color: var(--white); }
+.slot input:focus-visible + span { outline: 2px solid rgba(91, 143, 164, 0.35); }
+
+.slot-gone {
+    background: var(--silver-2);
+    border-style: dashed;
+    color: var(--silver-3);
+    text-decoration: line-through;
+}
+
+.call-type { display: flex; flex-wrap: wrap; gap: 0.6rem 1.8rem; }
+.radio-inline { display: flex; align-items: center; gap: 0.5rem; font-weight: 400; color: var(--charcoal); }
+.radio-inline input { width: auto; accent-color: var(--steel); }
+
 /* ---------- Contact ---------- */
 
 .contact-grid {

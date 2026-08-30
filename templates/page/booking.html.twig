@@ -13,52 +13,116 @@
 </section>
 
 <section class="section">
-    <div class="wrap wrap-narrow">
+    <div class="wrap booking-grid">
+        <aside class="person-card">
+            <img src="{{ asset('img/mohammad-beshtawi.svg') }}" alt="{{ t.booking.person.photo_alt }}" width="112" height="112">
+            <h2>{{ t.booking.person.name }}</h2>
+            <p class="person-role">{{ t.booking.person.role }}</p>
+            <p>{{ t.booking.person.blurb }}</p>
+        </aside>
+
+        <div>
         {% if sent|default(false) %}
             <p class="form-success" role="status">{{ t.booking.f.thanks }}</p>
         {% else %}
-        {% set old = old|default({}) %}
-        {% set errors = errors|default({}) %}
-        {% if errors is not empty %}
-            <p class="form-error-summary" role="alert">{{ t.form_errors[error_key|default('validation')] }}</p>
-        {% endif %}
-        <form class="form-card" method="post" action="{{ path('booking') }}">
-            <div class="field-row">
-                <label>{{ t.booking.f.name }} *
-                    <input type="text" name="name" required maxlength="200" value="{{ old.name|default('') }}" {{ errors.name is defined ? 'aria-invalid="true"' }}>
-                </label>
-                <label>{{ t.booking.f.company }}
-                    <input type="text" name="company" maxlength="200" value="{{ old.company|default('') }}">
-                </label>
-            </div>
-            <div class="field-row">
-                <label>{{ t.booking.f.email }} *
-                    <input type="email" name="email" required maxlength="320" value="{{ old.email|default('') }}" {{ errors.email is defined ? 'aria-invalid="true"' }}>
-                </label>
-                <label>{{ t.booking.f.phone }}
-                    <input type="tel" name="phone" maxlength="50" value="{{ old.phone|default('') }}">
-                </label>
-            </div>
-            <div class="field-row">
-                <label>{{ t.booking.f.preferred_date }}
-                    <input type="date" name="preferred_date" value="{{ old.preferred_date|default('') }}">
-                </label>
-                <label>{{ t.booking.f.preferred_time }}
-                    <select name="preferred_time">
-                        {% for opt in t.booking.f.time_opts %}
-                            <option value="{{ opt }}" {{ old.preferred_time|default('') == opt ? 'selected' }}>{{ opt }}</option>
+            {% set old = old|default({}) %}
+            {% set errors = errors|default({}) %}
+            {% if errors is not empty %}
+                <p class="form-error-summary" role="alert">{{ t.form_errors[error_key|default('validation')] }}</p>
+            {% endif %}
+            <form class="form-card" method="post" action="{{ path('booking') }}">
+                <fieldset>
+                    <legend>{{ t.booking.slot.legend }} *</legend>
+                    <div class="slot-nav">
+                        {% if grid.prev %}
+                            <a href="{{ path('booking', {week: grid.prev}) }}">‹ {{ t.booking.slot.prev }}</a>
+                        {% else %}
+                            <span></span>
+                        {% endif %}
+                        {% if grid.days is not empty %}
+                            <strong>{{ grid.days|first|date('d.m.') }} – {{ grid.days|last|date('d.m.Y') }}</strong>
+                        {% endif %}
+                        {% if grid.next %}
+                            <a href="{{ path('booking', {week: grid.next}) }}">{{ t.booking.slot.next }} ›</a>
+                        {% else %}
+                            <span></span>
+                        {% endif %}
+                    </div>
+                    {% if 'free' not in grid.slots %}
+                        <p class="field-hint">{{ t.booking.slot.empty }}</p>
+                    {% else %}
+                    <div class="slot-scroll">
+                        <table class="slot-grid">
+                            <thead>
+                                <tr>
+                                    {% for day in grid.days %}
+                                        <th scope="col">{{ t.booking.slot.weekdays_short[day|date('N') - 1] }}<br>{{ day|date('d.m.') }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for time in grid.times %}
+                                    <tr>
+                                        {% for day in grid.days %}
+                                            {% set key = day|date('Y-m-d') ~ ' ' ~ time %}
+                                            <td>
+                                                {% if grid.slots[key] is defined %}
+                                                    {% if grid.slots[key] == 'free' %}
+                                                        <label class="slot">
+                                                            <input type="radio" name="starts_at" value="{{ key }}" required {{ old.starts_at|default('') == key ? 'checked' }}>
+                                                            <span>{{ time }}</span>
+                                                        </label>
+                                                    {% else %}
+                                                        <span class="slot-gone">{{ time }}</span>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                    <input type="hidden" name="week" value="{{ grid.weekStart }}">
+                </fieldset>
+
+                <fieldset>
+                    <legend>{{ t.booking.f.call_type }} *</legend>
+                    <div class="call-type">
+                        {% for value, label in t.booking.f.call_opts %}
+                            <label class="radio-inline">
+                                <input type="radio" name="call_type" value="{{ value }}" required {{ old.call_type|default('video') == value ? 'checked' }}>
+                                {{ label }}
+                            </label>
                         {% endfor %}
-                    </select>
+                    </div>
+                </fieldset>
+
+                <div class="field-row">
+                    <label>{{ t.booking.f.name }} *
+                        <input type="text" name="name" required maxlength="200" value="{{ old.name|default('') }}" {{ errors.name is defined ? 'aria-invalid="true"' }}>
+                    </label>
+                    <label>{{ t.booking.f.company }}
+                        <input type="text" name="company" maxlength="200" value="{{ old.company|default('') }}">
+                    </label>
+                </div>
+                <div class="field-row">
+                    <label>{{ t.booking.f.email }} *
+                        <input type="email" name="email" required maxlength="320" value="{{ old.email|default('') }}" {{ errors.email is defined ? 'aria-invalid="true"' }}>
+                    </label>
+                    <label>{{ t.booking.f.phone }}
+                        <input type="tel" name="phone" maxlength="50" value="{{ old.phone|default('') }}" {{ errors.phone is defined ? 'aria-invalid="true"' }}>
+                    </label>
+                </div>
+                <label>{{ t.booking.f.message }}
+                    <textarea name="message" rows="4" maxlength="5000" placeholder="{{ t.booking.f.message_ph }}">{{ old.message|default('') }}</textarea>
                 </label>
-            </div>
-            <label>{{ t.booking.f.message }}
-                <textarea name="message" required rows="5" maxlength="5000" placeholder="{{ t.booking.f.message_ph }}" {{ errors.message is defined ? 'aria-invalid="true"' }}>{{ old.message|default('') }}</textarea>
-                <small class="field-hint">{{ t.booking.f.message_hint }}</small>
-            </label>
-            {% include 'partials/_form_protect.html.twig' %}
-            <button class="btn btn-primary btn-lg" type="submit">{{ t.booking.f.submit }}</button>
-        </form>
+                {% include 'partials/_form_protect.html.twig' %}
+                <button class="btn btn-primary btn-lg" type="submit">{{ t.booking.f.submit }}</button>
+            </form>
         {% endif %}
+        </div>
     </div>
 </section>
 {% endblock %}
