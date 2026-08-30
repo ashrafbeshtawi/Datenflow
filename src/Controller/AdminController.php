@@ -26,14 +26,33 @@ class AdminController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly InquiryMailer $mailer,
+        private readonly SlotFinder $slots,
     ) {
     }
 
     #[Route('', name: 'admin', methods: ['GET'])]
     public function dashboard(Request $request): Response
     {
+        $now = $this->slots->now();
+        $all = $this->em->getRepository(Inquiry::class)->findBy([], ['createdAt' => 'DESC'], 300);
+
+        // Upcoming confirmed appointments (bookings + blocks), soonest first;
+        // messages have no slot; everything else is history.
+        $upcoming = array_filter($all, fn (Inquiry $i) => $i->getStartsAt() !== null
+            && $i->getStartsAt() >= $now && $i->getStatus() === Inquiry::STATUS_CONFIRMED);
+        usort($upcoming, fn (Inquiry $a, Inquiry $b) => $a->getStartsAt() <=> $b->getStartsAt());
+        $messages = array_filter($all, fn (Inquiry $i) => $i->getStartsAt() === null);
+        $history = array_filter($all, fn (Inquiry $i) => $i->getStartsAt() !== null
+            && ($i->getStartsAt() < $now || $i->getStatus() !== Inquiry::STATUS_CONFIRMED));
+
+        $grid = $this->slots->buildWeekGrid(null);
+
         return $this->render('admin/dashboard.html.twig', $this->baseContext() + [
-            'inquiries' => $this->em->getRepository(Inquiry::class)->findBy([], ['createdAt' => 'DESC'], 200),
+            'upcoming' => $upcoming,
+            'messages' => $messages,
+            'history' => $history,
+            'free_slots' => count(array_keys($grid['slots'], 'free', true)),
+            'free_week' => $grid['weekStart'],
             'rules' => $this->em->getRepository(AvailabilityRule::class)->findBy([], ['weekday' => 'ASC', 'startTime' => 'ASC']),
             'meet_link' => $this->em->find(Setting::class, Setting::MEET_LINK)?->getValue(),
             'notice' => $request->query->getString('notice') ?: null,

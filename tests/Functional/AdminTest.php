@@ -30,7 +30,7 @@ class AdminTest extends WebTestCase
         $client->request('GET', '/admin');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('.admin-table', $email);
+        self::assertSelectorTextContains('#admin-messages', $email);
     }
 
     public function testCancelBookingMailsBothPartiesAndFreesTheSlot(): void
