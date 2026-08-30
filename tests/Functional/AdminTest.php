@@ -24,7 +24,7 @@ class AdminTest extends WebTestCase
     {
         $client = $this->adminClient();
         $email = uniqid('admin-list-').'@example.com';
-        $this->em()->persist(new Inquiry('contact', 'List Test', $email, 'Hallo'));
+        $this->em()->persist(new Inquiry('karriere', 'List Test', $email, 'Hallo'));
         $this->em()->flush();
 
         $client->request('GET', '/admin');
@@ -130,7 +130,7 @@ class AdminTest extends WebTestCase
     public function testInquiryCanBeEdited(): void
     {
         $client = $this->adminClient();
-        $inquiry = new Inquiry('contact', 'Old Name', uniqid('edit-').'@example.com', 'Alte Nachricht');
+        $inquiry = new Inquiry('karriere', 'Old Name', uniqid('edit-').'@example.com', 'Alte Nachricht');
         $this->em()->persist($inquiry);
         $this->em()->flush();
 

@@ -9,13 +9,10 @@
 {% macro type_badge(inquiry) %}
     {% if inquiry.type == 'block' %}
         <span class="badge badge-warm">Blockiert</span>
-    {% elseif inquiry.type == 'booking' and inquiry.callType %}
-        <span class="badge badge-steel"><i class="bi bi-{{ inquiry.callType == 'phone' ? 'telephone-fill' : 'camera-video-fill' }}"></i> {{ inquiry.callType == 'phone' ? 'Telefon' : 'Video' }}</span>
     {% elseif inquiry.type == 'booking' %}
-        {# Pre-slot-picker booking requests: no slot, no call type. #}
-        <span class="badge badge-grey">Terminanfrage (alt)</span>
+        <span class="badge badge-steel"><i class="bi bi-{{ inquiry.callType == 'phone' ? 'telephone-fill' : 'camera-video-fill' }}"></i> {{ inquiry.callType == 'phone' ? 'Telefon' : 'Video' }}</span>
     {% else %}
-        <span class="badge badge-grey">{{ inquiry.type == 'karriere' ? 'Bewerbung' : 'Kontakt' }}</span>
+        <span class="badge badge-grey">Bewerbung</span>
     {% endif %}
 {% endmacro %}
 

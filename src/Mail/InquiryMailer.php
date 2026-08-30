@@ -13,7 +13,6 @@ class InquiryMailer
 {
     private const SUBJECTS = [
         'booking' => '[Datenflow] Terminbuchung',
-        'contact' => '[Datenflow] Kontaktanfrage',
         'karriere' => '[Datenflow] Bewerbung',
     ];
 

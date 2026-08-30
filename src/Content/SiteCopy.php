@@ -238,15 +238,6 @@ final class SiteCopy
                 'phone' => '+49 1590 8408815',
                 'email' => 'contact@datenflow.de',
                 'address' => ['Datenflow', 'Elsenstraße 62', '12059 Berlin'],
-                'f' => [
-                    'name' => 'Ihr Name',
-                    'company' => 'Firma (optional)',
-                    'email' => 'E-Mail',
-                    'message' => 'Ihre Nachricht',
-                    'message_ph' => 'Was möchten Sie uns mitteilen?',
-                    'submit' => 'Nachricht senden',
-                    'thanks' => 'Danke für Ihre Nachricht, wir melden uns innerhalb von 24 Stunden.',
-                ],
             ],
             'karriere' => [
                 'kicker' => 'Karriere',
@@ -523,15 +514,6 @@ final class SiteCopy
                 'phone' => '+49 1590 8408815',
                 'email' => 'contact@datenflow.de',
                 'address' => ['Datenflow', 'Elsenstraße 62', '12059 Berlin'],
-                'f' => [
-                    'name' => 'Your name',
-                    'company' => 'Company (optional)',
-                    'email' => 'Email',
-                    'message' => 'Your message',
-                    'message_ph' => 'What would you like to tell us?',
-                    'submit' => 'Send message',
-                    'thanks' => 'Thanks for your message, we\'ll reply within 24 hours.',
-                ],
             ],
             'karriere' => [
                 'kicker' => 'Careers',
