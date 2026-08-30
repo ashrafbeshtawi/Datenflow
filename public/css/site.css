@@ -8,8 +8,8 @@
     --off-white: #F7F8F9;
     --greige: #C4BDB0;
     --greige-light: #EAE6E0;
-    --steel: #5B8FA4;
-    --steel-hover: #4A7A8E;
+    --steel: #3E7A96;
+    --steel-hover: #33657D;
     --slate: #4E6479;
     --ink-soft: #6B737A;
     --silver-1: #B8BEC4;
@@ -112,7 +112,7 @@ img, svg { max-width: 100%; }
     background: var(--steel-hover);
     color: #fff;
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px -4px rgba(91, 143, 164, 0.45);
+    box-shadow: 0 4px 14px -4px rgba(62, 122, 150, 0.45);
 }
 
 .btn-ghost {
@@ -185,6 +185,8 @@ img, svg { max-width: 100%; }
     opacity: 0.75;
 }
 .site-nav > a:hover { opacity: 1; color: var(--charcoal-deep); }
+/* The CTA is a button, not a nav link — never wash it out. */
+.site-nav > .nav-cta, .site-nav > .nav-cta:hover { opacity: 1; color: #fff; }
 
 .lang-switch { color: var(--ink-soft); }
 .lang-switch a {
@@ -620,7 +622,7 @@ img, svg { max-width: 100%; }
 .form-card input:focus,
 .form-card select:focus,
 .form-card textarea:focus {
-    outline: 2px solid rgba(91, 143, 164, 0.35);
+    outline: 2px solid rgba(62, 122, 150, 0.35);
     border-color: var(--steel);
 }
 
@@ -645,8 +647,8 @@ img, svg { max-width: 100%; }
 }
 
 .form-success {
-    background: rgba(91, 143, 164, 0.08);
-    border: 1px solid rgba(91, 143, 164, 0.3);
+    background: rgba(62, 122, 150, 0.08);
+    border: 1px solid rgba(62, 122, 150, 0.3);
     color: var(--slate);
     border-radius: 0.75rem;
     padding: 1.25rem 1.5rem;
@@ -727,7 +729,7 @@ img, svg { max-width: 100%; }
 
 .slot:hover span { border-color: var(--steel); }
 .slot input:checked + span { background: var(--steel); border-color: var(--steel-hover); color: var(--white); }
-.slot input:focus-visible + span { outline: 2px solid rgba(91, 143, 164, 0.35); }
+.slot input:focus-visible + span { outline: 2px solid rgba(62, 122, 150, 0.35); }
 
 .slot-gone {
     background: var(--silver-2);
