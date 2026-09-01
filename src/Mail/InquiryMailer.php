@@ -60,7 +60,7 @@ class InquiryMailer
 
         $this->mailer->send($email);
 
-        if ($inquiry->getType() === 'booking' && $inquiry->getStartsAt() !== null) {
+        if ($inquiry->getType() === Inquiry::TYPE_BOOKING && $inquiry->getStartsAt() !== null) {
             $this->mailer->send($this->confirmation($inquiry, $lang, $meetLink));
         }
     }
@@ -78,7 +78,7 @@ class InquiryMailer
             $subjects[] = $t['mail']['cancel_subject'];
             $parts[] = strtr($t['mail']['cancel_body'], [
                 '{name}' => $inquiry->getName(),
-                '{when}' => $this->when($inquiry, $lang),
+                '{when}' => $this->formatWhen($inquiry, $lang),
             ]);
         }
 
@@ -100,7 +100,7 @@ class InquiryMailer
     {
         $t = SiteCopy::for($lang)['booking'];
 
-        $when = $this->when($inquiry, $lang);
+        $when = $this->formatWhen($inquiry, $lang);
         $extra = $inquiry->getCallType() === 'video'
             ? strtr($t['mail']['extra_video'], ['{meet}' => (string) $meetLink])
             : strtr($t['mail']['extra_phone'], ['{phone}' => $inquiry->getPayload()['phone'] ?? '']);
@@ -121,7 +121,7 @@ class InquiryMailer
     }
 
     /** "Montag, 07.09.2026, 10:00 Uhr" resp. "Monday, 07.09.2026, 10:00". */
-    private function when(Inquiry $inquiry, string $lang): string
+    private function formatWhen(Inquiry $inquiry, string $lang): string
     {
         $t = SiteCopy::for($lang)['booking'];
         $at = $inquiry->getStartsAt();

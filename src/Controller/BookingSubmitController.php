@@ -60,7 +60,7 @@ class BookingSubmitController extends AbstractController
         }
 
         $inquiry = new Inquiry(
-            'booking',
+            Inquiry::TYPE_BOOKING,
             trim($request->request->getString('name')),
             trim($request->request->getString('email')),
             trim($request->request->getString('message')),

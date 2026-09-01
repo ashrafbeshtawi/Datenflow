@@ -20,6 +20,9 @@ class Inquiry
     public const STATUS_CONFIRMED = 'confirmed';
     public const STATUS_CANCELLED = 'cancelled';
 
+    public const TYPE_BOOKING = 'booking';
+    public const TYPE_BLOCK = 'block';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -72,6 +75,12 @@ class Inquiry
         $this->createdAt = new \DateTimeImmutable();
         $this->startsAt = $startsAt;
         $this->callType = $callType;
+    }
+
+    /** Admin-blocked slot: occupies starts_at via uniq_inquiry_slot like a real booking. */
+    public static function block(\DateTimeImmutable $at): self
+    {
+        return new self(self::TYPE_BLOCK, 'Blockiert', 'block@datenflow.internal', '', [], $at);
     }
 
     public function getId(): ?int

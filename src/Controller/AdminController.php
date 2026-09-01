@@ -31,26 +31,12 @@ class AdminController extends AbstractController
     }
 
     #[Route('', name: 'admin', methods: ['GET'])]
-    public function dashboard(Request $request): Response
+    public function showDashboard(Request $request): Response
     {
-        $now = $this->slots->now();
         $all = $this->em->getRepository(Inquiry::class)->findBy([], ['createdAt' => 'DESC'], 300);
-
-        // Upcoming confirmed appointments (bookings + blocks), soonest first;
-        // messages have no slot; everything else is history.
-        $upcoming = array_filter($all, fn (Inquiry $i) => $i->getStartsAt() !== null
-            && $i->getStartsAt() >= $now && $i->getStatus() === Inquiry::STATUS_CONFIRMED);
-        usort($upcoming, fn (Inquiry $a, Inquiry $b) => $a->getStartsAt() <=> $b->getStartsAt());
-        $messages = array_filter($all, fn (Inquiry $i) => $i->getStartsAt() === null);
-        $history = array_filter($all, fn (Inquiry $i) => $i->getStartsAt() !== null
-            && ($i->getStartsAt() < $now || $i->getStatus() !== Inquiry::STATUS_CONFIRMED));
-
         $grid = $this->slots->buildWeekGrid(null);
 
-        return $this->render('admin/dashboard.html.twig', $this->baseContext() + [
-            'upcoming' => $upcoming,
-            'messages' => $messages,
-            'history' => $history,
+        return $this->render('admin/dashboard.html.twig', $this->baseContext() + $this->partitionInquiries($all, $this->slots->now()) + [
             'free_slots' => count(array_keys($grid['slots'], 'free', true)),
             'free_week' => $grid['weekStart'],
             'rules' => $this->em->getRepository(AvailabilityRule::class)->findBy([], ['weekday' => 'ASC', 'startTime' => 'ASC']),
@@ -85,7 +71,7 @@ class AdminController extends AbstractController
             $this->em->flush();
 
             // Blocks are internal: freeing them notifies nobody.
-            if ($inquiry->getType() === 'booking' && $inquiry->getStartsAt() !== null) {
+            if ($inquiry->getType() === Inquiry::TYPE_BOOKING && $inquiry->getStartsAt() !== null) {
                 $this->mailer->sendCancellation($inquiry);
             }
         }
@@ -137,7 +123,7 @@ class AdminController extends AbstractController
         }
 
         try {
-            $this->em->persist(new Inquiry('block', 'Blockiert', 'block@datenflow.internal', '', [], $at, null));
+            $this->em->persist(Inquiry::block($at));
             $this->em->flush();
         } catch (UniqueConstraintViolationException) {
             return $this->redirectToRoute('admin', ['notice' => 'Slot ist bereits belegt.']);
@@ -165,6 +151,27 @@ class AdminController extends AbstractController
         if (!$this->isCsrfTokenValid('admin', $request->request->getString('_token'))) {
             throw $this->createAccessDeniedException('Invalid CSRF token.');
         }
+    }
+
+    /**
+     * Upcoming confirmed appointments (bookings + blocks), soonest first;
+     * messages have no slot; everything else is history.
+     *
+     * @param Inquiry[] $all
+     * @return array{upcoming: Inquiry[], messages: Inquiry[], history: Inquiry[]}
+     */
+    private function partitionInquiries(array $all, DateTimeImmutable $now): array
+    {
+        $upcoming = array_filter($all, fn (Inquiry $i) => $i->getStartsAt() !== null
+            && $i->getStartsAt() >= $now && $i->getStatus() === Inquiry::STATUS_CONFIRMED);
+        usort($upcoming, fn (Inquiry $a, Inquiry $b) => $a->getStartsAt() <=> $b->getStartsAt());
+
+        return [
+            'upcoming' => $upcoming,
+            'messages' => array_filter($all, fn (Inquiry $i) => $i->getStartsAt() === null),
+            'history' => array_filter($all, fn (Inquiry $i) => $i->getStartsAt() !== null
+                && ($i->getStartsAt() < $now || $i->getStatus() !== Inquiry::STATUS_CONFIRMED)),
+        ];
     }
 
     /** The base layout needs t/lang; the admin panel itself is German only. */
