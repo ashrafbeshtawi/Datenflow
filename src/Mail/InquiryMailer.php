@@ -37,8 +37,11 @@ class InquiryMailer
             'E-Mail:  '.$inquiry->getEmail(),
         ];
         if ($inquiry->getStartsAt() !== null) {
-            $lines[] = 'Termin:  '.$inquiry->getStartsAt()->format('d.m.Y H:i');
+            $lines[] = 'Termin:  '.$this->formatWhen($inquiry, 'de');
             $lines[] = 'Art:     '.($inquiry->getCallType() === 'video' ? 'Video (Google Meet)' : 'Telefon');
+            if ($inquiry->getCallType() === 'video') {
+                $lines[] = 'Meet:    '.($meetLink ?? '');
+            }
         }
         foreach ($inquiry->getPayload() as $key => $value) {
             $lines[] = str_pad(ucfirst(str_replace('_', ' ', $key)).':', 8).' '.$value;

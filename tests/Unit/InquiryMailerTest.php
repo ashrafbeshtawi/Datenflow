@@ -62,7 +62,8 @@ class InquiryMailerTest extends TestCase
         [$internal, $confirmation] = $this->sent;
 
         self::assertSame('contact@test.local', $internal->getTo()[0]->getAddress());
-        self::assertStringContainsString('Termin:  07.09.2026 10:00', $internal->getTextBody());
+        self::assertStringContainsString('Termin:  Montag, 07.09.2026, 10:00 Uhr', $internal->getTextBody());
+        self::assertStringContainsString('Meet:    https://meet.google.com/jre-kcoc-swk', $internal->getTextBody());
 
         self::assertSame('maria@example.com', $confirmation->getTo()[0]->getAddress());
         self::assertSame('Ihre Terminbestätigung bei Datenflow', $confirmation->getSubject());

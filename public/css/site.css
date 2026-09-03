@@ -784,6 +784,9 @@ img, svg { max-width: 100%; }
 
 .admin-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
 
+/* Buttons in a form-card sit side by side; the a.btn would otherwise stretch to a full grid row */
+.admin-view-actions { display: flex; align-items: center; gap: 0.6rem; }
+
 .admin-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

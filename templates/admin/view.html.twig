@@ -32,13 +32,15 @@
                     <button class="btn btn-primary" type="submit">Verschieben &amp; Kunden informieren</button>
                 </form>
             {% endif %}
-            {% if inquiry.startsAt is null %}
-                <form method="post" action="{{ path('admin_inquiry_delete', {id: inquiry.id}) }}">
-                    <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
-                    <button class="btn btn-danger" type="submit">Löschen</button>
-                </form>
-            {% endif %}
-            <a class="btn btn-ghost" href="{{ path('admin') }}">Zurück</a>
+            <div class="admin-view-actions">
+                {% if inquiry.startsAt is null %}
+                    <form method="post" action="{{ path('admin_inquiry_delete', {id: inquiry.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
+                        <button class="btn btn-danger" type="submit">Löschen</button>
+                    </form>
+                {% endif %}
+                <a class="btn btn-ghost" href="{{ path('admin') }}">Zurück</a>
+            </div>
         </div>
     </div>
 </section>
