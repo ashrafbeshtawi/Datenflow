@@ -247,7 +247,7 @@ class AdminTest extends WebTestCase
 
     private function lastHorizonMonday(): string
     {
-        return $this->slots()->now()->modify('monday this week')
+        return $this->slots()->getCurrentTime()->modify('monday this week')
             ->modify('+'.(SlotFinder::HORIZON_WEEKS - 1).' weeks')->format('Y-m-d');
     }
 

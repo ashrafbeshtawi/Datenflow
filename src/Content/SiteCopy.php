@@ -7,7 +7,7 @@ namespace App\Content;
  */
 final class SiteCopy
 {
-    public static function for(string $locale): array
+    public static function get(string $locale): array
     {
         return self::COPY[$locale === 'en' ? 'en' : 'de'];
     }

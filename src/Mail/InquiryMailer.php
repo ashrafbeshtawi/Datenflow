@@ -34,6 +34,27 @@ class InquiryMailer
      */
     public function send(Inquiry $inquiry, ?array $attachment = null, string $lang = 'de', ?string $meetLink = null): void
     {
+        $email = $this->buildInternalNotification($inquiry, $meetLink);
+        if ($attachment !== null) {
+            $email->attachFromPath($attachment['path'], $attachment['name']);
+        }
+
+        $isBooking = $inquiry->getType() === Inquiry::TYPE_BOOKING && $inquiry->getStartsAt() !== null;
+        $invite = $isBooking ? $this->buildInvite($inquiry, $meetLink) : null;
+        if ($invite !== null) {
+            $email->addPart($invite);
+        }
+
+        $this->mailer->send($email);
+
+        if ($isBooking) {
+            $this->mailer->send($this->buildConfirmation($inquiry, $lang, $meetLink)->addPart($invite));
+        }
+    }
+
+    /** Plain-text staff notification carrying everything the visitor submitted. */
+    private function buildInternalNotification(Inquiry $inquiry, ?string $meetLink): Email
+    {
         $lines = [
             'Name:    '.$inquiry->getName(),
             'E-Mail:  '.$inquiry->getEmail(),
@@ -52,28 +73,12 @@ class InquiryMailer
         $lines[] = 'Nachricht:';
         $lines[] = $inquiry->getMessage();
 
-        $email = (new Email())
+        return (new Email())
             ->from(Address::create($this->from))
             ->to($inquiry->getType() === 'karriere' ? $this->toKarriere : $this->toContact)
             ->replyTo(new Address($inquiry->getEmail(), $inquiry->getName()))
             ->subject(self::SUBJECTS[$inquiry->getType()].' von '.$inquiry->getName())
             ->text(implode("\n", $lines));
-
-        if ($attachment !== null) {
-            $email->attachFromPath($attachment['path'], $attachment['name']);
-        }
-
-        $isBooking = $inquiry->getType() === Inquiry::TYPE_BOOKING && $inquiry->getStartsAt() !== null;
-        $invite = $isBooking ? $this->invite($inquiry, $meetLink) : null;
-        if ($invite !== null) {
-            $email->addPart($invite);
-        }
-
-        $this->mailer->send($email);
-
-        if ($isBooking) {
-            $this->mailer->send($this->confirmation($inquiry, $lang, $meetLink)->addPart($invite));
-        }
     }
 
     /**
@@ -85,7 +90,7 @@ class InquiryMailer
         $parts = [];
         $subjects = [];
         foreach (['de', 'en'] as $lang) {
-            $t = SiteCopy::for($lang)['booking'];
+            $t = SiteCopy::get($lang)['booking'];
             $subjects[] = $t['mail']['cancel_subject'];
             $parts[] = strtr($t['mail']['cancel_body'], [
                 '{name}' => $inquiry->getName(),
@@ -116,19 +121,19 @@ class InquiryMailer
         $parts = [];
         $subjects = [];
         foreach (['de', 'en'] as $lang) {
-            $t = SiteCopy::for($lang)['booking'];
+            $t = SiteCopy::get($lang)['booking'];
             $subjects[] = $t['mail']['reschedule_subject'];
             $parts[] = strtr($t['mail']['reschedule_body'], [
                 '{name}' => $inquiry->getName(),
                 '{when}' => $this->formatWhen($inquiry, $lang),
                 '{type}' => $t['f']['call_opts'][$inquiry->getCallType()],
-                '{extra}' => $this->extraLine($inquiry, $t, $meetLink),
+                '{extra}' => $this->buildExtraLine($inquiry, $t, $meetLink),
             ]);
         }
 
         // ponytail: SEQUENCE from the wall clock — monotonic across reschedules
         // without persisting a counter; upgrade to a stored counter if it ever matters.
-        $invite = $this->invite($inquiry, $meetLink, time());
+        $invite = $this->buildInvite($inquiry, $meetLink, time());
 
         $this->mailer->send((new Email())
             ->from(Address::create($this->from))
@@ -148,15 +153,15 @@ class InquiryMailer
             ->addPart($invite));
     }
 
-    private function confirmation(Inquiry $inquiry, string $lang, ?string $meetLink): Email
+    private function buildConfirmation(Inquiry $inquiry, string $lang, ?string $meetLink): Email
     {
-        $t = SiteCopy::for($lang)['booking'];
+        $t = SiteCopy::get($lang)['booking'];
 
         $body = strtr($t['mail']['body'], [
             '{name}' => $inquiry->getName(),
             '{when}' => $this->formatWhen($inquiry, $lang),
             '{type}' => $t['f']['call_opts'][$inquiry->getCallType()],
-            '{extra}' => $this->extraLine($inquiry, $t, $meetLink),
+            '{extra}' => $this->buildExtraLine($inquiry, $t, $meetLink),
         ]);
 
         return (new Email())
@@ -172,7 +177,7 @@ class InquiryMailer
      * as a real event. The UID is stable per booking; a higher SEQUENCE makes
      * mail clients move the existing event instead of creating a second one.
      */
-    private function invite(Inquiry $inquiry, ?string $meetLink, int $sequence = 0): DataPart
+    private function buildInvite(Inquiry $inquiry, ?string $meetLink, int $sequence = 0): DataPart
     {
         $utc = new \DateTimeZone('UTC');
         // startsAt is naive Europe/Berlin wall-clock time; pin the zone before converting.
@@ -208,7 +213,7 @@ class InquiryMailer
     }
 
     /** Meet link for video calls, the client's phone number otherwise. */
-    private function extraLine(Inquiry $inquiry, array $t, ?string $meetLink): string
+    private function buildExtraLine(Inquiry $inquiry, array $t, ?string $meetLink): string
     {
         return $inquiry->getCallType() === 'video'
             ? strtr($t['mail']['extra_video'], ['{meet}' => (string) $meetLink])
@@ -218,7 +223,7 @@ class InquiryMailer
     /** "Montag, 07.09.2026, 10:00 Uhr" resp. "Monday, 07.09.2026, 10:00". */
     private function formatWhen(Inquiry $inquiry, string $lang): string
     {
-        $t = SiteCopy::for($lang)['booking'];
+        $t = SiteCopy::get($lang)['booking'];
         $at = $inquiry->getStartsAt();
 
         return strtr($t['mail']['when'], [

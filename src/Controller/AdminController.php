@@ -56,7 +56,7 @@ class AdminController extends AbstractController
             $error = true;
         }
 
-        return $this->render('admin/login.html.twig', $this->baseContext() + ['error' => $error]);
+        return $this->render('admin/login.html.twig', $this->buildBaseContext() + ['error' => $error]);
     }
 
     #[Route('/logout', name: 'admin_logout', methods: ['POST'])]
@@ -74,7 +74,7 @@ class AdminController extends AbstractController
         $all = $this->em->getRepository(Inquiry::class)->findBy([], ['createdAt' => 'DESC'], 300);
         $grid = $this->slots->buildWeekGrid(null);
 
-        return $this->render('admin/dashboard.html.twig', $this->baseContext() + $this->partitionInquiries($all, $this->slots->now()) + [
+        return $this->render('admin/dashboard.html.twig', $this->buildBaseContext() + $this->partitionInquiries($all, $this->slots->getCurrentTime()) + [
             'free_slots' => count(array_keys($grid['slots'], 'free', true)),
             'free_week' => $grid['weekStart'],
             'rules' => $this->em->getRepository(AvailabilityRule::class)->findBy([], ['weekday' => 'ASC', 'startTime' => 'ASC']),
@@ -84,9 +84,9 @@ class AdminController extends AbstractController
     }
 
     #[Route('/inquiry/{id}', name: 'admin_inquiry', methods: ['GET'])]
-    public function view(Inquiry $inquiry): Response
+    public function showInquiry(Inquiry $inquiry): Response
     {
-        return $this->render('admin/view.html.twig', $this->baseContext() + ['inquiry' => $inquiry]);
+        return $this->render('admin/view.html.twig', $this->buildBaseContext() + ['inquiry' => $inquiry]);
     }
 
     #[Route('/inquiry/{id}/reschedule', name: 'admin_reschedule', methods: ['POST'])]
@@ -100,7 +100,7 @@ class AdminController extends AbstractController
             new DateTimeZone(SlotFinder::TZ),
         );
         if ($inquiry->getType() !== Inquiry::TYPE_BOOKING || $inquiry->getStatus() !== Inquiry::STATUS_CONFIRMED
-            || $at === false || $at < $this->slots->now()) {
+            || $at === false || $at < $this->slots->getCurrentTime()) {
             return $this->redirectToRoute('admin', ['notice' => 'Ungültiger Zeitpunkt, Termin nicht verschoben.']);
         }
 
@@ -246,8 +246,8 @@ class AdminController extends AbstractController
     }
 
     /** The base layout needs t/lang; the admin panel itself is German only. */
-    private function baseContext(): array
+    private function buildBaseContext(): array
     {
-        return ['t' => SiteCopy::for('de'), 'lang' => 'de'];
+        return ['t' => SiteCopy::get('de'), 'lang' => 'de'];
     }
 }

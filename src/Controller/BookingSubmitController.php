@@ -82,7 +82,7 @@ class BookingSubmitController extends AbstractController
 
         try {
             $meetLink = $callType === 'video' ? $this->em->find(Setting::class, Setting::MEET_LINK)?->getValue() : null;
-            $this->mailer->send($inquiry, null, PageController::localeOf($request), $meetLink);
+            $this->mailer->send($inquiry, null, PageController::resolveLocale($request), $meetLink);
         } catch (Throwable $e) {
             // Booking is already persisted — surface the failure so the visitor can call instead.
             $this->logger->error('Inquiry mail failed', ['type' => 'booking', 'inquiry' => $inquiry->getId(), 'error' => $e->getMessage()]);
