@@ -96,20 +96,42 @@ class InquiryMailer
             ->text('Der Termin am '.$inquiry->getStartsAt()->format('d.m.Y H:i').' mit '.$inquiry->getName().' ('.$inquiry->getEmail().') wurde storniert. Der Slot ist wieder frei.'));
     }
 
+    /**
+     * New confirmation for an admin-moved booking. Like the cancellation, the
+     * visitor's language is not stored, so the mail is bilingual (DE, then EN).
+     */
+    public function sendReschedule(Inquiry $inquiry, ?string $meetLink): void
+    {
+        $parts = [];
+        $subjects = [];
+        foreach (['de', 'en'] as $lang) {
+            $t = SiteCopy::for($lang)['booking'];
+            $subjects[] = $t['mail']['reschedule_subject'];
+            $parts[] = strtr($t['mail']['reschedule_body'], [
+                '{name}' => $inquiry->getName(),
+                '{when}' => $this->formatWhen($inquiry, $lang),
+                '{type}' => $t['f']['call_opts'][$inquiry->getCallType()],
+                '{extra}' => $this->extraLine($inquiry, $t, $meetLink),
+            ]);
+        }
+
+        $this->mailer->send((new Email())
+            ->from(Address::create($this->from))
+            ->to(new Address($inquiry->getEmail(), $inquiry->getName()))
+            ->replyTo($this->toContact)
+            ->subject(implode(' / ', $subjects))
+            ->text(implode("\n\n----\n\n", $parts)));
+    }
+
     private function confirmation(Inquiry $inquiry, string $lang, ?string $meetLink): Email
     {
         $t = SiteCopy::for($lang)['booking'];
 
-        $when = $this->formatWhen($inquiry, $lang);
-        $extra = $inquiry->getCallType() === 'video'
-            ? strtr($t['mail']['extra_video'], ['{meet}' => (string) $meetLink])
-            : strtr($t['mail']['extra_phone'], ['{phone}' => $inquiry->getPayload()['phone'] ?? '']);
-
         $body = strtr($t['mail']['body'], [
             '{name}' => $inquiry->getName(),
-            '{when}' => $when,
+            '{when}' => $this->formatWhen($inquiry, $lang),
             '{type}' => $t['f']['call_opts'][$inquiry->getCallType()],
-            '{extra}' => $extra,
+            '{extra}' => $this->extraLine($inquiry, $t, $meetLink),
         ]);
 
         return (new Email())
@@ -118,6 +140,14 @@ class InquiryMailer
             ->replyTo($this->toContact)
             ->subject($t['mail']['subject'])
             ->text($body);
+    }
+
+    /** Meet link for video calls, the client's phone number otherwise. */
+    private function extraLine(Inquiry $inquiry, array $t, ?string $meetLink): string
+    {
+        return $inquiry->getCallType() === 'video'
+            ? strtr($t['mail']['extra_video'], ['{meet}' => (string) $meetLink])
+            : strtr($t['mail']['extra_phone'], ['{phone}' => $inquiry->getPayload()['phone'] ?? '']);
     }
 
     /** "Montag, 07.09.2026, 10:00 Uhr" resp. "Monday, 07.09.2026, 10:00". */

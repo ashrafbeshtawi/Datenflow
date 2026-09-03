@@ -83,20 +83,53 @@ class AdminController extends AbstractController
         ]);
     }
 
-    #[Route('/inquiry/{id}', name: 'admin_inquiry', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Inquiry $inquiry): Response
+    #[Route('/inquiry/{id}', name: 'admin_inquiry', methods: ['GET'])]
+    public function view(Inquiry $inquiry): Response
     {
-        if ($request->isMethod('POST')) {
-            $this->assertCsrf($request);
-            $inquiry->setName(trim($request->request->getString('name')));
-            $inquiry->setEmail(trim($request->request->getString('email')));
-            $inquiry->setMessage(trim($request->request->getString('message')));
-            $this->em->flush();
+        return $this->render('admin/view.html.twig', $this->baseContext() + ['inquiry' => $inquiry]);
+    }
 
-            return $this->redirectToRoute('admin', ['notice' => 'Anfrage gespeichert.']);
+    #[Route('/inquiry/{id}/reschedule', name: 'admin_reschedule', methods: ['POST'])]
+    public function reschedule(Request $request, Inquiry $inquiry): Response
+    {
+        $this->assertCsrf($request);
+
+        $at = DateTimeImmutable::createFromFormat(
+            '!Y-m-d H:i',
+            $request->request->getString('date').' '.$request->request->getString('time'),
+            new DateTimeZone(SlotFinder::TZ),
+        );
+        if ($inquiry->getType() !== Inquiry::TYPE_BOOKING || $inquiry->getStatus() !== Inquiry::STATUS_CONFIRMED
+            || $at === false || $at < $this->slots->now()) {
+            return $this->redirectToRoute('admin', ['notice' => 'Ungültiger Zeitpunkt, Termin nicht verschoben.']);
         }
 
-        return $this->render('admin/edit.html.twig', $this->baseContext() + ['inquiry' => $inquiry]);
+        $inquiry->setStartsAt($at);
+        try {
+            $this->em->flush();
+        } catch (UniqueConstraintViolationException) {
+            return $this->redirectToRoute('admin', ['notice' => 'Slot ist bereits belegt, Termin nicht verschoben.']);
+        }
+
+        $this->mailer->sendReschedule($inquiry, $this->em->find(Setting::class, Setting::MEET_LINK)?->getValue());
+
+        return $this->redirectToRoute('admin', ['notice' => 'Termin verschoben, der Kunde hat den neuen Termin per Mail.']);
+    }
+
+    #[Route('/inquiry/{id}/delete', name: 'admin_inquiry_delete', methods: ['POST'])]
+    public function deleteInquiry(Request $request, Inquiry $inquiry): Response
+    {
+        $this->assertCsrf($request);
+
+        // Appointments are cancelled (mail + history), never deleted.
+        if ($inquiry->getStartsAt() !== null) {
+            return $this->redirectToRoute('admin', ['notice' => 'Termine bitte stornieren, nicht löschen.']);
+        }
+
+        $this->em->remove($inquiry);
+        $this->em->flush();
+
+        return $this->redirectToRoute('admin', ['notice' => 'Nachricht gelöscht.']);
     }
 
     #[Route('/inquiry/{id}/cancel', name: 'admin_cancel', methods: ['POST'])]

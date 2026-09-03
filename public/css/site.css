@@ -782,6 +782,8 @@ img, svg { max-width: 100%; }
 
 /* ---------- Admin ---------- */
 
+.admin-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+
 .admin-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

@@ -158,25 +158,52 @@ class AdminTest extends WebTestCase
         }
     }
 
-    public function testInquiryCanBeEdited(): void
+    public function testMessageCanBeDeletedButAppointmentsCannot(): void
     {
         $client = $this->adminClient();
-        $inquiry = new Inquiry('karriere', 'Old Name', uniqid('edit-').'@example.com', 'Alte Nachricht');
-        $this->em()->persist($inquiry);
+        $message = new Inquiry('karriere', 'Delete Test', uniqid('delete-').'@example.com', 'Weg damit');
+        $this->em()->persist($message);
         $this->em()->flush();
+        [, $booking] = $this->bookFreeSlot('video');
 
-        $client->request('POST', '/admin/inquiry/'.$inquiry->getId(), [
-            'name' => 'New Name',
-            'email' => $inquiry->getEmail(),
-            'message' => 'Neue Nachricht',
+        $client->request('POST', '/admin/inquiry/'.$message->getId().'/delete', ['_token' => $this->csrfToken($client)]);
+        self::assertResponseRedirects();
+
+        $client->request('POST', '/admin/inquiry/'.$booking->getId().'/delete', ['_token' => $this->csrfToken($client)]);
+        self::assertResponseRedirects();
+
+        $this->em()->clear();
+        self::assertNull($this->em()->find(Inquiry::class, $message->getId()));
+        self::assertNotNull($this->em()->find(Inquiry::class, $booking->getId()), 'appointments must survive delete attempts');
+    }
+
+    public function testRescheduleMovesTheBookingAndMailsTheClient(): void
+    {
+        $client = $this->adminClient();
+        [$old, $inquiry] = $this->bookFreeSlot('video');
+        $grid = $this->slots()->buildWeekGrid($this->lastHorizonMonday());
+        $free = array_values(array_filter(
+            array_keys($grid['slots'], 'free', true),
+            fn (string $key) => $key !== $old->format('Y-m-d H:i'),
+        ));
+        self::assertNotEmpty($free);
+        $new = new \DateTimeImmutable($free[array_rand($free)], new \DateTimeZone(SlotFinder::TZ));
+
+        $client->request('POST', '/admin/inquiry/'.$inquiry->getId().'/reschedule', [
+            'date' => $new->format('Y-m-d'),
+            'time' => $new->format('H:i'),
             '_token' => $this->csrfToken($client),
         ]);
 
         self::assertResponseRedirects();
+        self::assertEmailCount(1);
+        self::assertStringContainsString('verschoben', self::getMailerMessage()->getSubject());
+
         $this->em()->clear();
-        $fresh = $this->em()->find(Inquiry::class, $inquiry->getId());
-        self::assertSame('New Name', $fresh->getName());
-        self::assertSame('Neue Nachricht', $fresh->getMessage());
+        // startsAt is naive (no TZ persisted), so compare wall-clock time.
+        self::assertSame($new->format('Y-m-d H:i'), $this->em()->find(Inquiry::class, $inquiry->getId())->getStartsAt()->format('Y-m-d H:i'));
+        self::assertTrue($this->slots()->isBookable($old), 'old slot must be free again');
+        self::assertFalse($this->slots()->isBookable($new));
     }
 
     private function adminClient(): KernelBrowser

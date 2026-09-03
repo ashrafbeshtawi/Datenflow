@@ -19,12 +19,16 @@
 {% block body %}
 <section class="section">
     <div class="wrap">
-        <p class="kicker">Intern</p>
-        <h1>Admin.</h1>
-        <form method="post" action="{{ path('admin_logout') }}">
-            <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
-            <button class="btn btn-ghost" type="submit"><i class="bi bi-box-arrow-right"></i> Abmelden</button>
-        </form>
+        <div class="admin-head">
+            <div>
+                <p class="kicker">Intern</p>
+                <h1>Admin.</h1>
+            </div>
+            <form method="post" action="{{ path('admin_logout') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
+                <button class="btn btn-ghost" type="submit"><i class="bi bi-box-arrow-right"></i> Abmelden</button>
+            </form>
+        </div>
         {% if notice %}
             <p class="form-success" role="status">{{ notice }}</p>
         {% endif %}
@@ -67,7 +71,7 @@
                                 </td>
                                 <td class="admin-actions">
                                     {% if inquiry.type != 'block' %}
-                                        <a class="btn btn-ghost btn-sm" href="{{ path('admin_inquiry', {id: inquiry.id}) }}">Bearbeiten</a>
+                                        <a class="btn btn-ghost btn-sm" href="{{ path('admin_inquiry', {id: inquiry.id}) }}">Verschieben</a>
                                     {% endif %}
                                     <form method="post" action="{{ path('admin_cancel', {id: inquiry.id}) }}">
                                         <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
@@ -99,7 +103,11 @@
                                 <td><a href="mailto:{{ inquiry.email }}">{{ inquiry.email }}</a></td>
                                 <td class="admin-message">{{ inquiry.message|length > 70 ? inquiry.message|slice(0, 70) ~ '…' : inquiry.message }}</td>
                                 <td class="admin-actions">
-                                    <a class="btn btn-ghost btn-sm" href="{{ path('admin_inquiry', {id: inquiry.id}) }}">Bearbeiten</a>
+                                    <a class="btn btn-ghost btn-sm" href="{{ path('admin_inquiry', {id: inquiry.id}) }}">Ansehen</a>
+                                    <form method="post" action="{{ path('admin_inquiry_delete', {id: inquiry.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
+                                        <button class="btn btn-danger btn-sm" type="submit">Löschen</button>
+                                    </form>
                                 </td>
                             </tr>
                         {% else %}
