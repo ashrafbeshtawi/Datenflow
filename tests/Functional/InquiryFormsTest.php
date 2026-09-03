@@ -153,22 +153,6 @@ class InquiryFormsTest extends WebTestCase
         self::assertEmailCount(0);
     }
 
-    public function testContactSubmissionPersistsAndMails(): void
-    {
-        $email = uniqid('contact-').'@example.com';
-
-        $this->client->request('GET', '/contact');
-        $this->client->submitForm('Nachricht senden', [
-            'name' => 'Kai Kunde',
-            'email' => $email,
-            'message' => 'Bitte um Rückruf.',
-        ]);
-
-        self::assertEmailCount(1);
-        self::assertResponseRedirects('/contact?sent=1');
-        self::assertSame('contact', $this->findInquiry($email)->getType());
-    }
-
     public function testKarriereSubmissionAttachesCv(): void
     {
         $email = uniqid('karriere-').'@example.com';

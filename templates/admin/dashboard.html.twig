@@ -1,0 +1,195 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin — Datenflow{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
+{% endblock %}
+
+{% macro type_badge(inquiry) %}
+    {% if inquiry.type == 'block' %}
+        <span class="badge badge-warm">Blockiert</span>
+    {% elseif inquiry.type == 'booking' %}
+        <span class="badge badge-steel"><i class="bi bi-{{ inquiry.callType == 'phone' ? 'telephone-fill' : 'camera-video-fill' }}"></i> {{ inquiry.callType == 'phone' ? 'Telefon' : 'Video' }}</span>
+    {% else %}
+        <span class="badge badge-grey">Bewerbung</span>
+    {% endif %}
+{% endmacro %}
+
+{% block body %}
+<section class="section">
+    <div class="wrap">
+        <p class="kicker">Intern</p>
+        <h1>Admin.</h1>
+        <form method="post" action="{{ path('admin_logout') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
+            <button class="btn btn-ghost" type="submit"><i class="bi bi-box-arrow-right"></i> Abmelden</button>
+        </form>
+        {% if notice %}
+            <p class="form-success" role="status">{{ notice }}</p>
+        {% endif %}
+
+        <div class="admin-stats">
+            <div class="stat-tile">
+                <strong>{{ upcoming|length }}</strong>
+                <span><i class="bi bi-calendar-check"></i> Kommende Termine</span>
+            </div>
+            <div class="stat-tile">
+                <strong>{{ messages|length }}</strong>
+                <span><i class="bi bi-envelope"></i> Nachrichten</span>
+            </div>
+            <div class="stat-tile">
+                <strong>{{ free_slots }}</strong>
+                <span><i class="bi bi-clock"></i> Freie Slots ab {{ free_week|date('d.m.') }}</span>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <h2><i class="bi bi-calendar-check"></i> Kommende Termine</h2>
+            <div class="slot-scroll">
+                <table class="admin-table" id="admin-upcoming">
+                    <thead>
+                        <tr><th>Termin</th><th>Art</th><th>Name</th><th>Kontakt</th><th class="admin-actions"></th></tr>
+                    </thead>
+                    <tbody>
+                        {% for inquiry in upcoming %}
+                            <tr>
+                                <td><strong>{{ t.booking.slot.weekdays_short[inquiry.startsAt|date('N') - 1] }} {{ inquiry.startsAt|date('d.m.Y') }}</strong> · {{ inquiry.startsAt|date('H:i') }}</td>
+                                <td>{{ _self.type_badge(inquiry) }}</td>
+                                <td>{{ inquiry.name }}</td>
+                                <td>
+                                    {% if inquiry.type != 'block' %}
+                                        <a href="mailto:{{ inquiry.email }}">{{ inquiry.email }}</a>
+                                        {% if inquiry.payload.phone is defined %}<br>{{ inquiry.payload.phone }}{% endif %}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td class="admin-actions">
+                                    {% if inquiry.type != 'block' %}
+                                        <a class="btn btn-ghost btn-sm" href="{{ path('admin_inquiry', {id: inquiry.id}) }}">Bearbeiten</a>
+                                    {% endif %}
+                                    <form method="post" action="{{ path('admin_cancel', {id: inquiry.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
+                                        <button class="btn btn-danger btn-sm" type="submit">{{ inquiry.type == 'block' ? 'Freigeben' : 'Stornieren' }}</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="5" class="admin-empty">Keine kommenden Termine.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <h2><i class="bi bi-envelope"></i> Nachrichten</h2>
+            <div class="slot-scroll">
+                <table class="admin-table" id="admin-messages">
+                    <thead>
+                        <tr><th>Eingang</th><th>Typ</th><th>Name</th><th>E-Mail</th><th>Nachricht</th><th class="admin-actions"></th></tr>
+                    </thead>
+                    <tbody>
+                        {% for inquiry in messages %}
+                            <tr>
+                                <td>{{ inquiry.createdAt|date('d.m.Y H:i') }}</td>
+                                <td>{{ _self.type_badge(inquiry) }}</td>
+                                <td>{{ inquiry.name }}</td>
+                                <td><a href="mailto:{{ inquiry.email }}">{{ inquiry.email }}</a></td>
+                                <td class="admin-message">{{ inquiry.message|length > 70 ? inquiry.message|slice(0, 70) ~ '…' : inquiry.message }}</td>
+                                <td class="admin-actions">
+                                    <a class="btn btn-ghost btn-sm" href="{{ path('admin_inquiry', {id: inquiry.id}) }}">Bearbeiten</a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="6" class="admin-empty">Noch keine Nachrichten.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="admin-config">
+            <div class="admin-card">
+                <h2><i class="bi bi-clock"></i> Verfügbarkeit</h2>
+                <table class="admin-table">
+                    <tbody>
+                        {% for rule in rules %}
+                            <tr>
+                                <td>{{ t.booking.slot.weekdays[rule.weekday - 1] }}</td>
+                                <td>{{ rule.startTime|date('H:i') }} – {{ rule.endTime|date('H:i') }}</td>
+                                <td class="admin-actions">
+                                    <form method="post" action="{{ path('admin_availability_delete', {id: rule.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
+                                        <button class="btn btn-danger btn-sm" type="submit">Löschen</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="3" class="admin-empty">Keine Regeln, es sind keine Termine buchbar.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <form class="admin-inline-form" method="post" action="{{ path('admin_availability_add') }}">
+                    <label>Wochentag
+                        <select name="weekday">
+                            {% for name in t.booking.slot.weekdays %}
+                                <option value="{{ loop.index }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label>Von <input type="time" name="start_time" step="1800" value="09:00" required></label>
+                    <label>Bis <input type="time" name="end_time" step="1800" value="17:00" required></label>
+                    <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
+                    <button class="btn btn-primary btn-sm" type="submit">Hinzufügen</button>
+                </form>
+            </div>
+
+            <div class="admin-card">
+                <h2><i class="bi bi-slash-circle"></i> Slot blockieren</h2>
+                <p class="field-hint">Der Slot verschwindet sofort aus der Buchungsseite. Freigeben über „Kommende Termine“.</p>
+                <form class="admin-inline-form" method="post" action="{{ path('admin_block') }}">
+                    <label>Datum <input type="date" name="date" required></label>
+                    <label>Uhrzeit <input type="time" name="time" step="1800" required></label>
+                    <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
+                    <button class="btn btn-primary btn-sm" type="submit">Blockieren</button>
+                </form>
+            </div>
+
+            <div class="admin-card">
+                <h2><i class="bi bi-gear"></i> Einstellungen</h2>
+                <form class="admin-inline-form" method="post" action="{{ path('admin_settings') }}">
+                    <label>Google-Meet-Link <input type="url" name="meet_link" size="28" value="{{ meet_link }}" required></label>
+                    <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
+                    <button class="btn btn-primary btn-sm" type="submit">Speichern</button>
+                </form>
+            </div>
+        </div>
+
+        <details class="admin-card admin-history">
+            <summary><h2><i class="bi bi-archive"></i> Verlauf ({{ history|length }})</h2></summary>
+            <div class="slot-scroll">
+                <table class="admin-table">
+                    <thead>
+                        <tr><th>Termin</th><th>Art</th><th>Name</th><th>E-Mail</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for inquiry in history|slice(0, 100) %}
+                            <tr>
+                                <td>{{ inquiry.startsAt|date('d.m.Y H:i') }}</td>
+                                <td>{{ _self.type_badge(inquiry) }}</td>
+                                <td>{{ inquiry.name }}</td>
+                                <td><a href="mailto:{{ inquiry.email }}">{{ inquiry.email }}</a></td>
+                                <td><span class="status-{{ inquiry.status }}">{{ inquiry.status == 'confirmed' ? 'stattgefunden' : 'storniert' }}</span></td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="5" class="admin-empty">Noch kein Verlauf.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    </div>
+</section>
+{% endblock %}

@@ -30,20 +30,6 @@ class InquiryMailerTest extends TestCase
         );
     }
 
-    public function testContactInquirySendsOneInternalMail(): void
-    {
-        $inquiry = new Inquiry('contact', 'Kai Kunde', 'kai@example.com', 'Bitte um Rückruf.', ['company' => 'Kunde GmbH']);
-
-        $this->mailer->send($inquiry);
-
-        self::assertCount(1, $this->sent);
-        $mail = $this->sent[0];
-        self::assertSame('contact@test.local', $mail->getTo()[0]->getAddress());
-        self::assertSame('kai@example.com', $mail->getReplyTo()[0]->getAddress());
-        self::assertStringContainsString('Kontaktanfrage', $mail->getSubject());
-        self::assertStringContainsString('Bitte um Rückruf.', $mail->getTextBody());
-    }
-
     public function testKarriereInquiryGoesToJobsWithAttachment(): void
     {
         $cvPath = tempnam(sys_get_temp_dir(), 'cv');

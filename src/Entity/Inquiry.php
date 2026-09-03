@@ -20,6 +20,9 @@ class Inquiry
     public const STATUS_CONFIRMED = 'confirmed';
     public const STATUS_CANCELLED = 'cancelled';
 
+    public const TYPE_BOOKING = 'booking';
+    public const TYPE_BLOCK = 'block';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -74,6 +77,12 @@ class Inquiry
         $this->callType = $callType;
     }
 
+    /** Admin-blocked slot: occupies starts_at via uniq_inquiry_slot like a real booking. */
+    public static function block(\DateTimeImmutable $at): self
+    {
+        return new self(self::TYPE_BLOCK, 'Blockiert', 'block@datenflow.internal', '', [], $at);
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -122,5 +131,26 @@ class Inquiry
     public function getStatus(): string
     {
         return $this->status;
+    }
+
+    /** Cancelling frees the slot: the partial unique index only covers confirmed rows. */
+    public function cancel(): void
+    {
+        $this->status = self::STATUS_CANCELLED;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function setEmail(string $email): void
+    {
+        $this->email = $email;
+    }
+
+    public function setMessage(string $message): void
+    {
+        $this->message = $message;
     }
 }

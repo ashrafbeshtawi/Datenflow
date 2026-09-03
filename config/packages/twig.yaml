@@ -1,5 +1,10 @@
 twig:
     file_name_pattern: '*.twig'
+    # Slot times are naive Europe/Berlin (see SlotFinder); without this, the
+    # date filter converts them to the server timezone (UTC in prod/CI) and
+    # every day in the booking grid renders shifted by one.
+    date:
+        timezone: 'Europe/Berlin'
 
 when@test:
     twig:

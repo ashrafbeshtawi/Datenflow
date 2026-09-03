@@ -675,6 +675,11 @@ img, svg { max-width: 100%; }
 
 @media (max-width: 55rem) { .booking-grid { grid-template-columns: 1fr; } }
 
+/* Intro column: heading + checks + person card beside the form. */
+.booking-intro h1 { font-size: clamp(1.9rem, 3vw, 2.5rem); }
+.booking-intro .section-sub { margin-bottom: 1.25rem; }
+.booking-intro .checks { display: grid; gap: 0.4rem; margin-bottom: 1.75rem; }
+
 .person-card {
     background: var(--white);
     border: 1px solid var(--greige-light);
@@ -682,8 +687,6 @@ img, svg { max-width: 100%; }
     padding: 2rem;
     box-shadow: var(--shadow);
     text-align: center;
-    position: sticky;
-    top: 6rem;
 }
 
 .person-card img {
@@ -738,9 +741,144 @@ img, svg { max-width: 100%; }
     text-decoration: line-through;
 }
 
-.call-type { display: flex; flex-wrap: wrap; gap: 0.6rem 1.8rem; }
-.radio-inline { display: flex; align-items: center; gap: 0.5rem; font-weight: 400; color: var(--charcoal); }
-.radio-inline input { width: auto; accent-color: var(--steel); }
+/* Collapsed by default: 7 time rows, the label toggles the rest (pure CSS). */
+.slot-expand:not(:checked) ~ .slot-grid tbody tr:nth-child(n+8) { display: none; }
+
+.slot-expand-label {
+    display: inline-block;
+    margin-top: 0.6rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--steel);
+    cursor: pointer;
+}
+.slot-expand-label:hover { color: var(--slate); }
+.slot-expand-label .less { display: none; }
+.slot-expand:checked ~ .slot-expand-label .more { display: none; }
+.slot-expand:checked ~ .slot-expand-label .less { display: inline; }
+
+.call-type { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+
+/* Call-type choice as selectable pills (radio visually hidden, like .slot). */
+.call-pill input { position: absolute; opacity: 0; pointer-events: none; }
+
+.call-pill span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.55rem 1.2rem;
+    border: 1.5px solid var(--greige-light);
+    border-radius: 0.55rem;
+    background: var(--off-white);
+    font-weight: 600;
+    color: var(--charcoal-deep);
+    cursor: pointer;
+}
+
+.call-pill .bi { font-size: 1.15rem; color: var(--steel); line-height: 1; }
+
+.call-pill:hover span { border-color: var(--steel); }
+.call-pill input:checked + span { background: var(--steel); border-color: var(--steel-hover); color: #fff; }
+.call-pill input:checked + span .bi { color: #fff; }
+.call-pill input:focus-visible + span { outline: 2px solid rgba(91, 143, 164, 0.35); }
+
+/* ---------- Admin ---------- */
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 45rem) { .admin-stats { grid-template-columns: 1fr; } }
+
+.stat-tile {
+    background: var(--white);
+    border: 1px solid var(--greige-light);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow);
+    padding: 1.1rem 1.4rem;
+    display: grid;
+    gap: 0.15rem;
+}
+
+.stat-tile strong { font-size: 1.9rem; line-height: 1.1; color: var(--charcoal-deep); font-family: var(--serif); }
+.stat-tile span { color: var(--ink-soft); font-size: 0.9rem; font-weight: 600; }
+.stat-tile .bi { color: var(--steel); margin-right: 0.3rem; }
+
+.admin-card {
+    background: var(--white);
+    border: 1px solid var(--greige-light);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.admin-card h2 { font-size: 1.2rem; margin-bottom: 1rem; }
+.admin-card h2 .bi { color: var(--steel); margin-right: 0.4rem; font-size: 1.05rem; }
+
+.admin-config {
+    display: grid;
+    grid-template-columns: 1.2fr 0.9fr 0.9fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (max-width: 62rem) { .admin-config { grid-template-columns: 1fr; } }
+
+.admin-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.admin-table th,
+.admin-table td { text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--greige-light); vertical-align: middle; }
+.admin-table th { color: var(--ink-soft); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.admin-table tbody tr:hover { background: var(--off-white); }
+.admin-table tbody tr:last-child td { border-bottom: 0; }
+
+.admin-message { color: var(--ink-soft); max-width: 22rem; }
+.admin-empty { color: var(--ink-soft); }
+
+.admin-actions { text-align: right; white-space: nowrap; }
+.admin-actions form { display: inline-block; margin-left: 0.35rem; }
+
+.admin-inline-form { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: end; margin-top: 1rem; }
+.admin-inline-form label { display: grid; gap: 0.25rem; font-size: 0.85rem; font-weight: 600; color: var(--charcoal-deep); }
+.admin-inline-form input,
+.admin-inline-form select {
+    font: inherit;
+    padding: 0.4rem 0.6rem;
+    border: 1.5px solid var(--greige-light);
+    border-radius: 0.5rem;
+    background: var(--off-white);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.15rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.badge-steel { background: rgba(91, 143, 164, 0.14); color: var(--slate); }
+.badge-warm { background: #F6E9E3; color: #A24E2E; }
+.badge-grey { background: var(--silver-2); color: var(--charcoal); }
+
+.btn-sm { padding: 0.3rem 0.9rem; font-size: 0.85rem; }
+.btn-danger { background: transparent; color: #A24E2E; border-color: #D9B3A3; }
+.btn-danger:hover { background: #C0603C; border-color: #C0603C; color: #fff; }
+
+.status-cancelled { color: #A24E2E; font-weight: 600; }
+.status-confirmed { color: var(--steel); font-weight: 600; }
+
+.admin-history summary { cursor: pointer; list-style: none; }
+.admin-history summary::-webkit-details-marker { display: none; }
+.admin-history summary h2 { display: inline-block; margin: 0; }
+.admin-history summary::after { content: '▾'; color: var(--ink-soft); margin-left: 0.5rem; }
+.admin-history[open] summary::after { content: '▴'; }
+.admin-history[open] summary { margin-bottom: 1rem; }
 
 /* ---------- Contact ---------- */
 

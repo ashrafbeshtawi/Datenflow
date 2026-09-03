@@ -24,7 +24,7 @@ class SlotFinderTest extends KernelTestCase
 
     public function testGridMatchesSeededAvailability(): void
     {
-        $grid = $this->slots->buildWeekGrid(null);
+        $grid = $this->slots->buildWeekGrid($this->currentMonday()->format('Y-m-d'));
 
         $weekStart = new \DateTimeImmutable($grid['weekStart']);
         self::assertSame('1', $weekStart->format('N'), 'weekStart must be a Monday');
@@ -50,13 +50,39 @@ class SlotFinderTest extends KernelTestCase
         $past = $this->slots->buildWeekGrid('2020-01-06');
         self::assertSame($this->currentMonday()->format('Y-m-d'), $past['weekStart']);
 
+        // Garbage behaves like no parameter at all.
         $garbage = $this->slots->buildWeekGrid('not-a-date');
-        self::assertSame($this->currentMonday()->format('Y-m-d'), $garbage['weekStart']);
+        self::assertSame($this->slots->buildWeekGrid(null)['weekStart'], $garbage['weekStart']);
+    }
+
+    public function testDefaultWeekSkipsFullyBookedWeeks(): void
+    {
+        $marker = uniqid('fill-').'@example.com';
+
+        try {
+            $before = $this->slots->buildWeekGrid(null);
+            $free = array_keys($before['slots'], 'free', true);
+            self::assertNotEmpty($free, 'default week must have free slots');
+
+            foreach ($free as $key) {
+                $this->em->persist(new Inquiry('block', 'Fill', $marker, '', [], new \DateTimeImmutable($key, new \DateTimeZone(SlotFinder::TZ)), null));
+            }
+            $this->em->flush();
+
+            $after = $this->slots->buildWeekGrid(null);
+            self::assertGreaterThan($before['weekStart'], $after['weekStart'], 'default view must skip the fully booked week');
+        } finally {
+            // Cancelling frees the slots again, so runs do not pollute each other.
+            $this->em->createQuery('UPDATE '.Inquiry::class." i SET i.status = 'cancelled' WHERE i.email = :email")
+                ->setParameters(['email' => $marker])
+                ->execute();
+            $this->em->clear();
+        }
     }
 
     public function testSlotsInsideTheLeadTimeAreGone(): void
     {
-        $grid = $this->slots->buildWeekGrid(null);
+        $grid = $this->slots->buildWeekGrid($this->currentMonday()->format('Y-m-d'));
         $cutoff = $this->slots->now()->modify('+'.SlotFinder::LEAD_HOURS.' hours')->format('Y-m-d H:i');
 
         $insideLead = array_filter($grid['slots'], fn ($state, $key) => $key <= $cutoff, ARRAY_FILTER_USE_BOTH);

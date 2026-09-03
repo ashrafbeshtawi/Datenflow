@@ -21,37 +21,7 @@
                 <a href="mailto:{{ t.contact.email }}">{{ t.contact.email }}</a></p>
             <p><strong>{{ lang == 'en' ? 'Address' : 'Adresse' }}</strong><br>
                 {{ t.contact.address|join(', ') }}</p>
-            <a class="btn btn-primary" href="{{ path('booking') }}">{{ t.nav.cta }}</a>
-        </div>
-
-        <div>
-            {% if sent|default(false) %}
-                <p class="form-success" role="status">{{ t.contact.f.thanks }}</p>
-            {% else %}
-            {% set old = old|default({}) %}
-            {% set errors = errors|default({}) %}
-            {% if errors is not empty %}
-                <p class="form-error-summary" role="alert">{{ t.form_errors[error_key|default('validation')] }}</p>
-            {% endif %}
-            <form class="form-card" method="post" action="{{ path('contact') }}">
-                <div class="field-row">
-                    <label>{{ t.contact.f.name }} *
-                        <input type="text" name="name" required maxlength="200" value="{{ old.name|default('') }}" {{ errors.name is defined ? 'aria-invalid="true"' }}>
-                    </label>
-                    <label>{{ t.contact.f.company }}
-                        <input type="text" name="company" maxlength="200" value="{{ old.company|default('') }}">
-                    </label>
-                </div>
-                <label>{{ t.contact.f.email }} *
-                    <input type="email" name="email" required maxlength="320" value="{{ old.email|default('') }}" {{ errors.email is defined ? 'aria-invalid="true"' }}>
-                </label>
-                <label>{{ t.contact.f.message }} *
-                    <textarea name="message" required rows="5" maxlength="5000" placeholder="{{ t.contact.f.message_ph }}" {{ errors.message is defined ? 'aria-invalid="true"' }}>{{ old.message|default('') }}</textarea>
-                </label>
-                {% include 'partials/_form_protect.html.twig' %}
-                <button class="btn btn-primary" type="submit">{{ t.contact.f.submit }}</button>
-            </form>
-            {% endif %}
+            <a class="btn btn-primary btn-lg" href="{{ path('booking') }}">{{ t.nav.cta }}</a>
         </div>
     </div>
 </section>

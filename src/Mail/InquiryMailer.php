@@ -13,7 +13,6 @@ class InquiryMailer
 {
     private const SUBJECTS = [
         'booking' => '[Datenflow] Terminbuchung',
-        'contact' => '[Datenflow] Kontaktanfrage',
         'karriere' => '[Datenflow] Bewerbung',
     ];
 
@@ -61,21 +60,47 @@ class InquiryMailer
 
         $this->mailer->send($email);
 
-        if ($inquiry->getType() === 'booking' && $inquiry->getStartsAt() !== null) {
+        if ($inquiry->getType() === Inquiry::TYPE_BOOKING && $inquiry->getStartsAt() !== null) {
             $this->mailer->send($this->confirmation($inquiry, $lang, $meetLink));
         }
+    }
+
+    /**
+     * Cancellation notice for an admin-cancelled booking. The visitor's language
+     * is not stored, so the client mail is bilingual (DE first, then EN).
+     */
+    public function sendCancellation(Inquiry $inquiry): void
+    {
+        $parts = [];
+        $subjects = [];
+        foreach (['de', 'en'] as $lang) {
+            $t = SiteCopy::for($lang)['booking'];
+            $subjects[] = $t['mail']['cancel_subject'];
+            $parts[] = strtr($t['mail']['cancel_body'], [
+                '{name}' => $inquiry->getName(),
+                '{when}' => $this->formatWhen($inquiry, $lang),
+            ]);
+        }
+
+        $this->mailer->send((new Email())
+            ->from(Address::create($this->from))
+            ->to(new Address($inquiry->getEmail(), $inquiry->getName()))
+            ->replyTo($this->toContact)
+            ->subject(implode(' / ', $subjects))
+            ->text(implode("\n\n----\n\n", $parts)));
+
+        $this->mailer->send((new Email())
+            ->from(Address::create($this->from))
+            ->to($this->toContact)
+            ->subject('[Datenflow] Termin storniert: '.$inquiry->getName())
+            ->text('Der Termin am '.$inquiry->getStartsAt()->format('d.m.Y H:i').' mit '.$inquiry->getName().' ('.$inquiry->getEmail().') wurde storniert. Der Slot ist wieder frei.'));
     }
 
     private function confirmation(Inquiry $inquiry, string $lang, ?string $meetLink): Email
     {
         $t = SiteCopy::for($lang)['booking'];
-        $at = $inquiry->getStartsAt();
 
-        $when = strtr($t['mail']['when'], [
-            '{weekday}' => $t['slot']['weekdays'][(int) $at->format('N') - 1],
-            '{date}' => $at->format('d.m.Y'),
-            '{time}' => $at->format('H:i'),
-        ]);
+        $when = $this->formatWhen($inquiry, $lang);
         $extra = $inquiry->getCallType() === 'video'
             ? strtr($t['mail']['extra_video'], ['{meet}' => (string) $meetLink])
             : strtr($t['mail']['extra_phone'], ['{phone}' => $inquiry->getPayload()['phone'] ?? '']);
@@ -93,5 +118,18 @@ class InquiryMailer
             ->replyTo($this->toContact)
             ->subject($t['mail']['subject'])
             ->text($body);
+    }
+
+    /** "Montag, 07.09.2026, 10:00 Uhr" resp. "Monday, 07.09.2026, 10:00". */
+    private function formatWhen(Inquiry $inquiry, string $lang): string
+    {
+        $t = SiteCopy::for($lang)['booking'];
+        $at = $inquiry->getStartsAt();
+
+        return strtr($t['mail']['when'], [
+            '{weekday}' => $t['slot']['weekdays'][(int) $at->format('N') - 1],
+            '{date}' => $at->format('d.m.Y'),
+            '{time}' => $at->format('H:i'),
+        ]);
     }
 }
