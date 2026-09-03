@@ -70,6 +70,45 @@ class InquiryMailerTest extends TestCase
         self::assertStringContainsString('Montag, 07.09.2026, 10:00 Uhr', $confirmation->getTextBody());
         self::assertStringContainsString('Per Video (Google Meet)', $confirmation->getTextBody());
         self::assertStringContainsString('https://meet.google.com/jre-kcoc-swk', $confirmation->getTextBody());
+
+        // Both mails carry the calendar invite; 10:00 Berlin summer time = 08:00 UTC.
+        foreach ($this->sent as $mail) {
+            $ics = $mail->getAttachments()[0]->getBody();
+            self::assertStringContainsString('METHOD:REQUEST', $ics);
+            self::assertStringContainsString('DTSTART:20260907T080000Z', $ics);
+            self::assertStringContainsString('DTEND:20260907T083000Z', $ics);
+            self::assertStringContainsString('URL:https://meet.google.com/jre-kcoc-swk', $ics);
+            self::assertStringContainsString('ATTENDEE;RSVP=TRUE:mailto:maria@example.com', $ics);
+        }
+    }
+
+    public function testRescheduleMailsClientAndInternalWithInviteUpdate(): void
+    {
+        $inquiry = new Inquiry(
+            'booking',
+            'Maria Muster',
+            'maria@example.com',
+            '',
+            [],
+            new \DateTimeImmutable('2026-09-07 10:00'),
+            'video',
+        );
+
+        $this->mailer->sendReschedule($inquiry, 'https://meet.google.com/jre-kcoc-swk');
+
+        self::assertCount(2, $this->sent);
+        [$client, $internal] = $this->sent;
+        self::assertSame('maria@example.com', $client->getTo()[0]->getAddress());
+        self::assertSame('Ihr Termin wurde verschoben / Your appointment was moved', $client->getSubject());
+        self::assertSame('contact@test.local', $internal->getTo()[0]->getAddress());
+        self::assertStringContainsString('Montag, 07.09.2026, 10:00 Uhr', $internal->getTextBody());
+
+        foreach ($this->sent as $mail) {
+            $ics = $mail->getAttachments()[0]->getBody();
+            self::assertStringContainsString('METHOD:REQUEST', $ics);
+            // A moved event needs a SEQUENCE above the original 0.
+            self::assertMatchesRegularExpression('/SEQUENCE:[1-9]\d*/', $ics);
+        }
     }
 
     public function testPhoneBookingConfirmationIsLocalizedAndNamesTheNumber(): void

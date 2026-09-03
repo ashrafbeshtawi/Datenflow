@@ -196,8 +196,12 @@ class AdminTest extends WebTestCase
         ]);
 
         self::assertResponseRedirects();
-        self::assertEmailCount(1);
-        self::assertStringContainsString('verschoben', self::getMailerMessage()->getSubject());
+        // Client notice + internal notice, both carrying the calendar invite.
+        self::assertEmailCount(2);
+        foreach (self::getMailerMessages() as $mail) {
+            self::assertStringContainsString('verschoben', $mail->getSubject());
+            self::assertStringContainsString('METHOD:REQUEST', $mail->getAttachments()[0]->getBody());
+        }
 
         $this->em()->clear();
         // startsAt is naive (no TZ persisted), so compare wall-clock time.

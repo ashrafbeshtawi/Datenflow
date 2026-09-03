@@ -2,12 +2,14 @@
 
 namespace App\Mail;
 
+use App\Booking\SlotFinder;
 use App\Content\SiteCopy;
 use App\Entity\Inquiry;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Part\DataPart;
 
 class InquiryMailer
 {
@@ -61,10 +63,16 @@ class InquiryMailer
             $email->attachFromPath($attachment['path'], $attachment['name']);
         }
 
+        $isBooking = $inquiry->getType() === Inquiry::TYPE_BOOKING && $inquiry->getStartsAt() !== null;
+        $invite = $isBooking ? $this->invite($inquiry, $meetLink) : null;
+        if ($invite !== null) {
+            $email->addPart($invite);
+        }
+
         $this->mailer->send($email);
 
-        if ($inquiry->getType() === Inquiry::TYPE_BOOKING && $inquiry->getStartsAt() !== null) {
-            $this->mailer->send($this->confirmation($inquiry, $lang, $meetLink));
+        if ($isBooking) {
+            $this->mailer->send($this->confirmation($inquiry, $lang, $meetLink)->addPart($invite));
         }
     }
 
@@ -118,12 +126,26 @@ class InquiryMailer
             ]);
         }
 
+        // ponytail: SEQUENCE from the wall clock — monotonic across reschedules
+        // without persisting a counter; upgrade to a stored counter if it ever matters.
+        $invite = $this->invite($inquiry, $meetLink, time());
+
         $this->mailer->send((new Email())
             ->from(Address::create($this->from))
             ->to(new Address($inquiry->getEmail(), $inquiry->getName()))
             ->replyTo($this->toContact)
             ->subject(implode(' / ', $subjects))
-            ->text(implode("\n\n----\n\n", $parts)));
+            ->text(implode("\n\n----\n\n", $parts))
+            ->addPart($invite));
+
+        $this->mailer->send((new Email())
+            ->from(Address::create($this->from))
+            ->to($this->toContact)
+            ->subject('[Datenflow] Termin verschoben: '.$inquiry->getName())
+            ->text('Der Termin mit '.$inquiry->getName().' ('.$inquiry->getEmail().') wurde verschoben.'
+                ."\nNeuer Termin: ".$this->formatWhen($inquiry, 'de')
+                .($meetLink !== null ? "\nMeet: ".$meetLink : ''))
+            ->addPart($invite));
     }
 
     private function confirmation(Inquiry $inquiry, string $lang, ?string $meetLink): Email
@@ -143,6 +165,46 @@ class InquiryMailer
             ->replyTo($this->toContact)
             ->subject($t['mail']['subject'])
             ->text($body);
+    }
+
+    /**
+     * iCalendar invite (METHOD:REQUEST) so Gmail & Co. render the appointment
+     * as a real event. The UID is stable per booking; a higher SEQUENCE makes
+     * mail clients move the existing event instead of creating a second one.
+     */
+    private function invite(Inquiry $inquiry, ?string $meetLink, int $sequence = 0): DataPart
+    {
+        $utc = new \DateTimeZone('UTC');
+        // startsAt is naive Europe/Berlin wall-clock time; pin the zone before converting.
+        $start = new \DateTimeImmutable($inquiry->getStartsAt()->format('Y-m-d H:i'), new \DateTimeZone(SlotFinder::TZ));
+        $stamp = fn (\DateTimeImmutable $d) => $d->setTimezone($utc)->format('Ymd\THis\Z');
+        $esc = fn (string $v) => addcslashes($v, ',;\\');
+
+        $ics = implode("\r\n", array_filter([
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Datenflow//Booking//DE',
+            'METHOD:REQUEST',
+            'BEGIN:VEVENT',
+            'UID:booking-'.($inquiry->getId() ?? 0).'@datenflow.de',
+            'SEQUENCE:'.$sequence,
+            'DTSTAMP:'.$stamp(new \DateTimeImmutable()),
+            'DTSTART:'.$stamp($start),
+            'DTEND:'.$stamp($start->modify('+'.SlotFinder::SLOT_MINUTES.' minutes')),
+            'SUMMARY:'.$esc('Erstgespräch Datenflow: '.$inquiry->getName()),
+            'LOCATION:'.$esc($meetLink ?? 'Telefon'),
+            $meetLink !== null ? 'URL:'.$meetLink : null,
+            'ORGANIZER;CN=Datenflow:mailto:'.$this->toContact,
+            'ATTENDEE;RSVP=TRUE:mailto:'.$inquiry->getEmail(),
+            'STATUS:CONFIRMED',
+            'END:VEVENT',
+            'END:VCALENDAR',
+        ]));
+
+        $part = new DataPart($ics, 'einladung.ics', 'text/calendar');
+        $part->getHeaders()->addParameterizedHeader('Content-Type', 'text/calendar', ['method' => 'REQUEST', 'charset' => 'utf-8']);
+
+        return $part;
     }
 
     /** Meet link for video calls, the client's phone number otherwise. */
