@@ -12,12 +12,43 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class AdminTest extends WebTestCase
 {
-    public function testAdminRequiresPassword(): void
+    public function testAdminRedirectsAnonymousToLogin(): void
     {
         $client = static::createClient();
         $client->request('GET', '/admin');
 
-        self::assertResponseStatusCodeSame(401);
+        self::assertResponseRedirects('/admin/login');
+    }
+
+    public function testLoginRejectsWrongUsernameEvenWithCorrectPassword(): void
+    {
+        $client = static::createClient();
+        $this->login($client, 'wrong-user', 'test-admin');
+
+        self::assertSelectorExists('.form-error-summary');
+        $client->request('GET', '/admin');
+        self::assertResponseRedirects('/admin/login');
+    }
+
+    public function testLoginRejectsWrongPassword(): void
+    {
+        $client = static::createClient();
+        $this->login($client, 'test', 'wrong-password');
+
+        self::assertSelectorExists('.form-error-summary');
+        $client->request('GET', '/admin');
+        self::assertResponseRedirects('/admin/login');
+    }
+
+    public function testLogoutEndsTheSession(): void
+    {
+        $client = $this->adminClient();
+
+        $client->request('POST', '/admin/logout', ['_token' => $this->csrfToken($client)]);
+
+        self::assertResponseRedirects('/admin/login');
+        $client->request('GET', '/admin');
+        self::assertResponseRedirects('/admin/login');
     }
 
     public function testDashboardListsInquiries(): void
@@ -150,7 +181,17 @@ class AdminTest extends WebTestCase
 
     private function adminClient(): KernelBrowser
     {
-        return static::createClient(server: ['PHP_AUTH_USER' => 'admin', 'PHP_AUTH_PW' => 'test-admin']);
+        $client = static::createClient();
+        $this->login($client, 'test', 'test-admin');
+        self::assertResponseRedirects('/admin');
+
+        return $client;
+    }
+
+    private function login(KernelBrowser $client, string $username, string $password): void
+    {
+        $token = $client->request('GET', '/admin/login')->filter('input[name="_token"]')->first()->attr('value');
+        $client->request('POST', '/admin/login', ['username' => $username, 'password' => $password, '_token' => $token]);
     }
 
     private function csrfToken(KernelBrowser $client): string

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Booking\SlotFinder;
 use App\Content\SiteCopy;
+use App\EventListener\AdminAuthListener;
 use App\Entity\AvailabilityRule;
 use App\Entity\Inquiry;
 use App\Entity\Setting;
@@ -13,12 +14,14 @@ use DateTimeZone;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * Internal admin panel (German only). Auth happens in AdminBasicAuthListener.
+ * Internal admin panel (German only). Auth happens in AdminAuthListener,
+ * which sends anonymous visitors to login() below.
  */
 #[Route('/admin')]
 class AdminController extends AbstractController
@@ -28,6 +31,41 @@ class AdminController extends AbstractController
         private readonly InquiryMailer $mailer,
         private readonly SlotFinder $slots,
     ) {
+    }
+
+    #[Route('/login', name: 'admin_login', methods: ['GET', 'POST'])]
+    public function login(
+        Request $request,
+        #[Autowire(env: 'ADMIN_USER')] string $user,
+        #[Autowire(env: 'ADMIN_PASSWORD')] string $password,
+    ): Response {
+        $error = false;
+        if ($request->isMethod('POST')) {
+            $this->assertCsrf($request);
+            // Evaluate both comparisons before deciding, so a wrong user name
+            // costs the same time as a wrong password.
+            $userOk = hash_equals($user, $request->request->getString('username'));
+            $passOk = hash_equals($password, $request->request->getString('password'));
+
+            if ($user !== '' && $password !== '' && $userOk && $passOk) {
+                $request->getSession()->migrate(true);
+                $request->getSession()->set(AdminAuthListener::SESSION_KEY, true);
+
+                return $this->redirectToRoute('admin');
+            }
+            $error = true;
+        }
+
+        return $this->render('admin/login.html.twig', $this->baseContext() + ['error' => $error]);
+    }
+
+    #[Route('/logout', name: 'admin_logout', methods: ['POST'])]
+    public function logout(Request $request): Response
+    {
+        $this->assertCsrf($request);
+        $request->getSession()->invalidate();
+
+        return $this->redirectToRoute('admin_login');
     }
 
     #[Route('', name: 'admin', methods: ['GET'])]

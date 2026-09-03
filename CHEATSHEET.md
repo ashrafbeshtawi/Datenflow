@@ -49,5 +49,5 @@ vendor/bin/phpunit --testsuite E2E
 
 ## Admin
 
-`open http://localhost:8080/admin` — admin panel (HTTP Basic, password = `ADMIN_PASSWORD` from .env, user name ignored)
+`open http://localhost:8080/admin` — admin panel (form login, credentials = `ADMIN_USER` / `ADMIN_PASSWORD` from .env)
 Manage inquiries (edit/cancel), weekly availability, one-off slot blocks and the Google Meet link.

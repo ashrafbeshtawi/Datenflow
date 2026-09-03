@@ -21,6 +21,10 @@
     <div class="wrap">
         <p class="kicker">Intern</p>
         <h1>Admin.</h1>
+        <form method="post" action="{{ path('admin_logout') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
+            <button class="btn btn-ghost" type="submit"><i class="bi bi-box-arrow-right"></i> Abmelden</button>
+        </form>
         {% if notice %}
             <p class="form-success" role="status">{{ notice }}</p>
         {% endif %}
