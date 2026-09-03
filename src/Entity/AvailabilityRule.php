@@ -7,9 +7,11 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Weekly working hours: "on this weekday we take calls from X to Y".
+ * At most one rule per weekday (no rule = closed day); the unique index enforces it.
  * Slots are generated from these rules; one-off blocks are Inquiry rows of type 'block'.
  */
 #[ORM\Entity]
+#[ORM\UniqueConstraint(name: 'uniq_availability_weekday', columns: ['weekday'])]
 class AvailabilityRule
 {
     #[ORM\Id]

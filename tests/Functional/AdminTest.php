@@ -110,29 +110,62 @@ class AdminTest extends WebTestCase
         self::assertTrue($this->slots()->isBookable($at));
     }
 
-    public function testAvailabilityRuleRoundTripChangesTheGrid(): void
+    public function testAvailabilityFormRewritesTheWholeWeek(): void
     {
         $client = $this->adminClient();
 
         try {
             self::assertCount(5, $this->slots()->buildWeekGrid($this->lastHorizonMonday())['days']);
 
-            $client->request('POST', '/admin/availability', [
-                'weekday' => 6,
-                'start_time' => '10:00',
-                'end_time' => '12:00',
-                '_token' => $this->csrfToken($client),
-            ]);
+            // Open Saturday too; a checked day appears, an unchecked one closes.
+            $client->request('POST', '/admin/availability', $this->availabilityParams([1, 2, 3, 4, 5, 6], $client));
             self::assertResponseRedirects();
+            $this->em()->clear();
             self::assertCount(6, $this->slots()->buildWeekGrid($this->lastHorizonMonday())['days'], 'Saturday joined the grid');
+            self::assertCount(6, $this->em()->getRepository(AvailabilityRule::class)->findAll(), 'one rule per open day, never more');
 
-            $rule = $this->em()->getRepository(AvailabilityRule::class)->findOneBy(['weekday' => 6]);
-            $client->request('POST', '/admin/availability/'.$rule->getId().'/delete', ['_token' => $this->csrfToken($client)]);
+            $client->request('POST', '/admin/availability', $this->availabilityParams([1, 2, 3, 4, 5], $client));
             $this->em()->clear();
             self::assertCount(5, $this->slots()->buildWeekGrid($this->lastHorizonMonday())['days']);
         } finally {
-            // Never leave a stray Saturday rule behind for the other tests.
-            $this->em()->createQuery('DELETE FROM '.AvailabilityRule::class.' r WHERE r.weekday = 6')->execute();
+            // Restore the seeded Mon-Fri 09-17 week for the other tests.
+            $this->em()->createQuery('DELETE FROM '.AvailabilityRule::class.' r')->execute();
+            foreach ([1, 2, 3, 4, 5] as $weekday) {
+                $this->em()->persist(new AvailabilityRule($weekday, new \DateTimeImmutable('09:00'), new \DateTimeImmutable('17:00')));
+            }
+            $this->em()->flush();
+            $this->em()->clear();
+        }
+    }
+
+    public function testBlockingAWholeDayTakesEveryFreeSlotSilently(): void
+    {
+        $client = $this->adminClient();
+        $monday = $this->lastHorizonMonday();
+        $freeByDay = [];
+        foreach (array_keys($this->slots()->buildWeekGrid($monday)['slots'], 'free', true) as $key) {
+            $freeByDay[substr($key, 0, 10)][] = $key;
+        }
+        self::assertNotEmpty($freeByDay);
+        $date = array_key_first($freeByDay);
+
+        try {
+            $client->request('POST', '/admin/block', ['date' => $date, 'time' => '', '_token' => $this->csrfToken($client)]);
+
+            self::assertResponseRedirects();
+            self::assertEmailCount(0);
+            $this->em()->clear();
+            $after = $this->slots()->buildWeekGrid($monday)['slots'];
+            foreach (array_keys($after) as $key) {
+                if (str_starts_with($key, $date.' ')) {
+                    self::assertSame('gone', $after[$key], $key.' must be blocked');
+                }
+            }
+        } finally {
+            // Free the day again so later tests still find open slots.
+            $this->em()->createQuery(
+                'DELETE FROM '.Inquiry::class." i WHERE i.type = 'block' AND i.startsAt >= :from AND i.startsAt < :to"
+            )->setParameters(['from' => $date.' 00:00', 'to' => $date.' 23:59'])->execute();
             $this->em()->clear();
         }
     }
@@ -217,6 +250,19 @@ class AdminTest extends WebTestCase
         self::assertResponseRedirects('/admin');
 
         return $client;
+    }
+
+    /** Full availability form: the given weekdays open 10-12, everything else closed. */
+    private function availabilityParams(array $openWeekdays, KernelBrowser $client): array
+    {
+        $params = ['_token' => $this->csrfToken($client)];
+        foreach ($openWeekdays as $weekday) {
+            $params['open_'.$weekday] = '1';
+            $params['start_'.$weekday] = '10:00';
+            $params['end_'.$weekday] = '12:00';
+        }
+
+        return $params;
     }
 
     private function login(KernelBrowser $client, string $username, string $password): void

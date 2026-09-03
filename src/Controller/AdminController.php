@@ -77,7 +77,7 @@ class AdminController extends AbstractController
         return $this->render('admin/dashboard.html.twig', $this->buildBaseContext() + $this->partitionInquiries($all, $this->slots->getCurrentTime()) + [
             'free_slots' => count(array_keys($grid['slots'], 'free', true)),
             'free_week' => $grid['weekStart'],
-            'rules' => $this->em->getRepository(AvailabilityRule::class)->findBy([], ['weekday' => 'ASC', 'startTime' => 'ASC']),
+            'rules' => $this->loadRulesByWeekday(),
             'meet_link' => $this->em->find(Setting::class, Setting::MEET_LINK)?->getValue(),
             'notice' => $request->query->getString('notice') ?: null,
         ]);
@@ -150,33 +150,33 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('admin', ['notice' => 'Storniert, der Slot ist wieder frei.']);
     }
 
-    #[Route('/availability', name: 'admin_availability_add', methods: ['POST'])]
-    public function addAvailability(Request $request): Response
+    /** One form for the whole week: checked day = open with the given times, unchecked = closed. */
+    #[Route('/availability', name: 'admin_availability_save', methods: ['POST'])]
+    public function saveAvailability(Request $request): Response
     {
         $this->assertCsrf($request);
 
-        $weekday = $request->request->getInt('weekday');
-        $start = DateTimeImmutable::createFromFormat('!H:i', $request->request->getString('start_time'));
-        $end = DateTimeImmutable::createFromFormat('!H:i', $request->request->getString('end_time'));
-
-        if ($weekday < 1 || $weekday > 7 || $start === false || $end === false || $start >= $end) {
-            return $this->redirectToRoute('admin', ['notice' => 'Ungültige Zeiten, Regel nicht gespeichert.']);
+        $rules = [];
+        foreach (range(1, 7) as $weekday) {
+            if (!$request->request->getBoolean('open_'.$weekday)) {
+                continue;
+            }
+            $start = DateTimeImmutable::createFromFormat('!H:i', $request->request->getString('start_'.$weekday));
+            $end = DateTimeImmutable::createFromFormat('!H:i', $request->request->getString('end_'.$weekday));
+            if ($start === false || $end === false || $start >= $end) {
+                return $this->redirectToRoute('admin', ['notice' => 'Ungültige Zeiten, nichts gespeichert.']);
+            }
+            $rules[] = new AvailabilityRule($weekday, $start, $end);
         }
 
-        $this->em->persist(new AvailabilityRule($weekday, $start, $end));
+        // Full rewrite of at most 7 rows — duplicate weekdays are structurally impossible.
+        $this->em->createQuery('DELETE FROM '.AvailabilityRule::class)->execute();
+        foreach ($rules as $rule) {
+            $this->em->persist($rule);
+        }
         $this->em->flush();
 
         return $this->redirectToRoute('admin', ['notice' => 'Verfügbarkeit gespeichert.']);
-    }
-
-    #[Route('/availability/{id}/delete', name: 'admin_availability_delete', methods: ['POST'])]
-    public function deleteAvailability(Request $request, AvailabilityRule $rule): Response
-    {
-        $this->assertCsrf($request);
-        $this->em->remove($rule);
-        $this->em->flush();
-
-        return $this->redirectToRoute('admin', ['notice' => 'Verfügbarkeit gelöscht.']);
     }
 
     #[Route('/block', name: 'admin_block', methods: ['POST'])]
@@ -184,11 +184,13 @@ class AdminController extends AbstractController
     {
         $this->assertCsrf($request);
 
-        $at = DateTimeImmutable::createFromFormat(
-            '!Y-m-d H:i',
-            $request->request->getString('date').' '.$request->request->getString('time'),
-            new DateTimeZone(SlotFinder::TZ),
-        );
+        $date = $request->request->getString('date');
+        $time = $request->request->getString('time');
+        if ($time === '') {
+            return $this->blockWholeDay($date);
+        }
+
+        $at = DateTimeImmutable::createFromFormat('!Y-m-d H:i', $date.' '.$time, new DateTimeZone(SlotFinder::TZ));
         if ($at === false) {
             return $this->redirectToRoute('admin', ['notice' => 'Ungültiger Zeitpunkt.']);
         }
@@ -201,6 +203,33 @@ class AdminController extends AbstractController
         }
 
         return $this->redirectToRoute('admin', ['notice' => 'Slot blockiert.']);
+    }
+
+    /**
+     * ponytail: a day block is N slot blocks, shown as N rows under "Kommende
+     * Termine" and freed one by one — a day-level entity only if that ever hurts.
+     */
+    private function blockWholeDay(string $date): Response
+    {
+        $grid = $this->slots->buildWeekGrid($date);
+        $free = array_filter(
+            array_keys($grid['slots'], 'free', true),
+            fn (string $key) => str_starts_with($key, $date.' '),
+        );
+        if ($free === []) {
+            return $this->redirectToRoute('admin', ['notice' => 'Keine freien Slots an diesem Tag.']);
+        }
+
+        foreach ($free as $key) {
+            $this->em->persist(Inquiry::block(new DateTimeImmutable($key, new DateTimeZone(SlotFinder::TZ))));
+        }
+        try {
+            $this->em->flush();
+        } catch (UniqueConstraintViolationException) {
+            return $this->redirectToRoute('admin', ['notice' => 'Slot ist bereits belegt, bitte neu versuchen.']);
+        }
+
+        return $this->redirectToRoute('admin', ['notice' => count($free).' Slots blockiert.']);
     }
 
     #[Route('/settings', name: 'admin_settings', methods: ['POST'])]
@@ -243,6 +272,17 @@ class AdminController extends AbstractController
             'history' => array_filter($all, fn (Inquiry $i) => $i->getStartsAt() !== null
                 && ($i->getStartsAt() < $now || $i->getStatus() !== Inquiry::STATUS_CONFIRMED)),
         ];
+    }
+
+    /** @return array<int, AvailabilityRule> keyed by ISO weekday, at most one per day */
+    private function loadRulesByWeekday(): array
+    {
+        $rules = [];
+        foreach ($this->em->getRepository(AvailabilityRule::class)->findAll() as $rule) {
+            $rules[$rule->getWeekday()] = $rule;
+        }
+
+        return $rules;
     }
 
     /** The base layout needs t/lang; the admin panel itself is German only. */
