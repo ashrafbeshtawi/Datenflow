@@ -185,7 +185,8 @@ img, svg { max-width: 100%; }
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 1.4rem;
+    /* Fluid: roomy on wide screens, tightens near the burger breakpoint instead of wrapping. */
+    gap: clamp(1.2rem, 2.2vw, 2.4rem);
     flex: 1;
     justify-content: center;
 }
@@ -194,6 +195,7 @@ img, svg { max-width: 100%; }
     text-decoration: none;
     color: var(--charcoal);
     opacity: 0.75;
+    white-space: nowrap;
 }
 .nav-links a:hover { opacity: 1; color: var(--charcoal-deep); }
 /* The CTA is a button, not a nav link — never wash it out. */
@@ -214,7 +216,9 @@ img, svg { max-width: 100%; }
 
 .nav-toggle, .burger { display: none; }
 
-@media (max-width: 62rem) {
+/* 68rem (not 62): the centered, wider-spaced nav needs more room before it
+   degrades — below this the CTA starts wrapping, so hand over to the burger. */
+@media (max-width: 68rem) {
     .burger {
         display: flex;
         flex-direction: column;
