@@ -177,14 +177,25 @@ img, svg { max-width: 100%; }
     align-items: center;
     gap: 1.4rem;
     font-weight: 500;
+    /* Fill the space between brand and header edge, so .nav-links can center in it. */
+    flex: 1;
 }
 
-.site-nav > a {
+/* Nav links centered between the brand and the lang switch + CTA. */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+    flex: 1;
+    justify-content: center;
+}
+
+.nav-links a {
     text-decoration: none;
     color: var(--charcoal);
     opacity: 0.75;
 }
-.site-nav > a:hover { opacity: 1; color: var(--charcoal-deep); }
+.nav-links a:hover { opacity: 1; color: var(--charcoal-deep); }
 /* The CTA is a button, not a nav link — never wash it out. */
 .site-nav > .nav-cta, .site-nav > .nav-cta:hover { opacity: 1; color: #fff; }
 
@@ -232,7 +243,9 @@ img, svg { max-width: 100%; }
         padding: 0.5rem 1.5rem 1.25rem;
     }
     .nav-toggle:checked ~ .site-nav { display: flex; }
-    .site-nav > a { padding: 0.75rem 0; border-bottom: 1px solid var(--greige-light); opacity: 1; }
+    /* The centering wrapper dissolves; links become rows of the dropdown as before. */
+    .nav-links { display: contents; }
+    .nav-links a { padding: 0.75rem 0; border-bottom: 1px solid var(--greige-light); opacity: 1; }
     .lang-switch { padding: 0.75rem 0; }
     .nav-cta { margin-top: 0.75rem; text-align: center; }
 }
