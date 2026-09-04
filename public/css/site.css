@@ -714,7 +714,10 @@ img, svg { max-width: 100%; }
 .slot-grid th { font-size: 0.85rem; color: var(--charcoal-deep); line-height: 1.3; padding-bottom: 0.25rem; }
 .slot-grid td { padding: 0; min-width: 3.6rem; }
 
-.slot { display: block; cursor: pointer; }
+/* position: relative pins the absolute (visually hidden) radio inside the label;
+   without it the radio's containing block is the viewport, and .form-card's
+   width:100% turns every radio into a viewport-wide strip → horizontal scroll. */
+.slot { display: block; cursor: pointer; position: relative; }
 .slot input { position: absolute; opacity: 0; pointer-events: none; }
 
 .slot span,
@@ -760,6 +763,7 @@ img, svg { max-width: 100%; }
 .call-type { display: flex; flex-wrap: wrap; gap: 0.8rem; }
 
 /* Call-type choice as selectable pills (radio visually hidden, like .slot). */
+.call-pill { position: relative; }
 .call-pill input { position: absolute; opacity: 0; pointer-events: none; }
 
 .call-pill span {
