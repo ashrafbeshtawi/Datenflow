@@ -11,6 +11,11 @@ COPY docker/php/vhost.conf /etc/apache2/sites-available/000-default.conf
 # CV uploads on /karriere go up to 8 MB
 RUN printf 'upload_max_filesize=10M\npost_max_size=12M\n' > /usr/local/etc/php/conf.d/uploads.ini
 
+# App-wide convention: all times are naive Europe/Berlin wall-clock (see SlotFinder).
+# PHP must hydrate and create DateTimes in that zone, or every rendered entity
+# time drifts by the UTC offset (admin panel +2h in summer).
+RUN printf 'date.timezone=Europe/Berlin\n' > /usr/local/etc/php/conf.d/timezone.ini
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app

@@ -64,6 +64,27 @@ class AdminTest extends WebTestCase
         self::assertSelectorTextContains('#admin-messages', $email);
     }
 
+    /**
+     * Guards the app-wide convention: all times are naive Europe/Berlin wall-clock.
+     * If PHP's default timezone (docker/php timezone.ini) and Twig's date filter
+     * disagree, rendered times drift by the UTC offset — this is what it looks like.
+     */
+    public function testDashboardRendersTheBookedWallClockTime(): void
+    {
+        self::assertSame('Europe/Berlin', date_default_timezone_get(), 'app convention: naive Europe/Berlin everywhere, set in docker/php');
+
+        $client = $this->adminClient();
+        [$at, $inquiry] = $this->bookFreeSlot('video');
+
+        $crawler = $client->request('GET', '/admin');
+        self::assertResponseIsSuccessful();
+        $row = $crawler->filter('#admin-upcoming tr')
+            ->reduce(fn ($node) => str_contains($node->text(), $inquiry->getEmail()));
+        self::assertCount(1, $row, 'booking must appear exactly once');
+        self::assertStringContainsString($at->format('d.m.Y'), $row->text());
+        self::assertStringContainsString($at->format('H:i'), $row->text(), 'admin must show the slot at its booked wall-clock time');
+    }
+
     public function testCancelBookingMailsBothPartiesAndFreesTheSlot(): void
     {
         $client = $this->adminClient();
