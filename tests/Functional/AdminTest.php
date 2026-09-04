@@ -20,6 +20,18 @@ class AdminTest extends WebTestCase
         self::assertResponseRedirects('/admin/login');
     }
 
+    /**
+     * The router matches the rawurldecoded path, so the auth listener must
+     * compare decoded too — otherwise /%61dmin reaches the dashboard unguarded.
+     */
+    public function testPercentEncodedAdminPathIsGuardedToo(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/%61dmin');
+
+        self::assertResponseRedirects('/admin/login');
+    }
+
     public function testLoginRejectsWrongUsernameEvenWithCorrectPassword(): void
     {
         $client = static::createClient();
