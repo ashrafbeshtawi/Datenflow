@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Anfrage — Datenflow{% endblock %}
+
+{% block body %}
+<section class="section">
+    <div class="wrap wrap-narrow">
+        <p class="kicker">Intern</p>
+        <h1>Anfrage #{{ inquiry.id }}.</h1>
+        <p class="section-sub">
+            {{ inquiry.type }} · eingegangen {{ inquiry.createdAt|date('d.m.Y H:i') }}
+            {% if inquiry.startsAt %} · Termin {{ inquiry.startsAt|date('d.m.Y H:i') }}{% endif %}
+            · {{ inquiry.status == 'confirmed' ? 'aktiv' : 'storniert' }}
+        </p>
+
+        <div class="form-card">
+            <p><strong>Name:</strong> {{ inquiry.name }}</p>
+            <p><strong>E-Mail:</strong> <a href="mailto:{{ inquiry.email }}">{{ inquiry.email }}</a></p>
+            {% for key, value in inquiry.payload %}
+                <p><strong>{{ key|capitalize }}:</strong> {{ value }}</p>
+            {% endfor %}
+            {% if inquiry.message %}
+                <p><strong>Nachricht:</strong></p>
+                <p>{{ inquiry.message|nl2br }}</p>
+            {% endif %}
+
+            {% if inquiry.type == 'booking' and inquiry.status == 'confirmed' %}
+                <form class="admin-inline-form" method="post" action="{{ path('admin_reschedule', {id: inquiry.id}) }}">
+                    <label>Datum <input type="date" name="date" value="{{ inquiry.startsAt|date('Y-m-d') }}" required></label>
+                    <label>Uhrzeit <input type="time" name="time" step="1800" value="{{ inquiry.startsAt|date('H:i') }}" required></label>
+                    <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
+                    <button class="btn btn-primary" type="submit">Verschieben &amp; Kunden informieren</button>
+                </form>
+            {% endif %}
+            <div class="admin-view-actions">
+                {% if inquiry.startsAt is null %}
+                    <form method="post" action="{{ path('admin_inquiry_delete', {id: inquiry.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
+                        <button class="btn btn-danger" type="submit">Löschen</button>
+                    </form>
+                {% endif %}
+                <a class="btn btn-ghost" href="{{ path('admin') }}">Zurück</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

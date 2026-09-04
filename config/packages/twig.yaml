@@ -1,8 +1,8 @@
 twig:
     file_name_pattern: '*.twig'
-    # Slot times are naive Europe/Berlin (see SlotFinder); without this, the
-    # date filter converts them to the server timezone (UTC in prod/CI) and
-    # every day in the booking grid renders shifted by one.
+    # All times are naive Europe/Berlin wall-clock, and PHP's default timezone is
+    # pinned to Europe/Berlin too (docker/php timezone.ini) — hydration and the
+    # date filter MUST agree, otherwise rendered times drift by the UTC offset.
     date:
         timezone: 'Europe/Berlin'
 

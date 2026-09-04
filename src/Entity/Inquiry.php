@@ -139,18 +139,9 @@ class Inquiry
         $this->status = self::STATUS_CANCELLED;
     }
 
-    public function setName(string $name): void
+    /** Rescheduling an appointment; the unique index guards the new slot on flush. */
+    public function setStartsAt(\DateTimeImmutable $at): void
     {
-        $this->name = $name;
-    }
-
-    public function setEmail(string $email): void
-    {
-        $this->email = $email;
-    }
-
-    public function setMessage(string $message): void
-    {
-        $this->message = $message;
+        $this->startsAt = $at;
     }
 }

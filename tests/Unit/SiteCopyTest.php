@@ -9,15 +9,15 @@ class SiteCopyTest extends TestCase
 {
     public function testEnglishMirrorsGermanStructure(): void
     {
-        $de = SiteCopy::for('de');
-        $en = SiteCopy::for('en');
+        $de = SiteCopy::get('de');
+        $en = SiteCopy::get('en');
 
         self::assertSame($this->keyTree($de), $this->keyTree($en), 'DE and EN copy must have identical structure');
     }
 
     public function testUnknownLocaleFallsBackToGerman(): void
     {
-        self::assertSame(SiteCopy::for('de'), SiteCopy::for('fr'));
+        self::assertSame(SiteCopy::get('de'), SiteCopy::get('fr'));
     }
 
     /** Nested key structure (ignores leaf values). */

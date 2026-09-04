@@ -19,7 +19,10 @@ class AdminAuthListener
     public function __invoke(RequestEvent $event): void
     {
         $request = $event->getRequest();
-        $path = $request->getPathInfo();
+        // getPathInfo() is still percent-encoded, but the router matches the
+        // decoded path — compare decoded, or /%61dmin walks straight past the
+        // guard into the /admin routes.
+        $path = rawurldecode($request->getPathInfo());
         if (!$event->isMainRequest() || !str_starts_with($path, '/admin') || $path === '/admin/login') {
             return;
         }

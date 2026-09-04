@@ -13,37 +13,37 @@ use Symfony\Component\Routing\Attribute\Route;
 class PageController extends AbstractController
 {
     #[Route('/', name: 'home')]
-    public function home(Request $request): Response
+    public function showHome(Request $request): Response
     {
         return $this->renderPage($request, 'page/home.html.twig');
     }
 
     #[Route('/services', name: 'services')]
-    public function services(Request $request): Response
+    public function showServices(Request $request): Response
     {
         return $this->renderPage($request, 'page/services.html.twig');
     }
 
     #[Route('/process', name: 'process')]
-    public function process(Request $request): Response
+    public function showProcess(Request $request): Response
     {
         return $this->renderPage($request, 'page/process.html.twig');
     }
 
     #[Route('/preise', name: 'pricing')]
-    public function pricing(Request $request): Response
+    public function showPricing(Request $request): Response
     {
         return $this->renderPage($request, 'page/pricing.html.twig');
     }
 
     #[Route('/faq', name: 'faq')]
-    public function faq(Request $request): Response
+    public function showFaq(Request $request): Response
     {
         return $this->renderPage($request, 'page/faq.html.twig');
     }
 
     #[Route('/termin', name: 'booking')]
-    public function booking(Request $request, SlotFinder $slots): Response
+    public function showBooking(Request $request, SlotFinder $slots): Response
     {
         return $this->renderPage($request, 'page/booking.html.twig', [
             'grid' => $slots->buildWeekGrid($request->query->getString('week') ?: null),
@@ -51,38 +51,38 @@ class PageController extends AbstractController
     }
 
     #[Route('/contact', name: 'contact')]
-    public function contact(Request $request): Response
+    public function showContact(Request $request): Response
     {
         return $this->renderPage($request, 'page/contact.html.twig');
     }
 
     #[Route('/karriere', name: 'karriere')]
-    public function karriere(Request $request): Response
+    public function showKarriere(Request $request): Response
     {
         return $this->renderPage($request, 'page/karriere.html.twig');
     }
 
     #[Route('/impressum', name: 'impressum')]
-    public function impressum(Request $request): Response
+    public function showImpressum(Request $request): Response
     {
         return $this->renderPage($request, 'page/legal.html.twig', ['section' => 'impressum']);
     }
 
     #[Route('/datenschutz', name: 'datenschutz')]
-    public function datenschutz(Request $request): Response
+    public function showDatenschutz(Request $request): Response
     {
         return $this->renderPage($request, 'page/legal.html.twig', ['section' => 'datenschutz']);
     }
 
     // Old URLs from the previous site — keep them alive.
     #[Route('/tools', name: 'legacy_tools')]
-    public function legacyTools(): Response
+    public function redirectLegacyTools(): Response
     {
         return $this->redirectToRoute('services', [], Response::HTTP_MOVED_PERMANENTLY);
     }
 
     #[Route('/lang/{locale}', name: 'lang_switch', requirements: ['locale' => 'de|en'])]
-    public function langSwitch(string $locale, Request $request): Response
+    public function switchLang(string $locale, Request $request): Response
     {
         $target = $request->headers->get('referer') ?: $this->generateUrl('home');
         $response = new Response('', Response::HTTP_FOUND, ['Location' => $target]);
@@ -91,17 +91,17 @@ class PageController extends AbstractController
         return $response;
     }
 
-    public static function localeOf(Request $request): string
+    public static function resolveLocale(Request $request): string
     {
         return $request->cookies->get('lang') === 'en' ? 'en' : 'de';
     }
 
     private function renderPage(Request $request, string $template, array $context = []): Response
     {
-        $lang = self::localeOf($request);
+        $lang = self::resolveLocale($request);
 
         return $this->render($template, $context + [
-            't' => SiteCopy::for($lang),
+            't' => SiteCopy::get($lang),
             'lang' => $lang,
             'sent' => $request->query->getBoolean('sent'),
         ]);

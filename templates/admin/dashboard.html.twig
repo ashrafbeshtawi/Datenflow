@@ -19,12 +19,16 @@
 {% block body %}
 <section class="section">
     <div class="wrap">
-        <p class="kicker">Intern</p>
-        <h1>Admin.</h1>
-        <form method="post" action="{{ path('admin_logout') }}">
-            <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
-            <button class="btn btn-ghost" type="submit"><i class="bi bi-box-arrow-right"></i> Abmelden</button>
-        </form>
+        <div class="admin-head">
+            <div>
+                <p class="kicker">Intern</p>
+                <h1>Admin.</h1>
+            </div>
+            <form method="post" action="{{ path('admin_logout') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
+                <button class="btn btn-ghost" type="submit"><i class="bi bi-box-arrow-right"></i> Abmelden</button>
+            </form>
+        </div>
         {% if notice %}
             <p class="form-success" role="status">{{ notice }}</p>
         {% endif %}
@@ -67,7 +71,7 @@
                                 </td>
                                 <td class="admin-actions">
                                     {% if inquiry.type != 'block' %}
-                                        <a class="btn btn-ghost btn-sm" href="{{ path('admin_inquiry', {id: inquiry.id}) }}">Bearbeiten</a>
+                                        <a class="btn btn-ghost btn-sm" href="{{ path('admin_inquiry', {id: inquiry.id}) }}">Verschieben</a>
                                     {% endif %}
                                     <form method="post" action="{{ path('admin_cancel', {id: inquiry.id}) }}">
                                         <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
@@ -99,7 +103,11 @@
                                 <td><a href="mailto:{{ inquiry.email }}">{{ inquiry.email }}</a></td>
                                 <td class="admin-message">{{ inquiry.message|length > 70 ? inquiry.message|slice(0, 70) ~ '…' : inquiry.message }}</td>
                                 <td class="admin-actions">
-                                    <a class="btn btn-ghost btn-sm" href="{{ path('admin_inquiry', {id: inquiry.id}) }}">Bearbeiten</a>
+                                    <a class="btn btn-ghost btn-sm" href="{{ path('admin_inquiry', {id: inquiry.id}) }}">Ansehen</a>
+                                    <form method="post" action="{{ path('admin_inquiry_delete', {id: inquiry.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
+                                        <button class="btn btn-danger btn-sm" type="submit">Löschen</button>
+                                    </form>
                                 </td>
                             </tr>
                         {% else %}
@@ -113,45 +121,32 @@
         <div class="admin-config">
             <div class="admin-card">
                 <h2><i class="bi bi-clock"></i> Verfügbarkeit</h2>
-                <table class="admin-table">
-                    <tbody>
-                        {% for rule in rules %}
-                            <tr>
-                                <td>{{ t.booking.slot.weekdays[rule.weekday - 1] }}</td>
-                                <td>{{ rule.startTime|date('H:i') }} – {{ rule.endTime|date('H:i') }}</td>
-                                <td class="admin-actions">
-                                    <form method="post" action="{{ path('admin_availability_delete', {id: rule.id}) }}">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
-                                        <button class="btn btn-danger btn-sm" type="submit">Löschen</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        {% else %}
-                            <tr><td colspan="3" class="admin-empty">Keine Regeln, es sind keine Termine buchbar.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <form class="admin-inline-form" method="post" action="{{ path('admin_availability_add') }}">
-                    <label>Wochentag
-                        <select name="weekday">
-                            {% for name in t.booking.slot.weekdays %}
-                                <option value="{{ loop.index }}">{{ name }}</option>
+                <form method="post" action="{{ path('admin_availability_save') }}">
+                    <table class="admin-table">
+                        <tbody>
+                            {% for weekday in 1..7 %}
+                                {% set rule = rules[weekday]|default(null) %}
+                                <tr>
+                                    <td><label for="open_{{ weekday }}">{{ t.booking.slot.weekdays[weekday - 1] }}</label></td>
+                                    <td><input type="checkbox" id="open_{{ weekday }}" name="open_{{ weekday }}" value="1" {{ rule ? 'checked' }}></td>
+                                    <td><input type="time" name="start_{{ weekday }}" step="1800" value="{{ rule ? rule.startTime|date('H:i') : '09:00' }}"></td>
+                                    <td><input type="time" name="end_{{ weekday }}" step="1800" value="{{ rule ? rule.endTime|date('H:i') : '17:00' }}"></td>
+                                </tr>
                             {% endfor %}
-                        </select>
-                    </label>
-                    <label>Von <input type="time" name="start_time" step="1800" value="09:00" required></label>
-                    <label>Bis <input type="time" name="end_time" step="1800" value="17:00" required></label>
+                        </tbody>
+                    </table>
+                    <p class="field-hint">Haken = Tag ist buchbar, ohne Haken ist der Tag geschlossen.</p>
                     <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
-                    <button class="btn btn-primary btn-sm" type="submit">Hinzufügen</button>
+                    <button class="btn btn-primary btn-sm" type="submit">Speichern</button>
                 </form>
             </div>
 
             <div class="admin-card">
                 <h2><i class="bi bi-slash-circle"></i> Slot blockieren</h2>
-                <p class="field-hint">Der Slot verschwindet sofort aus der Buchungsseite. Freigeben über „Kommende Termine“.</p>
+                <p class="field-hint">Der Slot verschwindet sofort aus der Buchungsseite, Freigeben über „Kommende Termine“. Ohne Uhrzeit wird der ganze Tag blockiert.</p>
                 <form class="admin-inline-form" method="post" action="{{ path('admin_block') }}">
                     <label>Datum <input type="date" name="date" required></label>
-                    <label>Uhrzeit <input type="time" name="time" step="1800" required></label>
+                    <label>Uhrzeit <input type="time" name="time" step="1800"></label>
                     <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
                     <button class="btn btn-primary btn-sm" type="submit">Blockieren</button>
                 </form>

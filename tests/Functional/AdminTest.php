@@ -20,6 +20,18 @@ class AdminTest extends WebTestCase
         self::assertResponseRedirects('/admin/login');
     }
 
+    /**
+     * The router matches the rawurldecoded path, so the auth listener must
+     * compare decoded too — otherwise /%61dmin reaches the dashboard unguarded.
+     */
+    public function testPercentEncodedAdminPathIsGuardedToo(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/%61dmin');
+
+        self::assertResponseRedirects('/admin/login');
+    }
+
     public function testLoginRejectsWrongUsernameEvenWithCorrectPassword(): void
     {
         $client = static::createClient();
@@ -62,6 +74,27 @@ class AdminTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('#admin-messages', $email);
+    }
+
+    /**
+     * Guards the app-wide convention: all times are naive Europe/Berlin wall-clock.
+     * If PHP's default timezone (docker/php timezone.ini) and Twig's date filter
+     * disagree, rendered times drift by the UTC offset — this is what it looks like.
+     */
+    public function testDashboardRendersTheBookedWallClockTime(): void
+    {
+        self::assertSame('Europe/Berlin', date_default_timezone_get(), 'app convention: naive Europe/Berlin everywhere, set in docker/php');
+
+        $client = $this->adminClient();
+        [$at, $inquiry] = $this->bookFreeSlot('video');
+
+        $crawler = $client->request('GET', '/admin');
+        self::assertResponseIsSuccessful();
+        $row = $crawler->filter('#admin-upcoming tr')
+            ->reduce(fn ($node) => str_contains($node->text(), $inquiry->getEmail()));
+        self::assertCount(1, $row, 'booking must appear exactly once');
+        self::assertStringContainsString($at->format('d.m.Y'), $row->text());
+        self::assertStringContainsString($at->format('H:i'), $row->text(), 'admin must show the slot at its booked wall-clock time');
     }
 
     public function testCancelBookingMailsBothPartiesAndFreesTheSlot(): void
@@ -110,29 +143,62 @@ class AdminTest extends WebTestCase
         self::assertTrue($this->slots()->isBookable($at));
     }
 
-    public function testAvailabilityRuleRoundTripChangesTheGrid(): void
+    public function testAvailabilityFormRewritesTheWholeWeek(): void
     {
         $client = $this->adminClient();
 
         try {
             self::assertCount(5, $this->slots()->buildWeekGrid($this->lastHorizonMonday())['days']);
 
-            $client->request('POST', '/admin/availability', [
-                'weekday' => 6,
-                'start_time' => '10:00',
-                'end_time' => '12:00',
-                '_token' => $this->csrfToken($client),
-            ]);
+            // Open Saturday too; a checked day appears, an unchecked one closes.
+            $client->request('POST', '/admin/availability', $this->availabilityParams([1, 2, 3, 4, 5, 6], $client));
             self::assertResponseRedirects();
+            $this->em()->clear();
             self::assertCount(6, $this->slots()->buildWeekGrid($this->lastHorizonMonday())['days'], 'Saturday joined the grid');
+            self::assertCount(6, $this->em()->getRepository(AvailabilityRule::class)->findAll(), 'one rule per open day, never more');
 
-            $rule = $this->em()->getRepository(AvailabilityRule::class)->findOneBy(['weekday' => 6]);
-            $client->request('POST', '/admin/availability/'.$rule->getId().'/delete', ['_token' => $this->csrfToken($client)]);
+            $client->request('POST', '/admin/availability', $this->availabilityParams([1, 2, 3, 4, 5], $client));
             $this->em()->clear();
             self::assertCount(5, $this->slots()->buildWeekGrid($this->lastHorizonMonday())['days']);
         } finally {
-            // Never leave a stray Saturday rule behind for the other tests.
-            $this->em()->createQuery('DELETE FROM '.AvailabilityRule::class.' r WHERE r.weekday = 6')->execute();
+            // Restore the seeded Mon-Fri 09-17 week for the other tests.
+            $this->em()->createQuery('DELETE FROM '.AvailabilityRule::class.' r')->execute();
+            foreach ([1, 2, 3, 4, 5] as $weekday) {
+                $this->em()->persist(new AvailabilityRule($weekday, new \DateTimeImmutable('09:00'), new \DateTimeImmutable('17:00')));
+            }
+            $this->em()->flush();
+            $this->em()->clear();
+        }
+    }
+
+    public function testBlockingAWholeDayTakesEveryFreeSlotSilently(): void
+    {
+        $client = $this->adminClient();
+        $monday = $this->lastHorizonMonday();
+        $freeByDay = [];
+        foreach (array_keys($this->slots()->buildWeekGrid($monday)['slots'], 'free', true) as $key) {
+            $freeByDay[substr($key, 0, 10)][] = $key;
+        }
+        self::assertNotEmpty($freeByDay);
+        $date = array_key_first($freeByDay);
+
+        try {
+            $client->request('POST', '/admin/block', ['date' => $date, 'time' => '', '_token' => $this->csrfToken($client)]);
+
+            self::assertResponseRedirects();
+            self::assertEmailCount(0);
+            $this->em()->clear();
+            $after = $this->slots()->buildWeekGrid($monday)['slots'];
+            foreach (array_keys($after) as $key) {
+                if (str_starts_with($key, $date.' ')) {
+                    self::assertSame('gone', $after[$key], $key.' must be blocked');
+                }
+            }
+        } finally {
+            // Free the day again so later tests still find open slots.
+            $this->em()->createQuery(
+                'DELETE FROM '.Inquiry::class." i WHERE i.type = 'block' AND i.startsAt >= :from AND i.startsAt < :to"
+            )->setParameters(['from' => $date.' 00:00', 'to' => $date.' 23:59'])->execute();
             $this->em()->clear();
         }
     }
@@ -158,25 +224,56 @@ class AdminTest extends WebTestCase
         }
     }
 
-    public function testInquiryCanBeEdited(): void
+    public function testMessageCanBeDeletedButAppointmentsCannot(): void
     {
         $client = $this->adminClient();
-        $inquiry = new Inquiry('karriere', 'Old Name', uniqid('edit-').'@example.com', 'Alte Nachricht');
-        $this->em()->persist($inquiry);
+        $message = new Inquiry('karriere', 'Delete Test', uniqid('delete-').'@example.com', 'Weg damit');
+        $this->em()->persist($message);
         $this->em()->flush();
+        [, $booking] = $this->bookFreeSlot('video');
 
-        $client->request('POST', '/admin/inquiry/'.$inquiry->getId(), [
-            'name' => 'New Name',
-            'email' => $inquiry->getEmail(),
-            'message' => 'Neue Nachricht',
+        $client->request('POST', '/admin/inquiry/'.$message->getId().'/delete', ['_token' => $this->csrfToken($client)]);
+        self::assertResponseRedirects();
+
+        $client->request('POST', '/admin/inquiry/'.$booking->getId().'/delete', ['_token' => $this->csrfToken($client)]);
+        self::assertResponseRedirects();
+
+        $this->em()->clear();
+        self::assertNull($this->em()->find(Inquiry::class, $message->getId()));
+        self::assertNotNull($this->em()->find(Inquiry::class, $booking->getId()), 'appointments must survive delete attempts');
+    }
+
+    public function testRescheduleMovesTheBookingAndMailsTheClient(): void
+    {
+        $client = $this->adminClient();
+        [$old, $inquiry] = $this->bookFreeSlot('video');
+        $grid = $this->slots()->buildWeekGrid($this->lastHorizonMonday());
+        $free = array_values(array_filter(
+            array_keys($grid['slots'], 'free', true),
+            fn (string $key) => $key !== $old->format('Y-m-d H:i'),
+        ));
+        self::assertNotEmpty($free);
+        $new = new \DateTimeImmutable($free[array_rand($free)], new \DateTimeZone(SlotFinder::TZ));
+
+        $client->request('POST', '/admin/inquiry/'.$inquiry->getId().'/reschedule', [
+            'date' => $new->format('Y-m-d'),
+            'time' => $new->format('H:i'),
             '_token' => $this->csrfToken($client),
         ]);
 
         self::assertResponseRedirects();
+        // Client notice + internal notice, both carrying the calendar invite.
+        self::assertEmailCount(2);
+        foreach (self::getMailerMessages() as $mail) {
+            self::assertStringContainsString('verschoben', $mail->getSubject());
+            self::assertStringContainsString('METHOD:REQUEST', $mail->getAttachments()[0]->getBody());
+        }
+
         $this->em()->clear();
-        $fresh = $this->em()->find(Inquiry::class, $inquiry->getId());
-        self::assertSame('New Name', $fresh->getName());
-        self::assertSame('Neue Nachricht', $fresh->getMessage());
+        // startsAt is naive (no TZ persisted), so compare wall-clock time.
+        self::assertSame($new->format('Y-m-d H:i'), $this->em()->find(Inquiry::class, $inquiry->getId())->getStartsAt()->format('Y-m-d H:i'));
+        self::assertTrue($this->slots()->isBookable($old), 'old slot must be free again');
+        self::assertFalse($this->slots()->isBookable($new));
     }
 
     private function adminClient(): KernelBrowser
@@ -186,6 +283,19 @@ class AdminTest extends WebTestCase
         self::assertResponseRedirects('/admin');
 
         return $client;
+    }
+
+    /** Full availability form: the given weekdays open 10-12, everything else closed. */
+    private function availabilityParams(array $openWeekdays, KernelBrowser $client): array
+    {
+        $params = ['_token' => $this->csrfToken($client)];
+        foreach ($openWeekdays as $weekday) {
+            $params['open_'.$weekday] = '1';
+            $params['start_'.$weekday] = '10:00';
+            $params['end_'.$weekday] = '12:00';
+        }
+
+        return $params;
     }
 
     private function login(KernelBrowser $client, string $username, string $password): void
@@ -216,7 +326,7 @@ class AdminTest extends WebTestCase
 
     private function lastHorizonMonday(): string
     {
-        return $this->slots()->now()->modify('monday this week')
+        return $this->slots()->getCurrentTime()->modify('monday this week')
             ->modify('+'.(SlotFinder::HORIZON_WEEKS - 1).' weeks')->format('Y-m-d');
     }
 

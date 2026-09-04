@@ -32,7 +32,7 @@ class SlotFinder
      */
     public function buildWeekGrid(?string $weekParam): array
     {
-        $now = $this->now();
+        $now = $this->getCurrentTime();
         $firstMonday = $now->modify('monday this week')->setTime(0, 0);
         $lastMonday = $firstMonday->modify('+'.(self::HORIZON_WEEKS - 1).' weeks');
 
@@ -54,8 +54,8 @@ class SlotFinder
     /** @return array{weekStart: string, days: DateTimeImmutable[], times: string[], slots: array<string, string>, prev: ?string, next: ?string} */
     private function assembleWeek(DateTimeImmutable $monday, DateTimeImmutable $firstMonday, DateTimeImmutable $lastMonday, DateTimeImmutable $now): array
     {
-        $rulesByDay = $this->rulesByWeekday();
-        $taken = $this->takenSlots($monday, $monday->modify('+7 days'));
+        $rulesByDay = $this->loadRulesByWeekday();
+        $taken = $this->findTakenSlots($monday, $monday->modify('+7 days'));
         // Slot keys are 'Y-m-d H:i', which sorts chronologically — so a plain
         // string comparison against this cutoff is a time comparison.
         $cutoff = $now->modify('+'.self::LEAD_HOURS.' hours')->format('Y-m-d H:i');
@@ -67,7 +67,7 @@ class SlotFinder
             $day = $monday->modify('+'.($weekday - 1).' days');
             $days[$weekday] = $day;
             foreach ($rules as $rule) {
-                foreach ($this->slotTimes($rule) as $time) {
+                foreach ($this->listSlotTimes($rule) as $time) {
                     $times[$time] = true;
                     $key = $day->format('Y-m-d').' '.$time;
                     // 'gone' = already booked/blocked, or closer than the lead time.
@@ -95,7 +95,7 @@ class SlotFinder
      */
     public function isBookable(DateTimeImmutable $at): bool
     {
-        $now = $this->now();
+        $now = $this->getCurrentTime();
         if ($at < $now->modify('+'.self::LEAD_HOURS.' hours')) {
             return false;
         }
@@ -105,8 +105,8 @@ class SlotFinder
 
         $time = $at->format('H:i');
         $onGrid = false;
-        foreach ($this->rulesByWeekday()[(int) $at->format('N')] ?? [] as $rule) {
-            if (in_array($time, $this->slotTimes($rule), true)) {
+        foreach ($this->loadRulesByWeekday()[(int) $at->format('N')] ?? [] as $rule) {
+            if (in_array($time, $this->listSlotTimes($rule), true)) {
                 $onGrid = true;
                 break;
             }
@@ -115,11 +115,11 @@ class SlotFinder
             return false;
         }
 
-        return $this->takenSlots($at, $at->modify('+1 minute')) === [];
+        return $this->findTakenSlots($at, $at->modify('+1 minute')) === [];
     }
 
     /** @return array<int, AvailabilityRule[]> keyed by ISO weekday */
-    private function rulesByWeekday(): array
+    private function loadRulesByWeekday(): array
     {
         $byDay = [];
         foreach ($this->em->getRepository(AvailabilityRule::class)->findAll() as $rule) {
@@ -130,7 +130,7 @@ class SlotFinder
     }
 
     /** @return string[] 'H:i' slot start times for one rule */
-    private function slotTimes(AvailabilityRule $rule): array
+    private function listSlotTimes(AvailabilityRule $rule): array
     {
         $times = [];
         for ($t = $rule->getStartTime(); $t < $rule->getEndTime(); $t = $t->modify('+'.self::SLOT_MINUTES.' minutes')) {
@@ -141,7 +141,7 @@ class SlotFinder
     }
 
     /** @return array<string, true> keyed by 'Y-m-d H:i' */
-    private function takenSlots(DateTimeImmutable $from, DateTimeImmutable $to): array
+    private function findTakenSlots(DateTimeImmutable $from, DateTimeImmutable $to): array
     {
         $rows = $this->em->createQuery(
             'SELECT i.startsAt FROM '.Inquiry::class.' i
@@ -158,7 +158,7 @@ class SlotFinder
         return $taken;
     }
 
-    public function now(): DateTimeImmutable
+    public function getCurrentTime(): DateTimeImmutable
     {
         return new DateTimeImmutable('now', new DateTimeZone(self::TZ));
     }

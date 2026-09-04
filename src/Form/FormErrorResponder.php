@@ -19,10 +19,10 @@ class FormErrorResponder
 
     public function respond(Request $request, string $template, string $errorKey, int $status, array $errors = [], array $extra = []): Response
     {
-        $lang = PageController::localeOf($request);
+        $lang = PageController::resolveLocale($request);
 
         return new Response($this->twig->render($template, $extra + [
-            't' => SiteCopy::for($lang),
+            't' => SiteCopy::get($lang),
             'lang' => $lang,
             'old' => $request->request->all(),
             'errors' => $errors ?: ['form' => $errorKey],

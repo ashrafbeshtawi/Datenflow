@@ -83,7 +83,7 @@ class SlotFinderTest extends KernelTestCase
     public function testSlotsInsideTheLeadTimeAreGone(): void
     {
         $grid = $this->slots->buildWeekGrid($this->currentMonday()->format('Y-m-d'));
-        $cutoff = $this->slots->now()->modify('+'.SlotFinder::LEAD_HOURS.' hours')->format('Y-m-d H:i');
+        $cutoff = $this->slots->getCurrentTime()->modify('+'.SlotFinder::LEAD_HOURS.' hours')->format('Y-m-d H:i');
 
         $insideLead = array_filter($grid['slots'], fn ($state, $key) => $key <= $cutoff, ARRAY_FILTER_USE_BOTH);
         self::assertNotEmpty($insideLead, 'current week always contains slots inside the lead time');
@@ -124,6 +124,6 @@ class SlotFinderTest extends KernelTestCase
 
     private function currentMonday(): \DateTimeImmutable
     {
-        return $this->slots->now()->modify('monday this week')->setTime(0, 0);
+        return $this->slots->getCurrentTime()->modify('monday this week')->setTime(0, 0);
     }
 }
