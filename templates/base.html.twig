@@ -26,11 +26,13 @@
             <span></span><span></span><span></span>
         </label>
         <nav class="site-nav" aria-label="{{ lang == 'en' ? 'Main navigation' : 'Hauptnavigation' }}">
-            <a href="{{ path('home') }}">{{ t.nav.home }}</a>
-            <a href="{{ path('services') }}">{{ t.nav.services }}</a>
-            <a href="{{ path('process') }}">{{ t.nav.process }}</a>
-            <a href="{{ path('pricing') }}">{{ t.nav.pricing }}</a>
-            <a href="{{ path('faq') }}">{{ t.nav.faq }}</a>
+            <span class="nav-links">
+                <a href="{{ path('home') }}">{{ t.nav.home }}</a>
+                <a href="{{ path('services') }}">{{ t.nav.services }}</a>
+                <a href="{{ path('process') }}">{{ t.nav.process }}</a>
+                <a href="{{ path('pricing') }}">{{ t.nav.pricing }}</a>
+                <a href="{{ path('faq') }}">{{ t.nav.faq }}</a>
+            </span>
             <span class="lang-switch">
                 <a href="{{ path('lang_switch', {locale: 'de'}) }}" class="{{ lang == 'de' ? 'active' }}" lang="de">DE</a>
                 <span aria-hidden="true">·</span>
