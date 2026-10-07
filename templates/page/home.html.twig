@@ -15,8 +15,17 @@
             </div>
             {% with {checks: t.hero.checks} %}{% include 'partials/_checks.html.twig' %}{% endwith %}
         </div>
-        <div class="hero-art" aria-hidden="true">
-            <div class="hero-art-bg"></div>
+        {# One file per screen shape; CSS shows the one matching the orientation. preload="none" keeps
+           the ~30 MB films off the wire until someone presses play, so the hidden one never loads. #}
+        <div class="hero-film">
+            <video class="hero-video hero-video-landscape" controls preload="none" playsinline
+                   poster="{{ asset('img/imagefilm-poster.jpg') }}" aria-label="{{ t.hero.video }}">
+                <source src="{{ asset('datenflow-imagefilm.mp4') }}" type="video/mp4">
+            </video>
+            <video class="hero-video hero-video-portrait" controls preload="none" playsinline
+                   poster="{{ asset('img/imagefilm-poster-9x16.jpg') }}" aria-label="{{ t.hero.video }}">
+                <source src="{{ asset('datenflow-imagefilm-9x16.mp4') }}" type="video/mp4">
+            </video>
         </div>
     </div>
 </section>
