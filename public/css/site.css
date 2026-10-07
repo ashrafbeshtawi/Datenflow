@@ -355,13 +355,16 @@ img, svg { max-width: 100%; }
     .hero-inner { grid-template-columns: minmax(0, 1fr); padding-top: 3rem; padding-bottom: 3rem; }
 }
 
-/* Large landscape screens: the film takes the bigger column and grows past the
-   content edge into the right margin (up to 1.5rem from the viewport), while the
-   copy stays aligned with the header. */
+/* Large landscape screens: copy left, film right with a clear gap between them.
+   The film takes the bigger column and grows past the content edge into the right
+   margin (up to 1.5rem from the viewport), while the copy stays aligned with the header. */
 @media (min-width: 64rem) and (orientation: landscape) {
-    .hero-inner { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); }
+    .hero-inner {
+        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+        column-gap: clamp(4rem, 7vw, 8rem);
+    }
     .hero-film {
-        justify-content: flex-start;
+        justify-content: flex-end;
         margin-right: min(0px, calc((72rem - 100vw) / 2 + 1.5rem));
     }
     .hero-video-landscape { max-width: 60rem; }
