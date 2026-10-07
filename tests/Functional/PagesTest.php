@@ -93,18 +93,6 @@ class PagesTest extends WebTestCase
         }
     }
 
-    public function testFrontControllerUrlRedirectsToCleanUrl(): void
-    {
-        $client = static::createClient();
-        $server = ['SCRIPT_NAME' => '/index.php', 'SCRIPT_FILENAME' => '/app/public/index.php'];
-
-        $client->request('GET', '/index.php', [], [], $server);
-        self::assertResponseRedirects('http://localhost/', 301);
-
-        $client->request('GET', '/index.php/services?x=1', [], [], $server);
-        self::assertResponseRedirects('http://localhost/services?x=1', 301);
-    }
-
     public function testTrailingSlashRedirectKeepsHttpsBehindProxy(): void
     {
         $client = static::createClient();

@@ -78,6 +78,14 @@ jobs:
           docker logs prod-smoke
           exit 1
 
+      # The /index.php -> clean URL redirect lives in the Apache vhost, not Symfony.
+      - name: Check the /index.php redirect in the prod image
+        run: |
+          loc() { curl -s -o /dev/null -w '%{redirect_url}' "$@"; }
+          test "$(loc http://localhost:8081/index.php/faq?a=1)" = "http://localhost:8081/faq?a=1"
+          test "$(loc -H 'X-Forwarded-Proto: https' -H 'Host: www.datenflow.de' http://localhost:8081/index.php)" = "https://www.datenflow.de/"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8081/)" = "200"
+
       - name: Dump logs on failure
         if: failure()
         run: |
