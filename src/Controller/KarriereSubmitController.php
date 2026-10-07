@@ -37,7 +37,7 @@ class KarriereSubmitController extends AbstractController
     ) {
     }
 
-    #[Route('/karriere', name: 'karriere_submit', methods: ['POST'])]
+    #[Route(['de' => '/karriere', 'en' => '/en/careers'], name: 'karriere_submit', methods: ['POST'])]
     public function __invoke(Request $request): Response
     {
         $rejection = $this->guard->reject($request);

@@ -140,6 +140,18 @@ class InquiryFormsTest extends WebTestCase
         self::assertEmailCount(0);
     }
 
+    public function testEnglishFormStaysOnEnglishUrls(): void
+    {
+        $this->client->request('GET', '/en/booking');
+        $this->client->submitForm('Book the call', [
+            'name' => 'Bot',
+            'email' => 'bot@example.com',
+            '_hp' => 'i am a bot',
+        ]);
+
+        self::assertResponseRedirects('/en/booking?sent=1');
+    }
+
     public function testInvalidCsrfTokenIsRejected(): void
     {
         $this->client->request('POST', '/termin', [
