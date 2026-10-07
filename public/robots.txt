@@ -1,6 +1,5 @@
 User-agent: *
 Allow: /
 Disallow: /admin
-Disallow: /lang/
 
 Sitemap: https://www.datenflow.de/sitemap.xml

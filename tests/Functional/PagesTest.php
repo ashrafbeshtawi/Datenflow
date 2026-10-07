@@ -4,7 +4,6 @@ namespace App\Tests\Functional;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\BrowserKit\Cookie;
 
 class PagesTest extends WebTestCase
 {
@@ -91,7 +90,9 @@ class PagesTest extends WebTestCase
         foreach (self::pageProvider() as [$path]) {
             self::assertContains('http://localhost'.$path, $locs);
         }
-        self::assertCount(10, $locs);
+        self::assertContains('http://localhost/en', $locs);
+        self::assertContains('http://localhost/en/careers', $locs);
+        self::assertCount(20, $locs);
     }
 
     public function testTrailingSlashRedirectKeepsHttpsBehindProxy(): void
@@ -115,18 +116,33 @@ class PagesTest extends WebTestCase
         self::assertResponseRedirects('/services', 301);
     }
 
-    public function testLangSwitchSetsCookieAndRendersEnglish(): void
+    #[DataProvider('englishPageProvider')]
+    public function testEnglishPageLoadsUnderItsOwnUrl(string $path, string $expectedH1Part): void
     {
         $client = static::createClient();
-        $client->request('GET', '/lang/en');
+        $client->request('GET', $path);
 
-        $cookie = $client->getResponse()->headers->getCookies()[0];
-        self::assertSame('lang', $cookie->getName());
-        self::assertSame('en', $cookie->getValue());
-
-        $client->getCookieJar()->set(new Cookie('lang', 'en'));
-        $client->request('GET', '/');
-        self::assertSelectorTextContains('h1', 'complicated');
+        self::assertResponseIsSuccessful();
         self::assertSelectorExists('html[lang="en"]');
+        self::assertSelectorTextContains('h1', $expectedH1Part);
+        self::assertSelectorExists('link[rel="canonical"][href="http://localhost'.$path.'"]');
+    }
+
+    public static function englishPageProvider(): iterable
+    {
+        yield 'home' => ['/en', 'complicated'];
+        yield 'booking' => ['/en/booking', 'free'];
+    }
+
+    public function testPagesLinkTheirOtherLanguageVersion(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/en/pricing');
+
+        self::assertSelectorExists('link[rel="alternate"][hreflang="de"][href="http://localhost/preise"]');
+        self::assertSelectorExists('link[rel="alternate"][hreflang="en"][href="http://localhost/en/pricing"]');
+        self::assertSelectorExists('link[rel="alternate"][hreflang="x-default"][href="http://localhost/preise"]');
+        self::assertSelectorExists('.lang-switch a[href="/preise"]');
+        self::assertSelectorExists('.lang-switch a[href="/en/pricing"].active');
     }
 }

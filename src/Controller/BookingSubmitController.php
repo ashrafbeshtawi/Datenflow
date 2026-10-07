@@ -35,7 +35,7 @@ class BookingSubmitController extends AbstractController
     ) {
     }
 
-    #[Route('/termin', name: 'booking_submit', methods: ['POST'])]
+    #[Route(['de' => '/termin', 'en' => '/en/booking'], name: 'booking_submit', methods: ['POST'])]
     public function __invoke(Request $request): Response
     {
         $rejection = $this->guard->reject($request);
