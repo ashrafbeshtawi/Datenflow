@@ -156,13 +156,8 @@ img, svg { max-width: 100%; }
 }
 
 .brand-mark {
-    display: inline-flex;
     width: 2.1rem;
     height: 2.1rem;
-    padding: 0.4rem;
-    background: linear-gradient(135deg, var(--steel), var(--slate));
-    color: var(--white);
-    border-radius: 0.6rem;
 }
 
 .brand-name {

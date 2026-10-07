@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{{ t.meta.title }}{% endblock %}</title>
     <meta name="description" content="{% block description %}{{ t.meta.description }}{% endblock %}">
-    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
     <link rel="stylesheet" href="{{ asset('css/site.css') }}">
     {% block head %}{% endblock %}
 </head>
@@ -16,8 +16,7 @@
 <header class="site-header">
     <div class="wrap header-inner">
         <a class="brand" href="{{ path('home') }}" aria-label="Datenflow — {{ t.nav.home }}">
-            {% from 'macros.html.twig' import icon %}
-            <span class="brand-mark">{{ icon('leaf') }}</span>
+            <img class="brand-mark" src="{{ asset('favicon.png') }}" alt="">
             <span class="brand-name">Datenflow</span>
         </a>
 
