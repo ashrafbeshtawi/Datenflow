@@ -6,6 +6,8 @@ RUN apt-get update \
  && docker-php-ext-install intl pdo_pgsql zip \
  && rm -rf /var/lib/apt/lists/*
 
+RUN a2enmod rewrite
+
 COPY docker/php/vhost.conf /etc/apache2/sites-available/000-default.conf
 
 # CV uploads on /karriere go up to 8 MB
