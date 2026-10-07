@@ -12,6 +12,9 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class PageController extends AbstractController
 {
+    /** Indexable pages, in sitemap order. */
+    public const PUBLIC_ROUTES = ['home', 'services', 'process', 'pricing', 'faq', 'booking', 'contact', 'karriere', 'impressum', 'datenschutz'];
+
     #[Route('/', name: 'home')]
     public function showHome(Request $request): Response
     {
@@ -72,6 +75,12 @@ class PageController extends AbstractController
     public function showDatenschutz(Request $request): Response
     {
         return $this->renderPage($request, 'page/legal.html.twig', ['section' => 'datenschutz']);
+    }
+
+    #[Route('/sitemap.xml', name: 'sitemap', format: 'xml')]
+    public function showSitemap(): Response
+    {
+        return $this->render('sitemap.xml.twig', ['routes' => self::PUBLIC_ROUTES]);
     }
 
     // Old URLs from the previous site — keep them alive.

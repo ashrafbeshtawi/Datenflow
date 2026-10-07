@@ -10,6 +10,12 @@ framework:
     # Note that the session will be started ONLY if you read or write from it.
     session: true
 
+    # Prod runs behind a TLS-terminating reverse proxy on the Docker network.
+    # Trust its X-Forwarded-* headers, or Symfony sees plain http and builds
+    # http:// redirects (e.g. /services/ -> http://.../services) and URLs.
+    trusted_proxies: 'private_ranges'
+    trusted_headers: ['x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port']
+
     #esi: true
     #fragments: true
 
