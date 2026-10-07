@@ -5,9 +5,10 @@ namespace App\Tests\E2E;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The /index.php -> clean URL redirect lives in the Apache vhost
- * (docker/php/vhost.conf), so it is checked against the Apache that serves
- * the app inside the php container, not through the Symfony kernel.
+ * Checks the /index.php -> clean URL redirect in docker/php/vhost.conf.
+ * Plain TestCase, no Symfony kernel: fetch() sends real HTTP requests to the
+ * Apache serving the app in the php container (localhost:80). Symfony itself
+ * doesn't handle /index.php, so a 301 here can only come from the vhost rule.
  */
 class ApacheRedirectTest extends TestCase
 {
