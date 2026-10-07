@@ -292,7 +292,7 @@ img, svg { max-width: 100%; }
 
 .hero-inner {
     display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: center;
     gap: 3rem;
     padding-top: 4.5rem;
@@ -324,37 +324,50 @@ img, svg { max-width: 100%; }
     margin: 1.6rem 0;
 }
 
-.hero-art {
-    position: relative;
-    height: 340px;
+.hero-film {
     display: flex;
-    align-items: center;
     justify-content: center;
 }
 
-.hero-art-bg {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg,
-        var(--greige-light) 0%,
-        var(--silver-2) 45%,
-        rgba(184, 190, 196, 0.35) 75%,
-        var(--greige-light) 100%
-    );
+.hero-video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--off-white);
     border-radius: 1.5rem 1.5rem 1.5rem 0.4rem;
+    box-shadow: var(--shadow-hover);
 }
 
-.hero-art-bg::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%);
-    border-radius: inherit;
+.hero-video-portrait { display: none; }
+
+/* Portrait screens (phones, upright tablets) get the 9:16 cut; capped so the
+   film plus its controls fit on screen. */
+@media (orientation: portrait) {
+    .hero-video-landscape { display: none; }
+    .hero-video-portrait {
+        display: block;
+        aspect-ratio: 9 / 16;
+        width: min(100%, calc(min(80svh, 44rem) * 9 / 16));
+    }
 }
 
 @media (max-width: 52rem) {
-    .hero-inner { grid-template-columns: 1fr; padding-top: 3rem; padding-bottom: 3rem; }
-    .hero-art { display: none; }
+    .hero-inner { grid-template-columns: minmax(0, 1fr); padding-top: 3rem; padding-bottom: 3rem; }
+}
+
+/* Large landscape screens: the hero spans the full screen width. Copy hugs the
+   left edge, the film the right edge, with a clear gap between them. Capped at
+   120rem so ultra-wide screens don't pull the two apart forever. */
+@media (min-width: 64rem) and (orientation: landscape) {
+    .hero-inner {
+        max-width: 120rem;
+        padding-left: clamp(1.5rem, 5vw, 6rem);
+        padding-right: clamp(1.5rem, 5vw, 6rem);
+        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+        column-gap: clamp(4rem, 7vw, 8rem);
+    }
+    .hero-film { justify-content: flex-end; }
+    .hero-video-landscape { max-width: 60rem; }
 }
 
 /* ---------- Checks ---------- */
