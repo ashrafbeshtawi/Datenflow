@@ -91,6 +91,7 @@ class PagesTest extends WebTestCase
         foreach (self::pageProvider() as [$path]) {
             self::assertContains('http://localhost'.$path, $locs);
         }
+        self::assertCount(10, $locs);
     }
 
     public function testTrailingSlashRedirectKeepsHttpsBehindProxy(): void
