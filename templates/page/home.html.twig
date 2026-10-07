@@ -19,11 +19,11 @@
            the ~30 MB films off the wire until someone presses play, so the hidden one never loads. #}
         <div class="hero-film">
             <video class="hero-video hero-video-landscape" controls preload="none" playsinline
-                   poster="{{ asset('img/imagefilm-poster.jpg') }}" aria-label="{{ t.hero.video }}">
+                   poster="{{ asset('img/imagefilm-poster-' ~ lang ~ '.svg') }}" aria-label="{{ t.hero.video }}">
                 <source src="{{ asset('datenflow-imagefilm.mp4') }}" type="video/mp4">
             </video>
             <video class="hero-video hero-video-portrait" controls preload="none" playsinline
-                   poster="{{ asset('img/imagefilm-poster-9x16.jpg') }}" aria-label="{{ t.hero.video }}">
+                   poster="{{ asset('img/imagefilm-poster-9x16-' ~ lang ~ '.svg') }}" aria-label="{{ t.hero.video }}">
                 <source src="{{ asset('datenflow-imagefilm-9x16.mp4') }}" type="video/mp4">
             </video>
         </div>
