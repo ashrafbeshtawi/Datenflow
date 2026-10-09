@@ -39,7 +39,11 @@ final class SiteCopy
                 'film_close' => 'Film schließen',
                 'checks' => ['Erstgespräch kostenlos', 'Festpreise statt Überraschungen', 'Wir sprechen Ihre Sprache, kein IT-Deutsch'],
             ],
-            'teasers' => ['more' => 'Mehr erfahren'],
+            'teasers' => [
+                'services' => 'Alle Leistungen ansehen',
+                'process' => 'Ablauf im Detail',
+                'pricing' => 'Preismodelle ansehen',
+            ],
             'industries' => [
                 'kicker' => 'Für wen wir arbeiten',
                 'title' => 'Wir kennen Ihren Alltag.',
@@ -341,7 +345,11 @@ final class SiteCopy
                 'film_close' => 'Close film',
                 'checks' => ['First call is free', 'Fixed prices, no surprises', 'We speak your language, not tech jargon'],
             ],
-            'teasers' => ['more' => 'Learn more'],
+            'teasers' => [
+                'services' => 'See all services',
+                'process' => 'The process in detail',
+                'pricing' => 'See pricing models',
+            ],
             'industries' => [
                 'kicker' => 'Who we work for',
                 'title' => 'We know your day-to-day.',

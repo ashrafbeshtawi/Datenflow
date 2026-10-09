@@ -1,12 +1,12 @@
 {% extends 'base.html.twig' %}
-{% from 'macros.html.twig' import icon %}
+{% from 'macros.html.twig' import accent, roman %}
 
 {% block title %}{{ t.nav.services }} — Datenflow{% endblock %}
 
 {% block body %}
 <section class="section page-head">
     <div class="wrap">
-        <p class="kicker">{{ t.industries.kicker }}</p>
+        <p class="kicker kicker-ruled kicker-left">{{ t.industries.kicker }}</p>
         <h1>{{ t.industries.title }}</h1>
         <p class="section-sub">{{ t.industries.sub }}</p>
     </div>
@@ -14,14 +14,14 @@
 
 <section class="section">
     <div class="wrap">
-        <div class="card-grid cols-3">
+        <div class="ledger">
             {% for item in t.industries.items %}
-                <article class="card">
-                    <span class="card-icon">{{ icon(item.icon) }}</span>
+                <article class="ledger-item">
+                    <span class="numeral">{{ roman(loop.index) }}</span>
                     <h2 class="card-h">{{ item.title }}</h2>
-                    <p class="card-tagline">{{ item.tagline }}</p>
-                    <p>{{ item.body }}</p>
-                    <ul class="tag-list">
+                    <p class="tagline">{{ item.tagline }}</p>
+                    <p class="body-text">{{ item.body }}</p>
+                    <ul class="dash-list">
                         {% for ex in item.examples %}<li>{{ ex }}</li>{% endfor %}
                     </ul>
                 </article>
@@ -30,21 +30,26 @@
     </div>
 </section>
 
-<section class="section section-tinted">
+<section class="section">
     <div class="wrap">
-        <p class="kicker">{{ t.services.kicker }}</p>
-        <h2>{{ t.services.title }}</h2>
-        <p class="section-sub">{{ t.services.sub }}</p>
-
-        <div class="card-grid cols-2">
+        <div class="split-head">
+            <div>
+                <p class="kicker kicker-ruled kicker-left">{{ t.services.kicker }}</p>
+                <h2>{{ accent(t.services.title, t.services.title_em) }}</h2>
+            </div>
+            <p class="section-sub">{{ t.services.sub }}</p>
+        </div>
+        <div class="service-list">
             {% for item in t.services.items %}
-                <article class="card">
-                    <span class="card-icon">{{ icon(item.icon) }}</span>
-                    <h3 class="card-h">{{ item.title }}</h3>
-                    <p>{{ item.body }}</p>
-                    <ul class="tag-list">
-                        {% for ex in item.examples %}<li>{{ ex }}</li>{% endfor %}
-                    </ul>
+                <article class="service">
+                    <span class="numeral">{{ roman(loop.index) }}</span>
+                    <div>
+                        <h3>{{ item.title }}</h3>
+                        <p class="body-text">{{ item.body }}</p>
+                        <ul class="tag-list">
+                            {% for ex in item.examples %}<li>{{ ex }}</li>{% endfor %}
+                        </ul>
+                    </div>
                 </article>
             {% endfor %}
         </div>

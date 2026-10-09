@@ -45,8 +45,6 @@
     --gold-pale: #E2C98F;
     --gold-text: linear-gradient(100deg, #B08A42, #F3E2AA 45%, #C9A55A);
     --gold-fill: linear-gradient(100deg, #B08A42, #D6B672 50%, #B08A42);
-    --dark-body: #C9C1B3;
-    --dark-line: #3A332A;
     --serif: "Cormorant", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
     --sans: "Jost", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --r-card: 0;
@@ -171,12 +169,12 @@ img, svg { max-width: 100%; }
 .btn-primary {
     background: var(--gold-fill);
     background-size: 200% 100%;
-    color: var(--paper);
+    color: #141210;
     font-weight: 500;
 }
 .btn-primary:hover {
     background-position: 100% 0;
-    color: var(--paper);
+    color: #141210;
 }
 
 .btn-ghost {
@@ -634,23 +632,30 @@ img, svg { max-width: 100%; }
 
 .section { padding: clamp(5rem, 10vw, 8.75rem) 0; }
 
-.section-tinted {
-    background: var(--paper-warm);
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
+/* Sections alternate dark and light: every second section of a page flips to
+   the light palette by redefining the tokens, so everything inside follows. */
+main > section:nth-of-type(even) {
+    color-scheme: light;
+    --ink: #141210;
+    --ink-body: #4E483F;
+    --ink-soft: #5E574D;
+    --ink-faint: #8C8477;
+    --paper: #FDFCFA;
+    --paper-warm: #F6F1E8;
+    --sand: #F3EEE4;
+    --line: #E6DCC7;
+    --line-soft: #ECE6DA;
+    --line-strong: #CDBF9F;
+    --gold: #B08A42;
+    --gold-deep: #8A6A2F;
+    --gold-light: #C9A55A;
+    --gold-pale: #8A6A2F;
+    --gold-text: linear-gradient(100deg, #8A6A2F, #C9A55A 45%, #8A6A2F);
+    --shadow: 0 4px 20px -8px rgba(20, 18, 16, 0.08);
+    --shadow-hover: 0 8px 32px -10px rgba(20, 18, 16, 0.14);
+    background: var(--paper);
+    color: var(--ink-body);
 }
-
-.section-dark {
-    background: #080706;
-    border-top: 1px solid var(--line-strong);
-    border-bottom: 1px solid var(--line-strong);
-    color: var(--ink);
-    margin-top: clamp(1rem, 3vw, 2rem);
-}
-.section-dark h2, .section-dark h3 { color: var(--ink); }
-.section-dark h2 em { color: var(--gold-pale); }
-.section-dark .section-sub, .section-dark .body-text { color: var(--dark-body); }
-.section-dark .kicker, .section-dark .numeral { color: var(--gold-pale); }
 
 /* Centered kicker + title + sub above a section's content. */
 .section-head {
@@ -682,10 +687,32 @@ img, svg { max-width: 100%; }
     margin-bottom: 2.5rem;
 }
 
-.section-more { margin-top: 1.5rem; }
 
-.page-head { padding-bottom: 0; }
-.page-head + .section { padding-top: 2.5rem; }
+.page-head { padding: clamp(4rem, 8vw, 6.5rem) 0 clamp(2.5rem, 5vw, 3.5rem); }
+.page-head .section-sub { margin-bottom: 0; }
+.section-sub-center { margin: 0 auto 2.5rem; text-align: center; }
+
+/* Home teasers: a numbered or bulleted row of titles, then a link to the page. */
+.teaser-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    border-top: 1px solid var(--line);
+}
+.teaser-list li {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 2rem 1.5rem 2rem 0;
+    border-bottom: 1px solid var(--line);
+}
+.teaser-list h3 { margin: 0; }
+.teaser-list .diamond { width: 7px; height: 7px; margin: 0.4rem 0 0.2rem 2px; }
+
+.section-more { margin-top: 3rem; text-align: center; }
 
 .kicker {
     font-size: 0.6875rem;
@@ -758,7 +785,7 @@ img, svg { max-width: 100%; }
     flex-direction: column;
     gap: 0.9rem;
 }
-.ledger-item h3 { margin: 0; }
+.ledger-item h2, .ledger-item h3 { margin: 0; }
 
 .dash-list {
     list-style: none;
@@ -781,7 +808,7 @@ img, svg { max-width: 100%; }
 
 .service {
     padding: 2.5rem 0;
-    border-top: 1px solid var(--dark-line);
+    border-top: 1px solid var(--line);
     display: grid;
     grid-template-columns: 3.5rem minmax(0, 1fr);
     gap: 0.5rem 1.25rem;
@@ -789,7 +816,6 @@ img, svg { max-width: 100%; }
 .service .numeral { font-size: 1.5rem; }
 .service h3 { font-size: 1.875rem; margin-bottom: 0.9rem; }
 .service .tag-list { margin-top: 1.1rem; }
-.section-dark .tag-list li { background: none; border-color: #5A4C33; color: #E9DFC9; }
 
 .timeline {
     list-style: none;
@@ -800,7 +826,7 @@ img, svg { max-width: 100%; }
     gap: 3rem 2rem;
 }
 .timeline li { display: flex; flex-direction: column; gap: 1rem; }
-.timeline h3 { font-size: 1.625rem; margin: 0; }
+.timeline h2, .timeline h3 { font-size: 1.625rem; margin: 0; }
 
 .timeline-num {
     display: flex;
@@ -831,9 +857,8 @@ img, svg { max-width: 100%; }
     justify-content: space-between;
 }
 .custom-offer > div { max-width: 45rem; }
-.custom-offer h3 { color: var(--ink); font-size: 1.875rem; margin-bottom: 0.5rem; }
-.custom-offer h3 em { color: var(--gold-pale); }
-.custom-offer p { margin: 0; font-size: 0.9375rem; color: var(--dark-body); }
+.custom-offer h2 { font-size: 1.875rem; margin-bottom: 0.5rem; }
+.custom-offer p { margin: 0; font-size: 0.9375rem; color: var(--ink-body); }
 
 /* ---------- Cards ---------- */
 
@@ -866,7 +891,7 @@ img, svg { max-width: 100%; }
     padding: 2.5rem 2rem;
 }
 .card-center .diamond { width: 7px; height: 7px; }
-.card-center h3 { font-size: 1.875rem; margin: 0.6rem 0 0; }
+.card-center h2, .card-center h3 { font-size: 1.875rem; margin: 0.6rem 0 0; }
 .card-center .body-text { margin-top: 0.4rem; }
 
 .card-icon {
@@ -908,49 +933,6 @@ img, svg { max-width: 100%; }
 }
 
 .intro-card { margin-bottom: 2rem; }
-
-/* ---------- Process steps ---------- */
-
-.steps {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 1.25rem;
-    counter-reset: step;
-    max-width: 46rem;
-}
-
-.step {
-    display: flex;
-    gap: 1.25rem;
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: var(--r-card);
-    padding: 1.5rem 1.75rem;
-    box-shadow: var(--shadow);
-}
-
-.step-num {
-    flex: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.6rem;
-    height: 2.6rem;
-    background: linear-gradient(135deg, var(--gold-deep), var(--gold-deep));
-    color: var(--paper);
-    font-family: var(--serif);
-    font-size: 1.2rem;
-    border-radius: 0.6rem;
-}
-
-.step-time {
-    font-size: 0.88rem;
-    color: var(--gold-deep);
-    font-weight: 600;
-    margin: 0;
-}
 
 /* ---------- FAQ ---------- */
 
