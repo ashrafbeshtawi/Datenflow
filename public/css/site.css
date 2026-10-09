@@ -503,6 +503,117 @@ img, svg { max-width: 100%; }
     .film-frame { box-shadow: 0 30px 80px -30px rgba(201, 165, 90, 0.25); }
 }
 
+/* ---------- Film reveal (js/hero-film.js) ----------
+   With the script the film starts hidden; the play button under the tag line
+   fades the copy out and lets the film emerge in a circle grown from the button. */
+
+.film-play,
+.film-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--gold);
+    color: var(--gold-pale);
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease, opacity 0.4s ease, transform 0.4s ease;
+}
+.film-play[hidden], .film-close[hidden] { display: none; }
+.film-play:hover, .film-close:hover { background: var(--gold); color: var(--paper); }
+.film-play:focus-visible, .film-close:focus-visible { outline: 2px solid var(--gold-pale); outline-offset: 4px; }
+
+.film-play {
+    position: relative;
+    margin-top: 2.25rem;
+    width: 4.5rem;
+    height: 4.5rem;
+    background: rgba(201, 165, 90, 0.08);
+}
+.film-play svg { width: 1.6rem; height: 1.6rem; fill: currentColor; margin-left: 4px; }
+
+/* Ring that keeps breathing out from the button. */
+.film-play::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 50%;
+    border: 1px solid var(--gold);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.hero:has(.is-playing) .film-play { animation: none; opacity: 0; transform: scale(0.6); pointer-events: none; }
+
+.film-close {
+    position: absolute;
+    top: 0.9rem;
+    right: 0.9rem;
+    z-index: 2;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-color: rgba(201, 165, 90, 0.6);
+    background: rgba(14, 12, 10, 0.6);
+}
+.film-close svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+
+/* Copy and film share the spot; the script animates the height between the two. */
+.hero-body.film-reveal {
+    display: block;
+    position: relative;
+    text-align: center;
+    transition: height 0.9s cubic-bezier(.6, 0, .2, 1);
+}
+.is-playing.film-reveal { overflow: hidden; }
+
+.film-reveal .hero-copy {
+    margin: 0 auto;
+    align-items: center;
+    transition: opacity 0.6s 0.5s ease, filter 0.6s 0.5s ease, transform 0.6s 0.5s ease, visibility 0s 0.5s;
+}
+.film-reveal .hero-actions, .film-reveal .checks { justify-content: center; }
+
+.film-reveal.is-playing .hero-copy {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(12px);
+    visibility: hidden;
+    transition: opacity 0.45s ease, filter 0.45s ease, transform 0.45s ease, visibility 0s 0.45s;
+}
+
+.film-reveal .film-frame {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    translate: -50% 0;
+    box-shadow: none;
+    visibility: hidden;
+    clip-path: circle(0px at var(--clip-x, 50%) var(--clip-y, 0px));
+    transition: clip-path 0.8s cubic-bezier(.6, 0, .2, 1), visibility 0s 0.8s;
+}
+
+.film-reveal.is-playing .film-frame {
+    visibility: visible;
+    clip-path: circle(var(--clip-r, 150%) at var(--clip-x, 50%) var(--clip-y, 0px));
+    transition: clip-path 1s cubic-bezier(.5, 0, .2, 1), visibility 0s;
+}
+
+/* Portrait: the frame hugs the 9:16 cut, so the close button sits on the film. */
+@media (orientation: portrait) {
+    .film-reveal .film-frame { width: min(100%, calc(min(80svh, 44rem) * 9 / 16)); }
+    .film-reveal .film-video-portrait { width: 100%; }
+}
+
+@keyframes df-pulse { from { transform: scale(1); opacity: 0.6; } to { transform: scale(1.7); opacity: 0; } }
+
+@media (prefers-reduced-motion: no-preference) {
+    .film-play { animation: df-fade 1s 1.5s ease both; }
+    .film-play::after { animation: df-pulse 2.4s 2.6s ease-out infinite; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-body.film-reveal, .film-reveal .hero-copy, .film-reveal .film-frame { transition: none; }
+}
+
 /* ---------- Checks ---------- */
 
 .checks {

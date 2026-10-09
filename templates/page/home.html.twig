@@ -3,6 +3,10 @@
 
 {% set numerals = ['i.', 'ii.', 'iii.', 'iv.'] %}
 
+{% block head %}
+    <script src="{{ asset('js/hero-film.js') }}" defer></script>
+{% endblock %}
+
 {% block body %}
 
 <section class="hero">
@@ -17,6 +21,10 @@
                 <span class="wordmark-tag">{{ t.hero.eyebrow }}</span>
                 <span class="wordmark-rule wordmark-rule-right" aria-hidden="true"></span>
             </p>
+            {# Shown by js/hero-film.js; without JS the film sits beside the copy instead. #}
+            <button type="button" class="film-play" aria-label="{{ t.hero.film_play }}" hidden>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>
+            </button>
         </div>
         <div class="hero-body">
             <div class="hero-copy">
@@ -31,6 +39,9 @@
             {# One file per screen shape; CSS shows the one matching the orientation. preload="none" keeps
                the ~30 MB films off the wire until someone presses play, so the hidden one never loads. #}
             <div class="film-frame">
+                <button type="button" class="film-close" aria-label="{{ t.hero.film_close }}" hidden>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
                 <video class="film-video film-video-landscape" controls preload="none" playsinline
                        poster="{{ asset('img/imagefilm-poster-' ~ lang ~ '.svg') }}" aria-label="{{ t.hero.video }}">
                     <source src="{{ asset('datenflow-imagefilm.mp4') }}" type="video/mp4">
