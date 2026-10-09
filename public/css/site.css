@@ -428,6 +428,11 @@ img, svg { max-width: 100%; }
     color: var(--gold-deep);
 }
 
+/* Deeper golds on parchment, so the resting wordmark keeps its contrast. */
+.theme-light .wordmark-gold {
+    background-image: linear-gradient(100deg, #7A5C26 0%, #9C7838 25%, #D6B672 42%, #B08A42 55%, #7A5C26 75%, #9C7838 100%);
+}
+
 /* Long line + short tick, mirrored on each side of the tag. */
 .wordmark-rule {
     display: block;
@@ -520,13 +525,18 @@ img, svg { max-width: 100%; }
 .film-play:hover, .film-close:hover { background: var(--gold); color: var(--paper); }
 .film-play:focus-visible, .film-close:focus-visible { outline: 2px solid var(--gold-pale); outline-offset: 4px; }
 
+/* A dark disc: the one dark spot in the light hero, to draw the eye. */
 .film-play {
     position: relative;
     margin-top: 2.25rem;
     width: 4.5rem;
     height: 4.5rem;
-    background: rgba(201, 165, 90, 0.08);
+    background: #141210;
+    border-color: #C9A55A;
+    color: #D6B672;
+    box-shadow: 0 10px 30px -10px rgba(20, 18, 16, 0.6);
 }
+.film-play:hover { background: #C9A55A; color: #141210; }
 .film-play svg { width: 1.6rem; height: 1.6rem; fill: currentColor; margin-left: 4px; }
 
 /* Ring that keeps breathing out from the button. */
@@ -632,7 +642,7 @@ img, svg { max-width: 100%; }
 
 .section { padding: clamp(5rem, 10vw, 8.75rem) 0; }
 
-/* Light pages: everything between the dark header and footer sits on warm
+/* Everything between the dark header and footer sits on light warm
    parchment. Redefining the tokens is enough, every rule below follows. */
 .theme-light {
     color-scheme: light;
@@ -640,12 +650,12 @@ img, svg { max-width: 100%; }
     --ink-body: #3E362B;
     --ink-soft: #5A5043;
     --ink-faint: #7D7262;
-    --paper: #E4D9C4;
-    --paper-warm: #DDD1BA;
-    --sand: #EDE4D3;
-    --line: #CDBF9F;
-    --line-soft: #D6CAB2;
-    --line-strong: #B9A57E;
+    --paper: #F0E9DC;
+    --paper-warm: #E9E0CF;
+    --sand: #F7F2E9;
+    --line: #DCCFB5;
+    --line-soft: #E5DBC8;
+    --line-strong: #C6B28C;
     --gold: #9C7838;
     --gold-deep: #7A5C26;
     --gold-light: #B08A42;
