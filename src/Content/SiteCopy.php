@@ -40,9 +40,10 @@ final class SiteCopy
                 'checks' => ['Erstgespräch kostenlos', 'Festpreise statt Überraschungen', 'Wir sprechen Ihre Sprache, kein IT-Deutsch'],
             ],
             'teasers' => [
-                'services' => 'Alle Leistungen ansehen',
-                'process' => 'Ablauf im Detail',
-                'pricing' => 'Preismodelle ansehen',
+                'services' => 'Für welche Branchen wir arbeiten und was wir bauen: Automatisierung, KI, individuelle Software und Betreuung.',
+                'process' => 'Die vier Schritte vom kostenlosen Erstgespräch bis zur Übergabe, mit Dauer und Kosten je Schritt.',
+                'pricing' => 'Einmal kaufen, monatlich mieten oder pro Bestellung zahlen, oder eine individuelle Lösung zum Festpreis.',
+                'faq' => 'Antworten auf die Fragen, die Kunden uns am Anfang am häufigsten stellen.',
             ],
             'industries' => [
                 'kicker' => 'Für wen wir arbeiten',
@@ -346,9 +347,10 @@ final class SiteCopy
                 'checks' => ['First call is free', 'Fixed prices, no surprises', 'We speak your language, not tech jargon'],
             ],
             'teasers' => [
-                'services' => 'See all services',
-                'process' => 'The process in detail',
-                'pricing' => 'See pricing models',
+                'services' => 'The industries we work for and what we build: automation, AI, custom software and support.',
+                'process' => 'The four steps from the free first call to handover, with time and cost for each.',
+                'pricing' => 'Buy once, rent monthly or pay per order, or a custom solution at a fixed price.',
+                'faq' => 'Answers to the questions customers ask us most at the start.',
             ],
             'industries' => [
                 'kicker' => 'Who we work for',

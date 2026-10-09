@@ -632,42 +632,34 @@ img, svg { max-width: 100%; }
 
 .section { padding: clamp(5rem, 10vw, 8.75rem) 0; }
 
-/* Sections alternate dark and light: every second section of a page flips to
-   the light palette by redefining the tokens, so everything inside follows. */
-main > section:nth-of-type(even) {
+/* Light pages: everything between the dark header and footer sits on warm
+   parchment. Redefining the tokens is enough, every rule below follows. */
+.theme-light {
     color-scheme: light;
-    --ink: #141210;
-    --ink-body: #4E483F;
-    --ink-soft: #5E574D;
-    --ink-faint: #8C8477;
-    --paper: #FDFCFA;
-    --paper-warm: #F6F1E8;
-    --sand: #F3EEE4;
-    --line: #E6DCC7;
-    --line-soft: #ECE6DA;
-    --line-strong: #CDBF9F;
-    --gold: #B08A42;
-    --gold-deep: #8A6A2F;
-    --gold-light: #C9A55A;
-    --gold-pale: #8A6A2F;
-    --gold-text: linear-gradient(100deg, #8A6A2F, #C9A55A 45%, #8A6A2F);
-    --shadow: 0 4px 20px -8px rgba(20, 18, 16, 0.08);
-    --shadow-hover: 0 8px 32px -10px rgba(20, 18, 16, 0.14);
+    --ink: #1E1913;
+    --ink-body: #3E362B;
+    --ink-soft: #5A5043;
+    --ink-faint: #7D7262;
+    --paper: #E4D9C4;
+    --paper-warm: #DDD1BA;
+    --sand: #EDE4D3;
+    --line: #CDBF9F;
+    --line-soft: #D6CAB2;
+    --line-strong: #B9A57E;
+    --gold: #9C7838;
+    --gold-deep: #7A5C26;
+    --gold-light: #B08A42;
+    --gold-pale: #7A5C26;
+    --gold-text: linear-gradient(100deg, #7A5C26, #B08A42 45%, #7A5C26);
+    --shadow: 0 4px 20px -8px rgba(30, 25, 19, 0.12);
+    --shadow-hover: 0 8px 32px -10px rgba(30, 25, 19, 0.18);
     background: var(--paper);
     color: var(--ink-body);
 }
 
-/* Centered kicker + title + sub above a section's content. */
-.section-head {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 1.1rem;
-    margin-bottom: 4rem;
-}
-.section-head > * { margin: 0; }
-.section-head h2 { max-width: 47.5rem; }
+/* One continuous ground, so back-to-back sections share a single gap. */
+.theme-light .section + .section { padding-top: 0; }
+.theme-light .section + .cta-band .cta-band-inner { padding-top: 0; }
 
 /* Title left, sub right, bottom-aligned. */
 .split-head {
@@ -692,27 +684,40 @@ main > section:nth-of-type(even) {
 .page-head .section-sub { margin-bottom: 0; }
 .section-sub-center { margin: 0 auto 2.5rem; text-align: center; }
 
-/* Home teasers: a numbered or bulleted row of titles, then a link to the page. */
-.teaser-list {
+/* Home: one small box per page, saying what it holds. */
+.page-cards-section { padding-top: 0; }
+
+.page-cards {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-    border-top: 1px solid var(--line);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 1.25rem;
 }
-.teaser-list li {
+
+.page-card {
+    height: 100%;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     gap: 0.75rem;
-    padding: 2rem 1.5rem 2rem 0;
-    border-bottom: 1px solid var(--line);
+    padding: 2rem 1.75rem 1.75rem;
+    background: var(--sand);
+    border: 1px solid var(--line);
+    text-decoration: none;
+    transition: border-color 0.2s ease, transform 0.2s ease;
 }
-.teaser-list h3 { margin: 0; }
-.teaser-list .diamond { width: 7px; height: 7px; margin: 0.4rem 0 0.2rem 2px; }
+.page-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.page-card h2 { font-size: 1.625rem; font-weight: 500; margin: 0; }
+.page-card .body-text { flex: 1; }
 
-.section-more { margin-top: 3rem; text-align: center; }
+.page-card-arrow {
+    color: var(--gold);
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+.page-card:hover .page-card-arrow { transform: translateX(6px); }
 
 .kicker {
     font-size: 0.6875rem;
@@ -874,7 +879,7 @@ main > section:nth-of-type(even) {
 @media (max-width: 52rem) { .cols-2 { grid-template-columns: 1fr; } }
 
 .card {
-    background: var(--paper);
+    background: var(--sand);
     border: 1px solid var(--line);
     padding: 2.25rem 2rem;
     transition: border-color 0.2s ease;

@@ -1,5 +1,7 @@
 {% extends 'base.html.twig' %}
-{% from 'macros.html.twig' import accent, roman %}
+{% from 'macros.html.twig' import roman %}
+
+{% block main_class %}{% endblock %}
 
 {% block head %}
     <script src="{{ asset('js/hero-film.js') }}" defer></script>
@@ -30,7 +32,7 @@
                 <p class="lede">{{ t.hero.lede }}</p>
                 <div class="hero-actions">
                     <a class="btn btn-primary btn-lg" href="{{ path('booking') }}">{{ t.hero.primary }}</a>
-                    <a class="btn btn-ghost btn-lg" href="#services">{{ t.hero.secondary }}</a>
+                    <a class="btn btn-ghost btn-lg" href="{{ path('services') }}">{{ t.hero.secondary }}</a>
                 </div>
                 {% with {checks: t.hero.checks} %}{% include 'partials/_checks.html.twig' %}{% endwith %}
             </div>
@@ -53,60 +55,27 @@
     </div>
 </section>
 
-{# Teasers: a glimpse of each topic, the details live on their own pages. #}
-<section id="services" class="section">
+{# One small box per page, saying what that page holds. #}
+<section class="section page-cards-section">
     <div class="wrap">
-        <div class="section-head">
-            <p class="kicker kicker-ruled">{{ t.services.kicker }}</p>
-            <h2>{{ accent(t.services.title, t.services.title_em) }}</h2>
-            <p class="section-sub">{{ t.services.sub }}</p>
-        </div>
-        <ul class="teaser-list">
-            {% for item in t.services.items %}
-                <li><span class="numeral">{{ roman(loop.index) }}</span><h3>{{ item.title }}</h3></li>
-            {% endfor %}
-        </ul>
-        <p class="section-more"><a class="btn btn-ghost" href="{{ path('services') }}">{{ t.teasers.services }}</a></p>
-    </div>
-</section>
-
-<section class="section">
-    <div class="wrap">
-        <div class="section-head">
-            <p class="kicker kicker-ruled">{{ t.process.kicker }}</p>
-            <h2>{{ t.process.title }}</h2>
-            <p class="section-sub">{{ t.process.sub }}</p>
-        </div>
-        <ol class="timeline">
-            {% for step in t.process.steps %}
+        <ul class="page-cards">
+            {% for page in [
+                {route: 'services', title: t.nav.services, body: t.teasers.services},
+                {route: 'process', title: t.nav.process, body: t.teasers.process},
+                {route: 'pricing', title: t.nav.pricing, body: t.teasers.pricing},
+                {route: 'faq', title: t.nav.faq, body: t.teasers.faq},
+            ] %}
                 <li>
-                    <span class="timeline-num">{{ step.num }}</span>
-                    <h3>{{ step.title }}</h3>
-                    <p class="meta">{{ step.time }}</p>
+                    <a class="page-card" href="{{ path(page.route) }}">
+                        <span class="numeral">{{ roman(loop.index) }}</span>
+                        <h2>{{ page.title }}</h2>
+                        <p class="body-text">{{ page.body }}</p>
+                        <span class="page-card-arrow" aria-hidden="true">→</span>
+                    </a>
                 </li>
             {% endfor %}
-        </ol>
-        <p class="section-more"><a class="btn btn-ghost" href="{{ path('process') }}">{{ t.teasers.process }}</a></p>
-    </div>
-</section>
-
-<section class="section">
-    <div class="wrap">
-        <div class="section-head">
-            <p class="kicker kicker-ruled">{{ t.pricing.kicker }}</p>
-            <h2>{{ t.pricing.title }}</h2>
-            <p class="section-sub">{{ t.pricing.sub }}</p>
-        </div>
-        <ul class="teaser-list">
-            {% for opt in t.pricing.options %}
-                <li><span class="diamond" aria-hidden="true"></span><h3>{{ opt.title }}</h3><p class="tagline">{{ opt.tagline }}</p></li>
-            {% endfor %}
-            <li><span class="diamond" aria-hidden="true"></span><h3>{{ t.pricing.custom_title }}</h3></li>
         </ul>
-        <p class="section-more"><a class="btn btn-ghost" href="{{ path('pricing') }}">{{ t.teasers.pricing }}</a></p>
     </div>
 </section>
-
-{% include 'partials/_cta_band.html.twig' %}
 
 {% endblock %}
