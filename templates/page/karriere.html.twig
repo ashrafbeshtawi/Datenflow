@@ -5,7 +5,7 @@
 {% block body %}
 <section class="section page-head">
     <div class="wrap wrap-narrow">
-        <p class="kicker">{{ t.karriere.kicker }}</p>
+        <p class="kicker kicker-ruled kicker-left">{{ t.karriere.kicker }}</p>
         <h1>{{ t.karriere.title }}</h1>
         <p class="section-sub">{{ t.karriere.sub }}</p>
         {% with {checks: t.karriere.checks} %}{% include 'partials/_checks.html.twig' %}{% endwith %}
