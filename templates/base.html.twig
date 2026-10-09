@@ -15,7 +15,9 @@
     <link rel="alternate" hreflang="x-default" href="{{ url(page_route, {_locale: 'de'}) }}">
     {% endif %}
     {% if sent|default(false) or route starts with 'admin' %}<meta name="robots" content="noindex">{% endif %}
+    <link rel="icon" href="{{ asset('logo.svg') }}" type="image/svg+xml">
     <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
+    <link rel="preload" href="{{ asset('fonts/cormorant-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ asset('css/site.css') }}">
     {% block head %}{% endblock %}
 </head>
@@ -26,7 +28,7 @@
 <header class="site-header">
     <div class="wrap header-inner">
         <a class="brand" href="{{ path('home') }}" aria-label="Datenflow — {{ t.nav.home }}">
-            <img class="brand-mark" src="{{ asset('favicon.png') }}" alt="">
+            <img class="brand-mark" src="{{ asset('logo.svg') }}" alt="">
             <span class="brand-name">Datenflow</span>
         </a>
 
@@ -36,7 +38,6 @@
         </label>
         <nav class="site-nav" aria-label="{{ lang == 'en' ? 'Main navigation' : 'Hauptnavigation' }}">
             <span class="nav-links">
-                <a href="{{ path('home') }}">{{ t.nav.home }}</a>
                 <a href="{{ path('services') }}">{{ t.nav.services }}</a>
                 <a href="{{ path('process') }}">{{ t.nav.process }}</a>
                 <a href="{{ path('pricing') }}">{{ t.nav.pricing }}</a>
@@ -52,7 +53,8 @@
     </div>
 </header>
 
-<main id="main">
+{# Pages sit on the light parchment palette between the dark header and footer. #}
+<main id="main" class="theme-light">
     {% block body %}{% endblock %}
 </main>
 

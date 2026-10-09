@@ -1,60 +1,79 @@
 {% extends 'base.html.twig' %}
-{% from 'macros.html.twig' import icon %}
+{% from 'macros.html.twig' import roman %}
+
+{% block head %}
+    <script src="{{ asset('js/hero-film.js') }}" defer></script>
+{% endblock %}
 
 {% block body %}
 
 <section class="hero">
     <div class="wrap hero-inner">
-        <div class="hero-copy">
-            <p class="kicker">{{ t.hero.eyebrow }}</p>
-            <h1>{{ t.hero.title_pre }} <em>{{ t.hero.title_em }}</em></h1>
-            <p class="lede">{{ t.hero.lede }}</p>
-            <div class="hero-actions">
-                <a class="btn btn-primary btn-lg" href="{{ path('booking') }}">{{ t.hero.primary }}</a>
-                <a class="btn btn-ghost btn-lg" href="{{ path('services') }}">{{ t.hero.secondary }}</a>
+        {# Gold wordmark: the shimmer sweeps across once and comes to rest. #}
+        <div class="wordmark">
+            <div class="wordmark-word">
+                <span class="wordmark-gold">Datenflow</span>
             </div>
-            {% with {checks: t.hero.checks} %}{% include 'partials/_checks.html.twig' %}{% endwith %}
+            <p class="wordmark-sub">
+                <span class="wordmark-rule wordmark-rule-left" aria-hidden="true"></span>
+                <span class="wordmark-tag">{{ t.hero.eyebrow }}</span>
+                <span class="wordmark-rule wordmark-rule-right" aria-hidden="true"></span>
+            </p>
+            {# Shown by js/hero-film.js; without JS the film sits beside the copy instead. #}
+            <button type="button" class="film-play" aria-label="{{ t.hero.film_play }}" hidden>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>
+            </button>
         </div>
-        {# One file per screen shape; CSS shows the one matching the orientation. preload="none" keeps
-           the ~30 MB films off the wire until someone presses play, so the hidden one never loads. #}
-        <div class="hero-film">
-            <video class="hero-video hero-video-landscape" controls preload="none" playsinline
-                   poster="{{ asset('img/imagefilm-poster-' ~ lang ~ '.svg') }}" aria-label="{{ t.hero.video }}">
-                <source src="{{ asset('datenflow-imagefilm.mp4') }}" type="video/mp4">
-            </video>
-            <video class="hero-video hero-video-portrait" controls preload="none" playsinline
-                   poster="{{ asset('img/imagefilm-poster-9x16-' ~ lang ~ '.svg') }}" aria-label="{{ t.hero.video }}">
-                <source src="{{ asset('datenflow-imagefilm-9x16.mp4') }}" type="video/mp4">
-            </video>
+        <div class="hero-body">
+            <div class="hero-copy">
+                <h1>{{ t.hero.title_pre }} <em class="gold-text">{{ t.hero.title_em }}</em></h1>
+                <p class="lede">{{ t.hero.lede }}</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary btn-lg" href="{{ path('booking') }}">{{ t.hero.primary }}</a>
+                    <a class="btn btn-ghost btn-lg" href="{{ path('services') }}">{{ t.hero.secondary }}</a>
+                </div>
+                {% with {checks: t.hero.checks} %}{% include 'partials/_checks.html.twig' %}{% endwith %}
+            </div>
+            {# One file per screen shape; CSS shows the one matching the orientation. preload="none" keeps
+               the ~30 MB films off the wire until someone presses play, so the hidden one never loads. #}
+            <div class="film-frame">
+                <button type="button" class="film-close" aria-label="{{ t.hero.film_close }}" hidden>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+                <video class="film-video film-video-landscape" controls preload="none" playsinline
+                       poster="{{ asset('img/imagefilm-poster-' ~ lang ~ '.svg') }}" aria-label="{{ t.hero.video }}">
+                    <source src="{{ asset('datenflow-imagefilm.mp4') }}" type="video/mp4">
+                </video>
+                <video class="film-video film-video-portrait" controls preload="none" playsinline
+                       poster="{{ asset('img/imagefilm-poster-9x16-' ~ lang ~ '.svg') }}" aria-label="{{ t.hero.video }}">
+                    <source src="{{ asset('datenflow-imagefilm-9x16.mp4') }}" type="video/mp4">
+                </video>
+            </div>
         </div>
     </div>
 </section>
 
-<section class="section">
+{# One small box per page, saying what that page holds. #}
+<section class="section page-cards-section">
     <div class="wrap">
-        <div class="card-grid cols-3">
-            <article class="card">
-                <span class="card-icon">{{ icon('custom') }}</span>
-                <h2 class="card-h">{{ t.nav.services }}</h2>
-                <p>{{ t.industries.sub }}</p>
-                <p class="section-more"><a class="btn btn-ghost" href="{{ path('services') }}">{{ t.teasers.more }}</a></p>
-            </article>
-            <article class="card">
-                <span class="card-icon">{{ icon('support') }}</span>
-                <h2 class="card-h">{{ t.nav.process }}</h2>
-                <p>{{ t.process.sub }}</p>
-                <p class="section-more"><a class="btn btn-ghost" href="{{ path('process') }}">{{ t.teasers.more }}</a></p>
-            </article>
-            <article class="card">
-                <span class="card-icon">{{ icon('check') }}</span>
-                <h2 class="card-h">{{ t.nav.pricing }}</h2>
-                <p>{{ t.pricing.sub }}</p>
-                <p class="section-more"><a class="btn btn-ghost" href="{{ path('pricing') }}">{{ t.teasers.more }}</a></p>
-            </article>
-        </div>
+        <ul class="page-cards">
+            {% for page in [
+                {route: 'services', title: t.nav.services, body: t.teasers.services},
+                {route: 'process', title: t.nav.process, body: t.teasers.process},
+                {route: 'pricing', title: t.nav.pricing, body: t.teasers.pricing},
+                {route: 'faq', title: t.nav.faq, body: t.teasers.faq},
+            ] %}
+                <li>
+                    <a class="page-card" href="{{ path(page.route) }}">
+                        <span class="numeral">{{ roman(loop.index) }}</span>
+                        <h2>{{ page.title }}</h2>
+                        <p class="body-text">{{ page.body }}</p>
+                        <span class="page-card-arrow" aria-hidden="true">→</span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
     </div>
 </section>
-
-{% include 'partials/_cta_band.html.twig' %}
 
 {% endblock %}

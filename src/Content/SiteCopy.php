@@ -35,9 +35,16 @@ final class SiteCopy
                 'primary' => 'Kostenloses Gespräch buchen',
                 'secondary' => 'Was wir machen',
                 'video' => 'Imagefilm: So hilft Datenflow Ihrem Betrieb',
+                'film_play' => 'Imagefilm abspielen',
+                'film_close' => 'Film schließen',
                 'checks' => ['Erstgespräch kostenlos', 'Festpreise statt Überraschungen', 'Wir sprechen Ihre Sprache, kein IT-Deutsch'],
             ],
-            'teasers' => ['more' => 'Mehr erfahren'],
+            'teasers' => [
+                'services' => 'Für welche Branchen wir arbeiten und was wir bauen: Automatisierung, KI, individuelle Software und Betreuung.',
+                'process' => 'Die vier Schritte vom kostenlosen Erstgespräch bis zur Übergabe, mit Dauer und Kosten je Schritt.',
+                'pricing' => 'Einmal kaufen, monatlich mieten oder pro Bestellung zahlen, oder eine individuelle Lösung zum Festpreis.',
+                'faq' => 'Antworten auf die Fragen, die Kunden uns am Anfang am häufigsten stellen.',
+            ],
             'industries' => [
                 'kicker' => 'Für wen wir arbeiten',
                 'title' => 'Wir kennen Ihren Alltag.',
@@ -69,6 +76,7 @@ final class SiteCopy
             'services' => [
                 'kicker' => 'Leistungen',
                 'title' => 'Vier Dinge, die wir richtig gut können.',
+                'title_em' => 'richtig gut',
                 'sub' => 'Sie müssen nicht wissen, wie es technisch funktioniert. Sie müssen nur sagen, was Sie im Alltag Zeit und Nerven kostet, den Rest übernehmen wir.',
                 'items' => [
                     [
@@ -153,6 +161,7 @@ final class SiteCopy
                 ],
                 'custom_title' => 'Individuelle Lösung',
                 'custom_body' => 'Passt keine fertige Lösung? Wir bauen eine, die genau zu Ihrem Betrieb passt, mit Festpreis-Angebot nach der kostenlosen Analyse.',
+                'custom_button' => 'Analyse anfragen',
             ],
             'faq' => [
                 'kicker' => 'Häufige Fragen',
@@ -186,6 +195,7 @@ final class SiteCopy
             ],
             'cta_band' => [
                 'title' => 'Erzählen Sie uns, was Sie Zeit kostet.',
+                'title_em' => 'Zeit kostet.',
                 'body' => 'Ein kostenloses Gespräch, 30 Minuten, ohne Verkaufsdruck. Danach wissen Sie, was möglich ist, und was es kosten würde.',
                 'button' => 'Kostenloses Gespräch buchen',
             ],
@@ -332,9 +342,16 @@ final class SiteCopy
                 'primary' => 'Book a free call',
                 'secondary' => 'What we do',
                 'video' => 'Short film: how Datenflow helps your business (in German)',
+                'film_play' => 'Play the short film',
+                'film_close' => 'Close film',
                 'checks' => ['First call is free', 'Fixed prices, no surprises', 'We speak your language, not tech jargon'],
             ],
-            'teasers' => ['more' => 'Learn more'],
+            'teasers' => [
+                'services' => 'The industries we work for and what we build: automation, AI, custom software and support.',
+                'process' => 'The four steps from the free first call to handover, with time and cost for each.',
+                'pricing' => 'Buy once, rent monthly or pay per order, or a custom solution at a fixed price.',
+                'faq' => 'Answers to the questions customers ask us most at the start.',
+            ],
             'industries' => [
                 'kicker' => 'Who we work for',
                 'title' => 'We know your day-to-day.',
@@ -366,6 +383,7 @@ final class SiteCopy
             'services' => [
                 'kicker' => 'Services',
                 'title' => 'Four things we do really well.',
+                'title_em' => 'really well',
                 'sub' => 'You don\'t need to know how it works technically. Just tell us what eats your time day-to-day, we take care of the rest.',
                 'items' => [
                     [
@@ -450,6 +468,7 @@ final class SiteCopy
                 ],
                 'custom_title' => 'Custom solution',
                 'custom_body' => 'No ready-made solution fits? We build one specifically for your business, with a fixed-price quote after the free analysis.',
+                'custom_button' => 'Request an analysis',
             ],
             'faq' => [
                 'kicker' => 'FAQ',
@@ -465,6 +484,7 @@ final class SiteCopy
             ],
             'cta_band' => [
                 'title' => 'Tell us what costs you time.',
+                'title_em' => 'costs you time.',
                 'body' => 'A free 30-minute call, no sales pressure. Afterwards you\'ll know what\'s possible, and what it would cost.',
                 'button' => 'Book a free call',
             ],
