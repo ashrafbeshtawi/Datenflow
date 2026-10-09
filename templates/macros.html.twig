@@ -20,3 +20,9 @@
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg>
 {%- endif -%}
 {% endmacro %}
+
+{# Renders text with the phrase `em` set in the gold italic accent. Both stay escaped. #}
+{% macro accent(text, em) -%}
+{%- set parts = text|split(em, 2) -%}
+{{ parts[0] }}<em>{{ em }}</em>{{ parts[1]|default('') }}
+{%- endmacro %}

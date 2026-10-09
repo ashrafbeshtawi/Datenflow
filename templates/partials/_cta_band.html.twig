@@ -1,9 +1,9 @@
+{% from 'macros.html.twig' import accent %}
 <section class="cta-band">
     <div class="wrap cta-band-inner">
-        <div>
-            <h2>{{ t.cta_band.title }}</h2>
-            <p>{{ t.cta_band.body }}</p>
-        </div>
+        <span class="diamond diamond-outline" aria-hidden="true"></span>
+        <h2>{{ accent(t.cta_band.title, t.cta_band.title_em) }}</h2>
+        <p>{{ t.cta_band.body }}</p>
         <a class="btn btn-primary btn-lg" href="{{ path('booking') }}">{{ t.cta_band.button }}</a>
     </div>
 </section>

@@ -69,6 +69,7 @@ final class SiteCopy
             'services' => [
                 'kicker' => 'Leistungen',
                 'title' => 'Vier Dinge, die wir richtig gut können.',
+                'title_em' => 'richtig gut',
                 'sub' => 'Sie müssen nicht wissen, wie es technisch funktioniert. Sie müssen nur sagen, was Sie im Alltag Zeit und Nerven kostet, den Rest übernehmen wir.',
                 'items' => [
                     [
@@ -153,6 +154,7 @@ final class SiteCopy
                 ],
                 'custom_title' => 'Individuelle Lösung',
                 'custom_body' => 'Passt keine fertige Lösung? Wir bauen eine, die genau zu Ihrem Betrieb passt, mit Festpreis-Angebot nach der kostenlosen Analyse.',
+                'custom_button' => 'Analyse anfragen',
             ],
             'faq' => [
                 'kicker' => 'Häufige Fragen',
@@ -186,6 +188,7 @@ final class SiteCopy
             ],
             'cta_band' => [
                 'title' => 'Erzählen Sie uns, was Sie Zeit kostet.',
+                'title_em' => 'Zeit kostet.',
                 'body' => 'Ein kostenloses Gespräch, 30 Minuten, ohne Verkaufsdruck. Danach wissen Sie, was möglich ist, und was es kosten würde.',
                 'button' => 'Kostenloses Gespräch buchen',
             ],
@@ -366,6 +369,7 @@ final class SiteCopy
             'services' => [
                 'kicker' => 'Services',
                 'title' => 'Four things we do really well.',
+                'title_em' => 'really well',
                 'sub' => 'You don\'t need to know how it works technically. Just tell us what eats your time day-to-day, we take care of the rest.',
                 'items' => [
                     [
@@ -450,6 +454,7 @@ final class SiteCopy
                 ],
                 'custom_title' => 'Custom solution',
                 'custom_body' => 'No ready-made solution fits? We build one specifically for your business, with a fixed-price quote after the free analysis.',
+                'custom_button' => 'Request an analysis',
             ],
             'faq' => [
                 'kicker' => 'FAQ',
@@ -465,6 +470,7 @@ final class SiteCopy
             ],
             'cta_band' => [
                 'title' => 'Tell us what costs you time.',
+                'title_em' => 'costs you time.',
                 'body' => 'A free 30-minute call, no sales pressure. Afterwards you\'ll know what\'s possible, and what it would cost.',
                 'button' => 'Book a free call',
             ],

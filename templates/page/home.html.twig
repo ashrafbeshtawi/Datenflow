@@ -1,28 +1,46 @@
 {% extends 'base.html.twig' %}
-{% from 'macros.html.twig' import icon %}
+{% from 'macros.html.twig' import accent %}
+
+{% set numerals = ['i.', 'ii.', 'iii.', 'iv.'] %}
 
 {% block body %}
 
 <section class="hero">
     <div class="wrap hero-inner">
+        {# Gold shimmer sweeps across the wordmark, then the ink layer settles over it. #}
+        <div class="wordmark">
+            <div class="wordmark-word">
+                <span class="wordmark-gold">Datenflow</span>
+                <span class="wordmark-ink" aria-hidden="true">Datenflow</span>
+            </div>
+            <p class="wordmark-sub">
+                <span class="wordmark-rule wordmark-rule-left" aria-hidden="true"></span>
+                <span class="wordmark-tag">{{ t.hero.eyebrow }}</span>
+                <span class="wordmark-rule wordmark-rule-right" aria-hidden="true"></span>
+            </p>
+        </div>
         <div class="hero-copy">
-            <p class="kicker">{{ t.hero.eyebrow }}</p>
-            <h1>{{ t.hero.title_pre }} <em>{{ t.hero.title_em }}</em></h1>
+            <h1>{{ t.hero.title_pre }} <em class="gold-text">{{ t.hero.title_em }}</em></h1>
             <p class="lede">{{ t.hero.lede }}</p>
             <div class="hero-actions">
                 <a class="btn btn-primary btn-lg" href="{{ path('booking') }}">{{ t.hero.primary }}</a>
-                <a class="btn btn-ghost btn-lg" href="{{ path('services') }}">{{ t.hero.secondary }}</a>
+                <a class="btn btn-ghost btn-lg" href="#services">{{ t.hero.secondary }}</a>
             </div>
             {% with {checks: t.hero.checks} %}{% include 'partials/_checks.html.twig' %}{% endwith %}
         </div>
-        {# One file per screen shape; CSS shows the one matching the orientation. preload="none" keeps
-           the ~30 MB films off the wire until someone presses play, so the hidden one never loads. #}
-        <div class="hero-film">
-            <video class="hero-video hero-video-landscape" controls preload="none" playsinline
+    </div>
+</section>
+
+{# One file per screen shape; CSS shows the one matching the orientation. preload="none" keeps
+   the ~30 MB films off the wire until someone presses play, so the hidden one never loads. #}
+<section class="film">
+    <div class="wrap">
+        <div class="film-frame">
+            <video class="film-video film-video-landscape" controls preload="none" playsinline
                    poster="{{ asset('img/imagefilm-poster-' ~ lang ~ '.svg') }}" aria-label="{{ t.hero.video }}">
                 <source src="{{ asset('datenflow-imagefilm.mp4') }}" type="video/mp4">
             </video>
-            <video class="hero-video hero-video-portrait" controls preload="none" playsinline
+            <video class="film-video film-video-portrait" controls preload="none" playsinline
                    poster="{{ asset('img/imagefilm-poster-9x16-' ~ lang ~ '.svg') }}" aria-label="{{ t.hero.video }}">
                 <source src="{{ asset('datenflow-imagefilm-9x16.mp4') }}" type="video/mp4">
             </video>
@@ -32,25 +50,97 @@
 
 <section class="section">
     <div class="wrap">
+        <div class="section-head">
+            <p class="kicker kicker-ruled">{{ t.industries.kicker }}</p>
+            <h2>{{ t.industries.title }}</h2>
+            <p class="section-sub">{{ t.industries.sub }}</p>
+        </div>
+        <div class="ledger">
+            {% for item in t.industries.items %}
+                <article class="ledger-item">
+                    <span class="numeral">{{ numerals[loop.index0] }}</span>
+                    <h3>{{ item.title }}</h3>
+                    <p class="tagline">{{ item.tagline }}</p>
+                    <p class="body-text">{{ item.body }}</p>
+                    <ul class="dash-list">
+                        {% for ex in item.examples %}<li>{{ ex }}</li>{% endfor %}
+                    </ul>
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section id="services" class="section section-dark">
+    <div class="wrap">
+        <div class="split-head">
+            <div>
+                <p class="kicker kicker-ruled kicker-left">{{ t.services.kicker }}</p>
+                <h2>{{ accent(t.services.title, t.services.title_em) }}</h2>
+            </div>
+            <p class="section-sub">{{ t.services.sub }}</p>
+        </div>
+        <div class="service-list">
+            {% for item in t.services.items %}
+                <article class="service">
+                    <span class="numeral">{{ numerals[loop.index0] }}</span>
+                    <div>
+                        <h3>{{ item.title }}</h3>
+                        <p class="body-text">{{ item.body }}</p>
+                        <ul class="tag-list">
+                            {% for ex in item.examples %}<li>{{ ex }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="wrap">
+        <div class="section-head">
+            <p class="kicker kicker-ruled">{{ t.process.kicker }}</p>
+            <h2>{{ t.process.title }}</h2>
+            <p class="section-sub">{{ t.process.sub }}</p>
+        </div>
+        <ol class="timeline">
+            {% for step in t.process.steps %}
+                <li>
+                    <span class="timeline-num">{{ step.num }}</span>
+                    <h3>{{ step.title }}</h3>
+                    <p class="body-text">{{ step.body }}</p>
+                    <p class="meta">{{ step.time }}</p>
+                </li>
+            {% endfor %}
+        </ol>
+    </div>
+</section>
+
+<section class="section section-tinted">
+    <div class="wrap">
+        <div class="section-head">
+            <p class="kicker kicker-ruled">{{ t.pricing.kicker }}</p>
+            <h2>{{ t.pricing.title }}</h2>
+            <p class="section-sub">{{ t.pricing.sub }}</p>
+        </div>
+        <p class="meta meta-center">{{ t.pricing.ready_title }}</p>
         <div class="card-grid cols-3">
-            <article class="card">
-                <span class="card-icon">{{ icon('custom') }}</span>
-                <h2 class="card-h">{{ t.nav.services }}</h2>
-                <p>{{ t.industries.sub }}</p>
-                <p class="section-more"><a class="btn btn-ghost" href="{{ path('services') }}">{{ t.teasers.more }}</a></p>
-            </article>
-            <article class="card">
-                <span class="card-icon">{{ icon('support') }}</span>
-                <h2 class="card-h">{{ t.nav.process }}</h2>
-                <p>{{ t.process.sub }}</p>
-                <p class="section-more"><a class="btn btn-ghost" href="{{ path('process') }}">{{ t.teasers.more }}</a></p>
-            </article>
-            <article class="card">
-                <span class="card-icon">{{ icon('check') }}</span>
-                <h2 class="card-h">{{ t.nav.pricing }}</h2>
-                <p>{{ t.pricing.sub }}</p>
-                <p class="section-more"><a class="btn btn-ghost" href="{{ path('pricing') }}">{{ t.teasers.more }}</a></p>
-            </article>
+            {% for opt in t.pricing.options %}
+                <article class="card card-center">
+                    <span class="diamond" aria-hidden="true"></span>
+                    <h3>{{ opt.title }}</h3>
+                    <p class="tagline">{{ opt.tagline }}</p>
+                    <p class="body-text">{{ opt.body }}</p>
+                </article>
+            {% endfor %}
+        </div>
+        <div class="custom-offer">
+            <div>
+                <h3>{{ accent(t.pricing.custom_title, t.pricing.custom_title|split(' ')|last) }}</h3>
+                <p>{{ t.pricing.custom_body }}</p>
+            </div>
+            <a class="btn btn-outline-light" href="{{ path('booking') }}">{{ t.pricing.custom_button }}</a>
         </div>
     </div>
 </section>
