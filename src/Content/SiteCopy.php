@@ -17,6 +17,19 @@ final class SiteCopy
             'meta' => [
                 'title' => 'Datenflow: IT-Lösungen',
                 'description' => 'Digitale Lösungen, Automatisierung und KI für Logistik, Gastronomie und Dienstleister, verständlich erklärt, ohne Fachchinesisch. Erstgespräch kostenlos.',
+                // Per page, keyed by route name. Titles stay under ~60 characters, descriptions under ~160.
+                'pages' => [
+                    'home' => ['title' => 'Datenflow | IT-Agentur in Berlin für Automatisierung & KI', 'description' => 'Digitale Lösungen, Automatisierung und KI für Logistik, Gastronomie und Dienstleister, verständlich erklärt, ohne Fachchinesisch. Erstgespräch kostenlos.'],
+                    'services' => ['title' => 'Leistungen: Automatisierung, KI & Software | Datenflow', 'description' => 'Für Logistik, Gastronomie, Dienstleistung und Handwerk: Abläufe automatisieren, KI im Alltag, individuelle Software und laufende Betreuung.'],
+                    'process' => ['title' => 'So arbeiten wir: vom Erstgespräch zur Lösung | Datenflow', 'description' => 'Vier Schritte vom kostenlosen Erstgespräch bis zur Übergabe: Analyse mit Festpreis-Vorschlag, Umsetzung in kleinen Etappen und Betreuung danach.'],
+                    'pricing' => ['title' => 'Preise: kaufen, mieten oder pro Bestellung | Datenflow', 'description' => 'Fertige Lösungen einmal kaufen, monatlich mieten oder pro Bestellung zahlen, oder eine individuelle Lösung mit Festpreis nach kostenloser Analyse.'],
+                    'faq' => ['title' => 'Häufige Fragen | Datenflow', 'description' => 'Was kostet das, wie lange dauert es, was passiert mit unseren Daten, lohnt sich KI? Antworten auf die Fragen, die Kunden uns am Anfang stellen.'],
+                    'booking' => ['title' => 'Kostenloses Erstgespräch buchen | Datenflow', 'description' => 'Buchen Sie online ein kostenloses Erstgespräch von 30 Minuten, per Video oder Telefon, mit sofortiger Bestätigung per E-Mail.'],
+                    'contact' => ['title' => 'Kontakt | Datenflow', 'description' => 'Telefon, E-Mail und Adresse von Datenflow in Berlin-Neukölln, oder direkt ein kostenloses Erstgespräch buchen.'],
+                    'karriere' => ['title' => 'Karriere bei Datenflow', 'description' => 'Bei Datenflow arbeiten: kleines Team, hohe Eigenverantwortung, hybrid in Berlin oder remote in der EU. Bewerbung in 3–5 Sätzen, Antwort in einer Woche.'],
+                    'impressum' => ['title' => 'Impressum | Datenflow', 'description' => 'Impressum von Datenflow: Anbieterangaben nach § 5 TMG, Inhaber Mohammad Beshtawi, Elsenstraße 62, 12059 Berlin.'],
+                    'datenschutz' => ['title' => 'Datenschutz | Datenflow', 'description' => 'Datenschutzerklärung von Datenflow: welche Daten wir bei Besuch, Kontakt, Terminbuchung und Bewerbung verarbeiten und welche Rechte Sie haben.'],
+                ],
             ],
             'nav' => [
                 'home' => 'Start',
@@ -324,6 +337,19 @@ final class SiteCopy
             'meta' => [
                 'title' => 'Datenflow: IT solutions',
                 'description' => 'Digital solutions, automation and AI for logistics, hospitality and service businesses, explained in plain language. Free first consultation.',
+                // Per page, keyed by route name. Titles stay under ~60 characters, descriptions under ~160.
+                'pages' => [
+                    'home' => ['title' => 'Datenflow | IT agency in Berlin for automation & AI', 'description' => 'Digital solutions, automation and AI for logistics, hospitality and service businesses, explained in plain language. Free first consultation.'],
+                    'services' => ['title' => 'Services: automation, AI & software | Datenflow', 'description' => 'For logistics, hospitality, services and trades: automating routine work, AI that helps day to day, custom software and ongoing support.'],
+                    'process' => ['title' => 'How we work: from first call to solution | Datenflow', 'description' => 'Four steps from the free first call to handover: an analysis with a fixed-price proposal, delivery in small stages, and support afterwards.'],
+                    'pricing' => ['title' => 'Pricing: buy, rent or pay per order | Datenflow', 'description' => 'Buy a ready-made solution once, rent it monthly or pay per order, or get a custom solution at a fixed price after a free analysis.'],
+                    'faq' => ['title' => 'FAQ | Datenflow', 'description' => 'What does it cost, how long does it take, what happens to our data, is AI worth it? Answers to the questions customers ask us at the start.'],
+                    'booking' => ['title' => 'Book a free first call | Datenflow', 'description' => 'Book a free 30-minute first call online, by video or phone, with instant confirmation by email.'],
+                    'contact' => ['title' => 'Contact | Datenflow', 'description' => 'Phone, email and address of Datenflow in Berlin-Neukölln, or book a free first call right away.'],
+                    'karriere' => ['title' => 'Careers at Datenflow', 'description' => 'Work at Datenflow: a small team with real ownership, hybrid in Berlin or remote in the EU. Apply in 3–5 sentences, get an answer within a week.'],
+                    'impressum' => ['title' => 'Imprint | Datenflow', 'description' => 'Imprint of Datenflow: provider details under § 5 TMG, owner Mohammad Beshtawi, Elsenstraße 62, 12059 Berlin.'],
+                    'datenschutz' => ['title' => 'Privacy | Datenflow', 'description' => 'Privacy policy of Datenflow: which data we process when you visit, contact us, book a call or apply, and what rights you have.'],
+                ],
             ],
             'nav' => [
                 'home' => 'Home',
