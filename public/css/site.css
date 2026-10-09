@@ -1,5 +1,5 @@
-/* Datenflow — quiet luxury design system.
-   Ivory paper, warm ink, antique gold. Cormorant for display, Jost for text.
+/* Datenflow — quiet luxury design system, dark edition.
+   Warm near-black ground, ivory type, antique gold. Cormorant for display, Jost for text.
    Fonts are self-hosted, so no visitor data goes to third parties (GDPR). */
 
 @font-face {
@@ -27,28 +27,31 @@
 }
 
 :root {
-    --ink: #141210;
-    --ink-body: #4E483F;
-    --ink-soft: #5E574D;
-    --ink-faint: #8C8477;
-    --paper: #FDFCFA;
-    --paper-warm: #F6F1E8;
-    --sand: #F3EEE4;
-    --line: #E6DCC7;
-    --line-soft: #ECE6DA;
-    --line-strong: #CDBF9F;
-    --gold: #B08A42;
-    --gold-deep: #8A6A2F;
+    color-scheme: dark;
+    /* "ink" = foreground, "paper" = ground; on the dark theme ink is ivory. */
+    --ink: #F4EFE6;
+    --ink-body: #C9C1B3;
+    --ink-soft: #A39A8B;
+    --ink-faint: #7D7568;
+    --paper: #0E0C0A;
+    --paper-warm: #15120E;
+    --sand: #1A1612;
+    --line: #2E2820;
+    --line-soft: #241F19;
+    --line-strong: #5A4C33;
+    --gold: #C9A55A;
+    --gold-deep: #D6B672;
     --gold-light: #C9A55A;
-    --gold-pale: #D6B672;
-    --gold-text: linear-gradient(100deg, var(--gold-deep), var(--gold-light) 45%, var(--gold-deep));
+    --gold-pale: #E2C98F;
+    --gold-text: linear-gradient(100deg, #B08A42, #F3E2AA 45%, #C9A55A);
+    --gold-fill: linear-gradient(100deg, #B08A42, #D6B672 50%, #B08A42);
     --dark-body: #C9C1B3;
     --dark-line: #3A332A;
     --serif: "Cormorant", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
     --sans: "Jost", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --r-card: 0;
-    --shadow: 0 4px 20px -8px rgba(20, 18, 16, 0.08);
-    --shadow-hover: 0 8px 32px -10px rgba(20, 18, 16, 0.14);
+    --shadow: 0 4px 20px -8px rgba(0, 0, 0, 0.5);
+    --shadow-hover: 0 8px 32px -10px rgba(0, 0, 0, 0.6);
 }
 
 * { box-sizing: border-box; }
@@ -160,17 +163,19 @@ img, svg { max-width: 100%; }
     border: 1px solid transparent;
     cursor: pointer;
     text-decoration: none;
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    transition: background 0.3s ease, background-position 0.4s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .btn-lg { padding: 1.05rem 1.9rem; }
 
 .btn-primary {
-    background: var(--ink);
+    background: var(--gold-fill);
+    background-size: 200% 100%;
     color: var(--paper);
+    font-weight: 500;
 }
 .btn-primary:hover {
-    background: var(--gold-deep);
+    background-position: 100% 0;
     color: var(--paper);
 }
 
@@ -185,12 +190,12 @@ img, svg { max-width: 100%; }
 }
 
 .btn-outline-light {
-    color: #F4EFE6;
+    color: var(--ink);
     border-color: var(--gold-light);
 }
 .btn-outline-light:hover {
     background: var(--gold-light);
-    color: var(--ink);
+    color: var(--paper);
 }
 
 /* ---------- Header ---------- */
@@ -199,7 +204,7 @@ img, svg { max-width: 100%; }
     position: sticky;
     top: 0;
     z-index: 50;
-    background: rgba(253, 252, 250, 0.92);
+    background: rgba(14, 12, 10, 0.88);
     backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--line-soft);
 }
@@ -276,7 +281,7 @@ img, svg { max-width: 100%; }
     border-color: var(--gold);
     white-space: nowrap;
 }
-.nav-cta:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.nav-cta:hover { background: var(--gold); border-color: var(--gold); color: var(--paper); }
 
 .lang-switch { color: var(--gold-deep); white-space: nowrap; }
 .lang-switch a {
@@ -331,6 +336,12 @@ img, svg { max-width: 100%; }
 
 /* ---------- Hero ---------- */
 
+.hero {
+    background:
+        radial-gradient(ellipse 60% 45% at 50% 22%, rgba(201, 165, 90, 0.13), transparent 70%),
+        var(--paper);
+}
+
 .hero-inner {
     display: flex;
     flex-direction: column;
@@ -366,7 +377,7 @@ img, svg { max-width: 100%; }
 
 .hero .checks { justify-content: center; margin-top: 0.5rem; }
 
-/* Wordmark: blurred, wide-tracked reveal; a gold shimmer sweeps through, then ink settles over it. */
+/* Wordmark: blurred, wide-tracked reveal while a gold shimmer sweeps through and comes to rest. */
 .wordmark {
     display: flex;
     flex-direction: column;
@@ -376,8 +387,7 @@ img, svg { max-width: 100%; }
 
 .wordmark-word { position: relative; }
 
-.wordmark-gold,
-.wordmark-ink {
+.wordmark-gold {
     display: block;
     font-family: var(--serif);
     font-weight: 500;
@@ -387,21 +397,12 @@ img, svg { max-width: 100%; }
     padding-left: 0.28em;
     text-transform: uppercase;
     white-space: nowrap;
-}
-
-.wordmark-gold {
-    background-image: linear-gradient(100deg, #8A6A2F 0%, #B08A42 25%, #F3E2AA 42%, #C9A55A 55%, #8A6A2F 75%, #B08A42 100%);
+    background-image: linear-gradient(100deg, #B08A42 0%, #C9A55A 25%, #F3E2AA 42%, #D6B672 55%, #B08A42 75%, #C9A55A 100%);
     background-size: 250% 100%;
     background-position: -20% 0;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-}
-
-.wordmark-ink {
-    position: absolute;
-    inset: 0;
-    color: var(--ink);
 }
 
 .wordmark-sub {
@@ -437,14 +438,12 @@ img, svg { max-width: 100%; }
 
 @keyframes df-reveal { from { opacity: 0; filter: blur(8px); letter-spacing: 0.42em; } to { opacity: 1; filter: blur(0); letter-spacing: 0.28em; } }
 @keyframes df-shimmer { from { background-position: 120% 0; } to { background-position: -20% 0; } }
-@keyframes df-ink { 0%, 55% { opacity: 0; } 100% { opacity: 1; } }
 @keyframes df-rule { from { transform: scaleX(0); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
 @keyframes df-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: no-preference) {
     .wordmark-word { animation: df-reveal 1.6s cubic-bezier(.2, .7, .2, 1) both; }
     .wordmark-gold { animation: df-shimmer 2.6s cubic-bezier(.3, .6, .3, 1) both; }
-    .wordmark-ink { animation: df-ink 3.2s ease both; }
     .wordmark-rule { animation: df-rule 1.2s 1.2s ease both; }
     .wordmark-tag { animation: df-fade 1s 1.5s ease both; }
 }
@@ -507,11 +506,13 @@ img, svg { max-width: 100%; }
 }
 
 .section-dark {
-    background: var(--ink);
-    color: #F4EFE6;
+    background: #080706;
+    border-top: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-strong);
+    color: var(--ink);
     margin-top: clamp(1rem, 3vw, 2rem);
 }
-.section-dark h2, .section-dark h3 { color: #F4EFE6; }
+.section-dark h2, .section-dark h3 { color: var(--ink); }
 .section-dark h2 em { color: var(--gold-pale); }
 .section-dark .section-sub, .section-dark .body-text { color: var(--dark-body); }
 .section-dark .kicker, .section-dark .numeral { color: var(--gold-pale); }
@@ -684,8 +685,9 @@ img, svg { max-width: 100%; }
 
 .custom-offer {
     margin-top: 1.25rem;
-    background: var(--ink);
-    color: #F4EFE6;
+    background: var(--sand);
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
     padding: 2.25rem 2.5rem;
     display: flex;
     flex-wrap: wrap;
@@ -694,7 +696,7 @@ img, svg { max-width: 100%; }
     justify-content: space-between;
 }
 .custom-offer > div { max-width: 45rem; }
-.custom-offer h3 { color: #F4EFE6; font-size: 1.875rem; margin-bottom: 0.5rem; }
+.custom-offer h3 { color: var(--ink); font-size: 1.875rem; margin-bottom: 0.5rem; }
 .custom-offer h3 em { color: var(--gold-pale); }
 .custom-offer p { margin: 0; font-size: 0.9375rem; color: var(--dark-body); }
 
@@ -937,9 +939,9 @@ img, svg { max-width: 100%; }
 }
 
 .form-error-summary {
-    background: #FBEAE2;
+    background: rgba(192, 96, 60, 0.12);
     border: 1px solid #C0603C;
-    color: #A24E2E;
+    color: #E8A387;
     border-radius: 0.75rem;
     padding: 1rem 1.5rem;
     font-weight: 600;
@@ -1015,7 +1017,7 @@ img, svg { max-width: 100%; }
 }
 
 .slot:hover span { border-color: var(--gold-deep); }
-.slot input:checked + span { background: var(--gold-deep); border-color: var(--ink); color: var(--paper); }
+.slot input:checked + span { background: var(--gold-deep); border-color: var(--gold); color: var(--paper); }
 .slot input:focus-visible + span { outline: 2px solid rgba(176, 138, 66, 0.35); }
 
 .slot-gone {
@@ -1070,8 +1072,8 @@ img, svg { max-width: 100%; }
 .call-pill .bi { font-size: 1.15rem; color: var(--gold-deep); line-height: 1; }
 
 .call-pill:hover span { border-color: var(--gold-deep); }
-.call-pill input:checked + span { background: var(--gold-deep); border-color: var(--ink); color: #fff; }
-.call-pill input:checked + span .bi { color: #fff; }
+.call-pill input:checked + span { background: var(--gold-deep); border-color: var(--gold); color: var(--paper); }
+.call-pill input:checked + span .bi { color: var(--paper); }
 .call-pill input:focus-visible + span { outline: 2px solid rgba(176, 138, 66, 0.35); }
 
 /* ---------- Admin ---------- */
@@ -1160,14 +1162,14 @@ img, svg { max-width: 100%; }
     white-space: nowrap;
 }
 .badge-steel { background: rgba(176, 138, 66, 0.14); color: var(--gold-deep); }
-.badge-warm { background: #F6E9E3; color: #A24E2E; }
+.badge-warm { background: rgba(192, 96, 60, 0.16); color: #E8A387; }
 .badge-grey { background: var(--sand); color: var(--ink-body); }
 
 .btn-sm { padding: 0.3rem 0.9rem; font-size: 0.85rem; }
-.btn-danger { background: transparent; color: #A24E2E; border-color: #D9B3A3; }
+.btn-danger { background: transparent; color: #E8A387; border-color: #7A4A38; }
 .btn-danger:hover { background: #C0603C; border-color: #C0603C; color: #fff; }
 
-.status-cancelled { color: #A24E2E; font-weight: 600; }
+.status-cancelled { color: #E8A387; font-weight: 600; }
 .status-confirmed { color: var(--gold-deep); font-weight: 600; }
 
 .admin-history summary { cursor: pointer; list-style: none; }
