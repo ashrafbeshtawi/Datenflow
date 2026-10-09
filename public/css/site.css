@@ -351,8 +351,17 @@ img, svg { max-width: 100%; }
     padding-bottom: clamp(4rem, 9vw, 6.9rem);
 }
 
-.hero-copy {
+/* Copy above the film by default; side by side on large landscape screens (see Image film). */
+.hero-body {
+    width: 100%;
     margin-top: 3.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(3.5rem, 7vw, 5.5rem);
+}
+
+.hero-copy {
     max-width: 47.5rem;
     display: flex;
     flex-direction: column;
@@ -451,10 +460,11 @@ img, svg { max-width: 100%; }
 /* ---------- Image film ---------- */
 
 .film-frame {
+    width: 100%;
     display: flex;
     justify-content: center;
     background: var(--sand);
-    border: 1px solid var(--line);
+    border: 1px solid var(--line-strong);
 }
 
 .film-video {
@@ -475,8 +485,22 @@ img, svg { max-width: 100%; }
         display: block;
         aspect-ratio: 9 / 16;
         width: min(100%, calc(min(80svh, 44rem) * 9 / 16));
-        border: 1px solid var(--line);
+        border: 1px solid var(--line-strong);
     }
+}
+
+/* Large landscape screens: copy left-aligned on the left, film on the right. */
+@media (min-width: 64rem) and (orientation: landscape) {
+    .hero-body {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: center;
+        gap: clamp(3rem, 4.5vw, 5rem);
+        text-align: left;
+    }
+    .hero-copy { align-items: flex-start; }
+    .hero-actions, .hero .checks { justify-content: flex-start; }
+    .film-frame { box-shadow: 0 30px 80px -30px rgba(201, 165, 90, 0.25); }
 }
 
 /* ---------- Checks ---------- */

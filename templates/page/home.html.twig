@@ -18,31 +18,28 @@
                 <span class="wordmark-rule wordmark-rule-right" aria-hidden="true"></span>
             </p>
         </div>
-        <div class="hero-copy">
-            <h1>{{ t.hero.title_pre }} <em class="gold-text">{{ t.hero.title_em }}</em></h1>
-            <p class="lede">{{ t.hero.lede }}</p>
-            <div class="hero-actions">
-                <a class="btn btn-primary btn-lg" href="{{ path('booking') }}">{{ t.hero.primary }}</a>
-                <a class="btn btn-ghost btn-lg" href="#services">{{ t.hero.secondary }}</a>
+        <div class="hero-body">
+            <div class="hero-copy">
+                <h1>{{ t.hero.title_pre }} <em class="gold-text">{{ t.hero.title_em }}</em></h1>
+                <p class="lede">{{ t.hero.lede }}</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary btn-lg" href="{{ path('booking') }}">{{ t.hero.primary }}</a>
+                    <a class="btn btn-ghost btn-lg" href="#services">{{ t.hero.secondary }}</a>
+                </div>
+                {% with {checks: t.hero.checks} %}{% include 'partials/_checks.html.twig' %}{% endwith %}
             </div>
-            {% with {checks: t.hero.checks} %}{% include 'partials/_checks.html.twig' %}{% endwith %}
-        </div>
-    </div>
-</section>
-
-{# One file per screen shape; CSS shows the one matching the orientation. preload="none" keeps
-   the ~30 MB films off the wire until someone presses play, so the hidden one never loads. #}
-<section class="film">
-    <div class="wrap">
-        <div class="film-frame">
-            <video class="film-video film-video-landscape" controls preload="none" playsinline
-                   poster="{{ asset('img/imagefilm-poster-' ~ lang ~ '.svg') }}" aria-label="{{ t.hero.video }}">
-                <source src="{{ asset('datenflow-imagefilm.mp4') }}" type="video/mp4">
-            </video>
-            <video class="film-video film-video-portrait" controls preload="none" playsinline
-                   poster="{{ asset('img/imagefilm-poster-9x16-' ~ lang ~ '.svg') }}" aria-label="{{ t.hero.video }}">
-                <source src="{{ asset('datenflow-imagefilm-9x16.mp4') }}" type="video/mp4">
-            </video>
+            {# One file per screen shape; CSS shows the one matching the orientation. preload="none" keeps
+               the ~30 MB films off the wire until someone presses play, so the hidden one never loads. #}
+            <div class="film-frame">
+                <video class="film-video film-video-landscape" controls preload="none" playsinline
+                       poster="{{ asset('img/imagefilm-poster-' ~ lang ~ '.svg') }}" aria-label="{{ t.hero.video }}">
+                    <source src="{{ asset('datenflow-imagefilm.mp4') }}" type="video/mp4">
+                </video>
+                <video class="film-video film-video-portrait" controls preload="none" playsinline
+                       poster="{{ asset('img/imagefilm-poster-9x16-' ~ lang ~ '.svg') }}" aria-label="{{ t.hero.video }}">
+                    <source src="{{ asset('datenflow-imagefilm-9x16.mp4') }}" type="video/mp4">
+                </video>
+            </div>
         </div>
     </div>
 </section>
