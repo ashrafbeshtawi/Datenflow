@@ -50,7 +50,12 @@ jobs:
           docker compose exec -T
           -e PANTHER_NO_SANDBOX=1
           -e PANTHER_CHROME_ARGUMENTS=--disable-dev-shm-usage
-          php vendor/bin/phpunit
+          php vendor/bin/phpunit --testsuite Unit,Functional,E2E
+
+      # Every page in sitemap.xml: unique title + description, canonical,
+      # hreflang, Open Graph, schema.org; admin noindex; robots.txt.
+      - name: SEO checks
+        run: docker compose exec -T php vendor/bin/phpunit --testsuite Seo
 
       # The dev stack (target: base) never runs the prod CMD — boot the real
       # prod image against the same database so migration/permission bugs
@@ -70,6 +75,10 @@ jobs:
           for i in $(seq 1 30); do
             if curl -sf http://localhost:8081 > /dev/null; then
               echo "prod image serves"
+              # robots.txt comes straight from Apache, the sitemap from Symfony.
+              curl -sf http://localhost:8081/robots.txt | grep -q '^Sitemap: '
+              curl -sf http://localhost:8081/sitemap.xml | grep -q '<loc>'
+              echo "prod image serves robots.txt and sitemap.xml"
               exit 0
             fi
             sleep 2

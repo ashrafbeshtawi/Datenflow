@@ -29,6 +29,9 @@
         <testsuite name="E2E">
             <directory>tests/E2E</directory>
         </testsuite>
+        <testsuite name="Seo">
+            <directory>tests/Seo</directory>
+        </testsuite>
     </testsuites>
 
     <source ignoreSuppressionOfDeprecations="true"

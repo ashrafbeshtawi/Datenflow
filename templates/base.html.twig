@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}{{ t.meta.title }}{% endblock %}</title>
-    <meta name="description" content="{% block description %}{{ t.meta.description }}{% endblock %}">
     {% set route = app.request.attributes.get('_route') %}
-    {% if route %}<link rel="canonical" href="{{ url(route, app.request.attributes.get('_route_params')) }}">{% endif %}
+    {% set seo = route and t.meta.pages[route] is defined ? t.meta.pages[route] : t.meta %}
+    {% set noindex = sent|default(false) or route starts with 'admin' %}
+    <title>{% block title %}{{ seo.title }}{% endblock %}</title>
+    <meta name="description" content="{{ seo.description }}">
+    {% if route %}{% set canonical = url(route, app.request.attributes.get('_route_params')) %}<link rel="canonical" href="{{ canonical }}">{% endif %}
     {# Only localized pages (route carries _locale) have a version in the other language. #}
     {% set page_route = app.request.attributes.get('_route_params')._locale is defined ? route : null %}
     {% if page_route %}
@@ -14,7 +16,45 @@
     <link rel="alternate" hreflang="en" href="{{ url(page_route, {_locale: 'en'}) }}">
     <link rel="alternate" hreflang="x-default" href="{{ url(page_route, {_locale: 'de'}) }}">
     {% endif %}
-    {% if sent|default(false) or route starts with 'admin' %}<meta name="robots" content="noindex">{% endif %}
+    {% if noindex %}<meta name="robots" content="noindex">{% endif %}
+    {% if not noindex %}
+    {# Link previews (Open Graph is read by most chat apps and networks; X reads the twitter:card hint). #}
+    {% set og_image = absolute_url(asset('img/og-image.png')) %}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Datenflow">
+    <meta property="og:title" content="{{ block('title') }}">
+    <meta property="og:description" content="{{ seo.description }}">
+    {% if canonical is defined %}<meta property="og:url" content="{{ canonical }}">{% endif %}
+    <meta property="og:locale" content="{{ lang == 'en' ? 'en_US' : 'de_DE' }}">
+    <meta property="og:locale:alternate" content="{{ lang == 'en' ? 'de_DE' : 'en_US' }}">
+    <meta property="og:image" content="{{ og_image }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Datenflow — {{ t.hero.eyebrow }}">
+    <meta name="twitter:card" content="summary_large_image">
+    {# Business details for search engines (schema.org), built from the contact copy. #}
+    {% set postcode_city = t.contact.address[2]|split(' ', 2) %}
+    <script type="application/ld+json">{{ {
+        '@context': 'https://schema.org',
+        '@type': 'ProfessionalService',
+        'name': 'Datenflow',
+        'description': t.meta.description,
+        'url': url('home', {_locale: lang}),
+        'logo': absolute_url(asset('favicon.png')),
+        'image': og_image,
+        'telephone': t.contact.phone|replace({' ': ''}),
+        'email': t.contact.email,
+        'address': {
+            '@type': 'PostalAddress',
+            'streetAddress': t.contact.address[1],
+            'postalCode': postcode_city[0],
+            'addressLocality': postcode_city[1],
+            'addressCountry': 'DE',
+        },
+        'areaServed': 'DE',
+        'inLanguage': [ 'de', 'en' ],
+    }|json_encode(constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_HEX_TAG'))|raw }}</script>
+    {% endif %}
     <link rel="icon" href="{{ asset('logo.svg') }}" type="image/svg+xml">
     <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
     <link rel="preload" href="{{ asset('fonts/cormorant-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
