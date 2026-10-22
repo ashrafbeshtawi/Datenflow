@@ -1,5 +1,5 @@
 # base: dev image used by docker-compose (app is volume-mounted)
-FROM php:8.5-apache AS base
+FROM php:8.5.12-apache AS base
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends libicu-dev libzip-dev libpq-dev \
@@ -17,6 +17,9 @@ RUN printf 'upload_max_filesize=10M\npost_max_size=12M\n' > /usr/local/etc/php/c
 # PHP must hydrate and create DateTimes in that zone, or every rendered entity
 # time drifts by the UTC offset (admin panel +2h in summer).
 RUN printf 'date.timezone=Europe/Berlin\n' > /usr/local/etc/php/conf.d/timezone.ini
+
+# Unused here; also a confirmed RCE consumer in CVE-2026-109619.
+RUN printf 'session.upload_progress.enabled=0\n' > /usr/local/etc/php/conf.d/security.ini
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
