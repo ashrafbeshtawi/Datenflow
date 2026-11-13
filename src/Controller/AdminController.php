@@ -17,6 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
@@ -38,16 +39,29 @@ class AdminController extends AbstractController
         Request $request,
         #[Autowire(env: 'ADMIN_USER')] string $user,
         #[Autowire(env: 'ADMIN_PASSWORD')] string $password,
+        RateLimiterFactory $adminLoginLimiter,
     ): Response {
         $error = false;
         if ($request->isMethod('POST')) {
             $this->assertCsrf($request);
+
+            // Every attempt counts, a successful login resets the counter, so
+            // only failed attempts pile up. Once the window is used up even the
+            // right password is refused, with the same message as a wrong one.
+            $limiter = $adminLoginLimiter->create(
+                ($request->getClientIp() ?? 'unknown').'|'.mb_strtolower($request->request->getString('username'))
+            );
+            if (!$limiter->consume()->isAccepted()) {
+                return $this->render('admin/login.html.twig', $this->buildBaseContext() + ['error' => true], new Response(status: Response::HTTP_TOO_MANY_REQUESTS));
+            }
+
             // Evaluate both comparisons before deciding, so a wrong user name
             // costs the same time as a wrong password.
             $userOk = hash_equals($user, $request->request->getString('username'));
             $passOk = hash_equals($password, $request->request->getString('password'));
 
             if ($user !== '' && $password !== '' && $userOk && $passOk) {
+                $limiter->reset();
                 $request->getSession()->migrate(true);
                 $request->getSession()->set(AdminAuthListener::SESSION_KEY, true);
 

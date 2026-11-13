@@ -52,6 +52,41 @@ class AdminTest extends WebTestCase
         self::assertResponseRedirects('/admin/login');
     }
 
+    public function testLoginIsLockedAfterFiveFailedAttempts(): void
+    {
+        // Own client IP, so earlier runs and other tests don't share the counter.
+        $client = static::createClient([], ['REMOTE_ADDR' => '10.'.random_int(0, 255).'.'.random_int(0, 255).'.'.random_int(1, 254)]);
+        for ($i = 0; $i < 5; ++$i) {
+            $this->login($client, 'test', 'wrong-password');
+            self::assertResponseStatusCodeSame(200);
+        }
+
+        $this->login($client, 'test', 'test-admin');
+
+        self::assertResponseStatusCodeSame(429);
+        self::assertSelectorExists('.form-error-summary');
+        $client->request('GET', '/admin');
+        self::assertResponseRedirects('/admin/login');
+    }
+
+    public function testSuccessfulLoginResetsTheFailedAttempts(): void
+    {
+        $client = static::createClient([], ['REMOTE_ADDR' => '10.'.random_int(0, 255).'.'.random_int(0, 255).'.'.random_int(1, 254)]);
+        for ($i = 0; $i < 4; ++$i) {
+            $this->login($client, 'test', 'wrong-password');
+        }
+        $this->login($client, 'test', 'test-admin');
+        self::assertResponseRedirects('/admin');
+
+        $client->request('POST', '/admin/logout', ['_token' => $this->csrfToken($client)]);
+        for ($i = 0; $i < 4; ++$i) {
+            $this->login($client, 'test', 'wrong-password');
+        }
+        $this->login($client, 'test', 'test-admin');
+
+        self::assertResponseRedirects('/admin', null, 'counter must start over after a successful login');
+    }
+
     public function testLogoutEndsTheSession(): void
     {
         $client = $this->adminClient();
