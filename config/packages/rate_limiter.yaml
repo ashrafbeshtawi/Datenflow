@@ -4,6 +4,13 @@ framework:
             policy: sliding_window
             limit: 5
             interval: '15 minutes'
+        # Failed admin logins per client IP + username; a success resets it.
+        # No when@test override: AdminTest checks the real limit and uses its
+        # own client IP, the other tests log in successfully and reset it.
+        admin_login:
+            policy: sliding_window
+            limit: 5
+            interval: '15 minutes'
 
 when@test:
     framework:
