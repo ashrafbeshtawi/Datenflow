@@ -7,6 +7,8 @@ use App\Mail\InquiryMailer;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 class InquiryMailerTest extends TestCase
 {
@@ -24,6 +26,7 @@ class InquiryMailerTest extends TestCase
 
         $this->mailer = new InquiryMailer(
             $transport,
+            new Environment(new FilesystemLoader(\dirname(__DIR__, 2).'/templates'), ['strict_variables' => true]),
             'Datenflow <noreply@test.local>',
             'contact@test.local',
             'jobs@test.local',
@@ -131,5 +134,86 @@ class InquiryMailerTest extends TestCase
         self::assertStringContainsString('Tuesday, 08.09.2026, 14:30', $confirmation->getTextBody());
         self::assertStringContainsString('By phone', $confirmation->getTextBody());
         self::assertStringContainsString('We will call you at: 030 1234567', $confirmation->getTextBody());
+
+        $html = $confirmation->getHtmlBody();
+        self::assertStringContainsString('<html lang="en">', $html);
+        self::assertStringContainsString('We will call you at: 030 1234567', $html);
+        // Phone call: no Meet button.
+        self::assertStringNotContainsString('>Google Meet</a>', $html);
+    }
+
+    public function testEveryMailHasHtmlPartAndPlainTextFallback(): void
+    {
+        $booking = new Inquiry(
+            'booking',
+            'Maria Muster',
+            'maria@example.com',
+            '',
+            [],
+            new \DateTimeImmutable('2026-09-07 10:00'),
+            'video',
+        );
+
+        $this->mailer->send($booking, null, 'de', 'https://meet.google.com/jre-kcoc-swk');
+        $this->mailer->sendReschedule($booking, 'https://meet.google.com/jre-kcoc-swk');
+        $this->mailer->sendCancellation($booking);
+        $this->mailer->send(new Inquiry('karriere', 'Devi Developer', 'devi@example.com', 'Hallo'));
+
+        self::assertCount(7, $this->sent);
+        foreach ($this->sent as $mail) {
+            self::assertNotEmpty($mail->getTextBody(), $mail->getSubject());
+            self::assertStringStartsWith('<!DOCTYPE html>', ltrim((string) $mail->getHtmlBody()), $mail->getSubject());
+        }
+    }
+
+    public function testVideoConfirmationHtmlHasMeetButton(): void
+    {
+        $inquiry = new Inquiry(
+            'booking',
+            'Maria Muster',
+            'maria@example.com',
+            '',
+            [],
+            new \DateTimeImmutable('2026-09-07 10:00'),
+            'video',
+        );
+
+        $this->mailer->send($inquiry, null, 'de', 'https://meet.google.com/jre-kcoc-swk');
+
+        $html = $this->sent[1]->getHtmlBody();
+        self::assertStringContainsString('<a href="https://meet.google.com/jre-kcoc-swk"', $html);
+        self::assertStringContainsString('Montag, 07.09.2026, 10:00 Uhr', $html);
+    }
+
+    public function testHtmlEscapesVisitorInput(): void
+    {
+        $inquiry = new Inquiry('karriere', '<b>Evil</b>', 'evil@example.com', "<script>alert(1)</script>\nZeile 2");
+
+        $this->mailer->send($inquiry);
+
+        $html = $this->sent[0]->getHtmlBody();
+        self::assertStringNotContainsString('<script>', $html);
+        self::assertStringNotContainsString('<b>Evil</b>', $html);
+        self::assertStringContainsString('&lt;script&gt;alert(1)&lt;/script&gt;<br />', $html);
+    }
+
+    public function testBilingualCancellationHtmlHasBothLanguages(): void
+    {
+        $inquiry = new Inquiry(
+            'booking',
+            'Maria Muster',
+            'maria@example.com',
+            '',
+            [],
+            new \DateTimeImmutable('2026-09-07 10:00'),
+            'phone',
+        );
+
+        $this->mailer->sendCancellation($inquiry);
+
+        $html = $this->sent[0]->getHtmlBody();
+        self::assertStringContainsString('Hallo Maria Muster', $html);
+        self::assertStringContainsString('Hello Maria Muster', $html);
+        self::assertStringContainsString('<hr', $html);
     }
 }
