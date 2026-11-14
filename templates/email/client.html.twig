@@ -1,0 +1,24 @@
+{#- Client mails (confirmation, reschedule, cancellation). The copy is the same
+    SiteCopy text as the plain-text part, split into paragraphs, so both parts
+    always say the same thing. One section per language for bilingual mails. -#}
+{% extends 'email/layout.html.twig' %}
+
+{% block content %}
+    {% for section in sections %}
+        {% if not loop.first %}
+            <hr style="border:0;border-top:1px solid #E2D8C6;margin:28px 0;">
+        {% endif %}
+        {% for paragraph in section|split("\n\n") %}
+            <p style="margin:0 0 16px;">{{ paragraph|nl2br }}</p>
+        {% endfor %}
+    {% endfor %}
+    {% if meetLink %}
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 0;">
+            <tr>
+                <td style="background:#B08A42;border-radius:4px;">
+                    <a href="{{ meetLink }}" style="display:inline-block;padding:12px 24px;font-weight:600;color:#FFFFFF;text-decoration:none;">Google Meet</a>
+                </td>
+            </tr>
+        </table>
+    {% endif %}
+{% endblock %}

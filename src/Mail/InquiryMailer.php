@@ -10,6 +10,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Part\DataPart;
+use Twig\Environment;
 
 class InquiryMailer
 {
@@ -20,6 +21,7 @@ class InquiryMailer
 
     public function __construct(
         private readonly MailerInterface $mailer,
+        private readonly Environment $twig,
         #[Autowire(env: 'MAIL_FROM')] private readonly string $from,
         #[Autowire(env: 'MAIL_TO_CONTACT')] private readonly string $toContact,
         #[Autowire(env: 'MAIL_TO_KARRIERE')] private readonly string $toKarriere,
@@ -52,33 +54,38 @@ class InquiryMailer
         }
     }
 
-    /** Plain-text staff notification carrying everything the visitor submitted. */
+    /** Staff notification carrying everything the visitor submitted. */
     private function buildInternalNotification(Inquiry $inquiry, ?string $meetLink): Email
     {
-        $lines = [
-            'Name:    '.$inquiry->getName(),
-            'E-Mail:  '.$inquiry->getEmail(),
+        $rows = [
+            ['Name', $inquiry->getName()],
+            ['E-Mail', $inquiry->getEmail()],
         ];
         if ($inquiry->getStartsAt() !== null) {
-            $lines[] = 'Termin:  '.$this->formatWhen($inquiry, 'de');
-            $lines[] = 'Art:     '.($inquiry->getCallType() === 'video' ? 'Video (Google Meet)' : 'Telefon');
+            $rows[] = ['Termin', $this->formatWhen($inquiry, 'de')];
+            $rows[] = ['Art', $inquiry->getCallType() === 'video' ? 'Video (Google Meet)' : 'Telefon'];
             if ($inquiry->getCallType() === 'video') {
-                $lines[] = 'Meet:    '.($meetLink ?? '');
+                $rows[] = ['Meet', $meetLink ?? ''];
             }
         }
         foreach ($inquiry->getPayload() as $key => $value) {
-            $lines[] = str_pad(ucfirst(str_replace('_', ' ', $key)).':', 8).' '.$value;
+            $rows[] = [ucfirst(str_replace('_', ' ', $key)), (string) $value];
         }
+
+        $lines = array_map(fn (array $row) => str_pad($row[0].':', 8).' '.$row[1], $rows);
         $lines[] = '';
         $lines[] = 'Nachricht:';
         $lines[] = $inquiry->getMessage();
+
+        $subject = self::SUBJECTS[$inquiry->getType()].' von '.$inquiry->getName();
 
         return (new Email())
             ->from(Address::create($this->from))
             ->to($inquiry->getType() === 'karriere' ? $this->toKarriere : $this->toContact)
             ->replyTo(new Address($inquiry->getEmail(), $inquiry->getName()))
-            ->subject(self::SUBJECTS[$inquiry->getType()].' von '.$inquiry->getName())
-            ->text(implode("\n", $lines));
+            ->subject($subject)
+            ->text(implode("\n", $lines))
+            ->html($this->renderInternal($subject, $subject, $rows, $inquiry->getMessage()));
     }
 
     /**
@@ -98,18 +105,26 @@ class InquiryMailer
             ]);
         }
 
+        $subject = implode(' / ', $subjects);
         $this->mailer->send((new Email())
             ->from(Address::create($this->from))
             ->to(new Address($inquiry->getEmail(), $inquiry->getName()))
             ->replyTo($this->toContact)
-            ->subject(implode(' / ', $subjects))
-            ->text(implode("\n\n----\n\n", $parts)));
+            ->subject($subject)
+            ->text(implode("\n\n----\n\n", $parts))
+            ->html($this->renderClient($subject, $parts)));
 
+        $internalSubject = '[Datenflow] Termin storniert: '.$inquiry->getName();
         $this->mailer->send((new Email())
             ->from(Address::create($this->from))
             ->to($this->toContact)
-            ->subject('[Datenflow] Termin storniert: '.$inquiry->getName())
-            ->text('Der Termin am '.$inquiry->getStartsAt()->format('d.m.Y H:i').' mit '.$inquiry->getName().' ('.$inquiry->getEmail().') wurde storniert. Der Slot ist wieder frei.'));
+            ->subject($internalSubject)
+            ->text('Der Termin am '.$inquiry->getStartsAt()->format('d.m.Y H:i').' mit '.$inquiry->getName().' ('.$inquiry->getEmail().') wurde storniert. Der Slot ist wieder frei.')
+            ->html($this->renderInternal($internalSubject, 'Termin storniert', [
+                ['Name', $inquiry->getName()],
+                ['E-Mail', $inquiry->getEmail()],
+                ['Termin', $this->formatWhen($inquiry, 'de')],
+            ], 'Der Slot ist wieder frei.')));
     }
 
     /**
@@ -135,21 +150,33 @@ class InquiryMailer
         // without persisting a counter; upgrade to a stored counter if it ever matters.
         $invite = $this->buildInvite($inquiry, $meetLink, time());
 
+        $subject = implode(' / ', $subjects);
         $this->mailer->send((new Email())
             ->from(Address::create($this->from))
             ->to(new Address($inquiry->getEmail(), $inquiry->getName()))
             ->replyTo($this->toContact)
-            ->subject(implode(' / ', $subjects))
+            ->subject($subject)
             ->text(implode("\n\n----\n\n", $parts))
+            ->html($this->renderClient($subject, $parts, $meetLink))
             ->addPart($invite));
 
+        $rows = [
+            ['Name', $inquiry->getName()],
+            ['E-Mail', $inquiry->getEmail()],
+            ['Neuer Termin', $this->formatWhen($inquiry, 'de')],
+        ];
+        if ($meetLink !== null) {
+            $rows[] = ['Meet', $meetLink];
+        }
+        $internalSubject = '[Datenflow] Termin verschoben: '.$inquiry->getName();
         $this->mailer->send((new Email())
             ->from(Address::create($this->from))
             ->to($this->toContact)
-            ->subject('[Datenflow] Termin verschoben: '.$inquiry->getName())
+            ->subject($internalSubject)
             ->text('Der Termin mit '.$inquiry->getName().' ('.$inquiry->getEmail().') wurde verschoben.'
                 ."\nNeuer Termin: ".$this->formatWhen($inquiry, 'de')
                 .($meetLink !== null ? "\nMeet: ".$meetLink : ''))
+            ->html($this->renderInternal($internalSubject, 'Termin verschoben', $rows))
             ->addPart($invite));
     }
 
@@ -169,7 +196,35 @@ class InquiryMailer
             ->to(new Address($inquiry->getEmail(), $inquiry->getName()))
             ->replyTo($this->toContact)
             ->subject($t['mail']['subject'])
-            ->text($body);
+            ->text($body)
+            ->html($this->renderClient($t['mail']['subject'], [$body], $inquiry->getCallType() === 'video' ? $meetLink : null, $lang));
+    }
+
+    /**
+     * HTML twin of a client mail: the same text sections (one per language),
+     * so the plain-text part stays a faithful fallback.
+     *
+     * @param string[] $sections
+     */
+    private function renderClient(string $subject, array $sections, ?string $meetLink = null, string $lang = 'de'): string
+    {
+        return $this->twig->render('email/client.html.twig', [
+            'subject' => $subject,
+            'sections' => $sections,
+            'meetLink' => $meetLink,
+            'lang' => $lang,
+        ]);
+    }
+
+    /** @param list<array{string, string}> $rows label/value pairs */
+    private function renderInternal(string $subject, string $heading, array $rows, string $message = ''): string
+    {
+        return $this->twig->render('email/internal.html.twig', [
+            'subject' => $subject,
+            'heading' => $heading,
+            'rows' => $rows,
+            'message' => $message,
+        ]);
     }
 
     /**
