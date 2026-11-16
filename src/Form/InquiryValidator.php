@@ -41,7 +41,8 @@ class InquiryValidator
             }
         }
         foreach (self::SINGLE_LINE as $field) {
-            if (preg_match('/\p{Cc}/u', $request->request->getString($field)) === 1) {
+            // preg_match returns false for invalid UTF-8; that counts as invalid too.
+            if (preg_match('/\p{Cc}/u', $request->request->getString($field)) !== 0) {
                 $errors[$field] = 'invalid';
             }
         }

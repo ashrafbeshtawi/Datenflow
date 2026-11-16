@@ -73,6 +73,19 @@ class InquiryValidatorTest extends TestCase
         self::assertSame(['name' => 'invalid', 'company' => 'invalid'], $errors);
     }
 
+    public function testInvalidUtf8InSingleLineFieldsIsRejected(): void
+    {
+        $request = self::post([
+            'name' => "Max\xFF\r\nURL:https://evil.example",
+            'email' => 'maria@example.com',
+            'message' => 'Hallo',
+        ]);
+
+        $errors = $this->validator->validate($request, ['name', 'email', 'message']);
+
+        self::assertSame(['name' => 'invalid'], $errors);
+    }
+
     private static function post(array $fields): Request
     {
         return new Request(request: $fields);
