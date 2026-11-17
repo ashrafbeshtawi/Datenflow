@@ -25,7 +25,8 @@ class BookingFlowTest extends PantherTestCase
         $client->submitForm('Termin buchen', [
             'name' => 'E2E Tester',
             'company' => 'Test Gastro GmbH',
-            'email' => 'e2e@example.com',
+            // Unique, or reruns on the same DB hit the two-bookings-per-email cap.
+            'email' => uniqid('e2e-').'@example.com',
             'message' => 'Unsere Reservierungen laufen noch über den Anrufbeantworter.',
         ]);
 

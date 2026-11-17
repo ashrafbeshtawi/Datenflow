@@ -11,11 +11,27 @@ framework:
             policy: sliding_window
             limit: 5
             interval: '15 minutes'
+        # Stored bookings per client IP (BookingLimits); on top of form_submit.
+        booking_submit:
+            policy: sliding_window
+            limit: 2
+            interval: '1 day'
 
 when@test:
+    services:
+        # In memory, so the counter starts empty with every kernel: the
+        # functional and E2E tests book from 127.0.0.1 many times a day.
+        booking_limiter.storage:
+            class: Symfony\Component\RateLimiter\Storage\InMemoryStorage
     framework:
         rate_limiter:
             form_submit:
                 policy: sliding_window
                 limit: 1000
                 interval: '15 minutes'
+            # Real limit; InquiryFormsTest keeps one kernel to hit it.
+            booking_submit:
+                policy: sliding_window
+                limit: 2
+                interval: '1 day'
+                storage_service: booking_limiter.storage
