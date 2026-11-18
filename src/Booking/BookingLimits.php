@@ -6,9 +6,10 @@ use App\Entity\Inquiry;
 use DateTimeImmutable;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\RateLimiter\LimiterInterface;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 
 /**
  * Bookings are confirmed on submit (no email round trip), so these caps keep
@@ -28,7 +29,8 @@ class BookingLimits
 
     public function __construct(
         private readonly EntityManagerInterface $em,
-        private readonly RateLimiterFactory $bookingSubmitLimiter,
+        #[Target('booking_submit')]
+        private readonly RateLimiterFactoryInterface $bookingSubmitLimiter,
     ) {
     }
 
