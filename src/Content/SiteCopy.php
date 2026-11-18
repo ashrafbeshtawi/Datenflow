@@ -295,6 +295,8 @@ final class SiteCopy
                 'cv_invalid_type' => 'Bitte PDF, DOC oder DOCX hochladen.',
                 'slot_taken' => 'Dieser Termin ist leider nicht mehr verfügbar, bitte wählen Sie einen anderen.',
                 'phone_required' => 'Für einen Telefonanruf benötigen wir Ihre Telefonnummer.',
+                'booking_limit_email' => 'Für diese E-Mail-Adresse sind schon zwei Termine gebucht. Für einen weiteren schreiben Sie uns bitte oder rufen Sie an.',
+                'booking_limit_ip' => 'Von diesem Anschluss wurden heute schon zwei Termine gebucht. Bitte versuchen Sie es morgen erneut oder rufen Sie uns an.',
             ],
             'footer' => [
                 'blurb' => 'IT-Lösungen, Logistik, Gastronomie, Dienstleistung, Kosmetik.',
@@ -597,6 +599,8 @@ final class SiteCopy
                 'cv_invalid_type' => 'Please upload PDF, DOC or DOCX.',
                 'slot_taken' => 'That slot is no longer available, please pick another one.',
                 'phone_required' => 'We need your phone number for a phone call.',
+                'booking_limit_email' => 'This email address already has two calls booked. For another one, please write to us or give us a call.',
+                'booking_limit_ip' => 'Two calls have already been booked from this connection today. Please try again tomorrow or give us a call.',
             ],
             'footer' => [
                 'blurb' => 'IT solutions, logistics, hospitality, services, beauty.',

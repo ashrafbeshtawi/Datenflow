@@ -75,6 +75,58 @@ class InquiryFormsTest extends WebTestCase
         self::assertEmailCount(0);
     }
 
+    public function testThirdOpenBookingForTheSameEmailIsRefused(): void
+    {
+        $email = uniqid('twice-').'@example.com';
+        $this->bookDirectly($this->farFutureSlot(), $email);
+        $this->bookDirectly($this->farFutureSlot(), $email);
+        [, $slot] = $this->openBookingWeek();
+
+        // Same address in other letter case still counts.
+        $this->client->submitForm('Termin buchen', [
+            'name' => 'Maria Muster',
+            'email' => strtoupper($email),
+            'starts_at' => $slot,
+            'call_type' => 'video',
+        ]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorTextContains('.form-error-summary', 'schon zwei Termine');
+        self::assertSelectorExists('input[name="email"][aria-invalid="true"]');
+        self::assertEmailCount(0);
+        self::assertCount(2, static::getContainer()->get(EntityManagerInterface::class)
+            ->getRepository(Inquiry::class)->findBy(['email' => $email]));
+    }
+
+    public function testThirdBookingFromTheSameIpOnOneDayIsRefused(): void
+    {
+        // One kernel for every request, so the in-memory test limiter keeps its count.
+        $this->client->disableReboot();
+        $this->client->setServerParameter('REMOTE_ADDR', '10.20.30.40');
+
+        // A rejected submit does not use up the quota.
+        [, $slot] = $this->openBookingWeek();
+        $this->client->submitForm('Termin buchen', ['name' => 'Maria Muster', 'email' => uniqid('ip-').'@example.com', 'starts_at' => $slot, 'call_type' => 'phone', 'phone' => '']);
+        self::assertResponseStatusCodeSame(422);
+
+        for ($i = 0; $i < 2; ++$i) {
+            $this->submitBooking(uniqid('ip-').'@example.com');
+            self::assertResponseRedirects('/termin?sent=1');
+        }
+
+        $refused = uniqid('ip-').'@example.com';
+        $this->submitBooking($refused);
+        self::assertResponseStatusCodeSame(429);
+        self::assertSelectorTextContains('.form-error-summary', 'heute schon zwei Termine');
+        self::assertNull(static::getContainer()->get(EntityManagerInterface::class)
+            ->getRepository(Inquiry::class)->findOneBy(['email' => $refused]));
+
+        // Another IP still books.
+        $this->client->setServerParameter('REMOTE_ADDR', '10.20.30.41');
+        $this->submitBooking(uniqid('ip-').'@example.com');
+        self::assertResponseRedirects('/termin?sent=1');
+    }
+
     public function testPhoneCallRequiresPhoneNumber(): void
     {
         [, $slot] = $this->openBookingWeek();
@@ -230,13 +282,33 @@ class InquiryFormsTest extends WebTestCase
         return [$crawler, $radios->eq(random_int(0, $radios->count() - 1))->attr('value')];
     }
 
-    private function bookDirectly(string $slot): void
+    private function submitBooking(string $email): void
+    {
+        [, $slot] = $this->openBookingWeek();
+        $this->client->submitForm('Termin buchen', [
+            'name' => 'Maria Muster',
+            'email' => $email,
+            'starts_at' => $slot,
+            'call_type' => 'video',
+        ]);
+    }
+
+    /** Past the booking horizon, random so reruns on the same test DB don't collide. */
+    private function farFutureSlot(): string
+    {
+        return (new \DateTimeImmutable('+1 year', new \DateTimeZone('Europe/Berlin')))
+            ->modify('+'.random_int(0, 365).' days')
+            ->setTime(random_int(0, 23), random_int(0, 59))
+            ->format('Y-m-d H:i');
+    }
+
+    private function bookDirectly(string $slot, ?string $email = null): void
     {
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $em->persist(new Inquiry(
             'booking',
             'Erste Bucherin',
-            uniqid('first-').'@example.com',
+            $email ?? uniqid('first-').'@example.com',
             '',
             [],
             new \DateTimeImmutable($slot, new \DateTimeZone('Europe/Berlin')),

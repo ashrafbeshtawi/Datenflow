@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Booking\BookingLimits;
 use App\Booking\SlotFinder;
 use App\Entity\Inquiry;
 use App\Entity\Setting;
@@ -31,6 +32,7 @@ class BookingSubmitController extends AbstractController
         private readonly InquiryValidator $validator,
         private readonly FormErrorResponder $errorPage,
         private readonly SlotFinder $slots,
+        private readonly BookingLimits $limits,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -59,6 +61,14 @@ class BookingSubmitController extends AbstractController
             return $this->respondError($request, $special !== [] ? reset($special) : 'validation', Response::HTTP_UNPROCESSABLE_ENTITY, $errors);
         }
 
+        $limit = $this->limits->check($request, $request->request->getString('email'));
+        if ($limit === BookingLimits::EMAIL) {
+            return $this->respondError($request, $limit, Response::HTTP_UNPROCESSABLE_ENTITY, ['email' => $limit]);
+        }
+        if ($limit === BookingLimits::IP) {
+            return $this->respondError($request, $limit, Response::HTTP_TOO_MANY_REQUESTS);
+        }
+
         $inquiry = new Inquiry(
             Inquiry::TYPE_BOOKING,
             trim($request->request->getString('name')),
@@ -79,6 +89,7 @@ class BookingSubmitController extends AbstractController
             // Someone else grabbed the slot between render and submit.
             return $this->respondError($request, 'slot_taken', Response::HTTP_UNPROCESSABLE_ENTITY, ['starts_at' => 'slot_taken']);
         }
+        $this->limits->record($request);
 
         try {
             $meetLink = $callType === 'video' ? $this->em->find(Setting::class, Setting::MEET_LINK)?->getValue() : null;
