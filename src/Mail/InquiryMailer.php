@@ -183,9 +183,15 @@ class InquiryMailer
         // startsAt is naive Europe/Berlin wall-clock time; pin the zone before converting.
         $start = new \DateTimeImmutable($inquiry->getStartsAt()->format('Y-m-d H:i'), new \DateTimeZone(SlotFinder::TZ));
         $stamp = fn (\DateTimeImmutable $d) => $d->setTimezone($utc)->format('Ymd\THis\Z');
-        $esc = fn (string $v) => addcslashes($v, ',;\\');
+        // RFC 5545 TEXT: escape \ , ; and turn line breaks into a literal \n so a
+        // value can never start a property line of its own.
+        $esc = fn (string $v) => preg_replace(
+            ['/\r\n|\r|\n/', '/[\x00-\x08\x0B-\x1F\x7F]/'],
+            ['\\\\n', ''],
+            addcslashes($v, ',;\\'),
+        );
 
-        $ics = implode("\r\n", array_filter([
+        $ics = implode("\r\n", array_map(self::foldIcsLine(...), array_filter([
             'BEGIN:VCALENDAR',
             'VERSION:2.0',
             'PRODID:-//Datenflow//Booking//DE',
@@ -204,12 +210,29 @@ class InquiryMailer
             'STATUS:CONFIRMED',
             'END:VEVENT',
             'END:VCALENDAR',
-        ]));
+        ])));
 
         $part = new DataPart($ics, 'einladung.ics', 'text/calendar');
         $part->getHeaders()->addParameterizedHeader('Content-Type', 'text/calendar', ['method' => 'REQUEST', 'charset' => 'utf-8']);
 
         return $part;
+    }
+
+    /** RFC 5545 folding: at most 75 octets per line, continuation lines start with a space. */
+    private static function foldIcsLine(string $line): string
+    {
+        $folded = '';
+        $octets = 0;
+        foreach (mb_str_split($line, 1, 'UTF-8') as $char) {
+            if ($octets + \strlen($char) > 75) {
+                $folded .= "\r\n ";
+                $octets = 1;
+            }
+            $folded .= $char;
+            $octets += \strlen($char);
+        }
+
+        return $folded;
     }
 
     /** Meet link for video calls, the client's phone number otherwise. */
