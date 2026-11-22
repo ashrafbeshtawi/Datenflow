@@ -8,7 +8,9 @@ use App\EventListener\AdminAuthListener;
 use App\Entity\AvailabilityRule;
 use App\Entity\Inquiry;
 use App\Entity\Setting;
+use App\Mail\CvStorage;
 use App\Mail\InquiryMailer;
+use App\Mail\InquiryNotifier;
 use DateTimeImmutable;
 use DateTimeZone;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -30,6 +32,8 @@ class AdminController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly InquiryMailer $mailer,
+        private readonly InquiryNotifier $notifier,
+        private readonly CvStorage $cvs,
         private readonly SlotFinder $slots,
     ) {
     }
@@ -140,10 +144,28 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin', ['notice' => 'Termine bitte stornieren, nicht löschen.']);
         }
 
+        $id = $inquiry->getId();
         $this->em->remove($inquiry);
         $this->em->flush();
+        $this->cvs->delete($id);
 
         return $this->redirectToRoute('admin', ['notice' => 'Nachricht gelöscht.']);
+    }
+
+    /** Retries the mails of an inquiry whose first send failed (CV attached again for karriere). */
+    #[Route('/inquiry/{id}/resend', name: 'admin_resend', methods: ['POST'])]
+    public function resendMail(Request $request, Inquiry $inquiry): Response
+    {
+        $this->assertCsrf($request);
+
+        if (!$inquiry->isMailFailed()) {
+            return $this->redirectToRoute('admin', ['notice' => 'Die Mails dieser Anfrage wurden bereits versendet.']);
+        }
+
+        // ponytail: the visitor's language is not stored, the confirmation goes out in German.
+        return $this->redirectToRoute('admin', ['notice' => $this->notifier->notify($inquiry)
+            ? 'Mail erneut versendet.'
+            : 'Mail konnte wieder nicht versendet werden, bitte später erneut versuchen.']);
     }
 
     #[Route('/inquiry/{id}/cancel', name: 'admin_cancel', methods: ['POST'])]

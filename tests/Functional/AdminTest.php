@@ -6,6 +6,7 @@ use App\Booking\SlotFinder;
 use App\Entity\AvailabilityRule;
 use App\Entity\Inquiry;
 use App\Entity\Setting;
+use App\Mail\CvStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -276,6 +277,63 @@ class AdminTest extends WebTestCase
         $this->em()->clear();
         self::assertNull($this->em()->find(Inquiry::class, $message->getId()));
         self::assertNotNull($this->em()->find(Inquiry::class, $booking->getId()), 'appointments must survive delete attempts');
+    }
+
+    public function testFailedMailIsFlaggedAndResendAttachesTheStoredCv(): void
+    {
+        $client = $this->adminClient();
+        $email = uniqid('resend-').'@example.com';
+        $inquiry = new Inquiry('karriere', 'Resend Test', $email, 'Hallo', ['cv_datei' => 'lebenslauf.pdf']);
+        $inquiry->setMailFailed(true);
+        $this->em()->persist($inquiry);
+        $this->em()->flush();
+        $id = $inquiry->getId();
+
+        $cvSource = tempnam(sys_get_temp_dir(), 'cv');
+        file_put_contents($cvSource, '%PDF-1.4 fake');
+        static::getContainer()->get(CvStorage::class)->store($inquiry, $cvSource);
+        $stored = static::getContainer()->get(CvStorage::class)->path($id);
+
+        try {
+            $crawler = $client->request('GET', '/admin');
+            $row = $crawler->filter('#admin-messages tr')->reduce(fn ($node) => str_contains($node->text(), $email));
+            self::assertStringContainsString('Mail nicht versendet', $row->text());
+            self::assertCount(1, $row->filter('form[action$="/inquiry/'.$id.'/resend"]'));
+
+            $client->request('POST', '/admin/inquiry/'.$id.'/resend', ['_token' => $this->csrfToken($client)]);
+
+            self::assertResponseRedirects();
+            self::assertEmailCount(1);
+            $mail = self::getMailerMessage();
+            self::assertCount(1, $mail->getAttachments());
+            self::assertSame('lebenslauf.pdf', $mail->getAttachments()[0]->getFilename());
+
+            $this->em()->clear();
+            self::assertFalse($this->em()->find(Inquiry::class, $id)->isMailFailed(), 'flag clears after a successful resend');
+
+            // Deleting the application takes the stored CV with it.
+            $client->request('POST', '/admin/inquiry/'.$id.'/delete', ['_token' => $this->csrfToken($client)]);
+            self::assertResponseRedirects();
+            self::assertFileDoesNotExist($stored);
+        } finally {
+            @unlink($stored);
+        }
+    }
+
+    public function testResendRequiresCsrfToken(): void
+    {
+        $client = $this->adminClient();
+        $inquiry = new Inquiry('karriere', 'Csrf Test', uniqid('csrf-').'@example.com', 'Hallo');
+        $inquiry->setMailFailed(true);
+        $this->em()->persist($inquiry);
+        $this->em()->flush();
+
+        $client->request('POST', '/admin/inquiry/'.$inquiry->getId().'/resend', ['_token' => 'forged']);
+
+        self::assertGreaterThanOrEqual(400, $client->getResponse()->getStatusCode());
+        self::assertEmailCount(0);
+        $this->em()->clear();
+        self::assertTrue($this->em()->find(Inquiry::class, $inquiry->getId())->isMailFailed());
     }
 
     public function testRescheduleMovesTheBookingAndMailsTheClient(): void

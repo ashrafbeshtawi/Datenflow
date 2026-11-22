@@ -6,7 +6,8 @@ use App\Entity\Inquiry;
 use App\Form\FormErrorResponder;
 use App\Form\FormGuard;
 use App\Form\InquiryValidator;
-use App\Mail\InquiryMailer;
+use App\Mail\CvStorage;
+use App\Mail\InquiryNotifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,7 +30,8 @@ class KarriereSubmitController extends AbstractController
 
     public function __construct(
         private readonly EntityManagerInterface $em,
-        private readonly InquiryMailer $mailer,
+        private readonly InquiryNotifier $notifier,
+        private readonly CvStorage $cvs,
         private readonly FormGuard $guard,
         private readonly InquiryValidator $validator,
         private readonly FormErrorResponder $errorPage,
@@ -78,14 +80,18 @@ class KarriereSubmitController extends AbstractController
         $this->em->persist($inquiry);
         $this->em->flush();
 
-        try {
-            $this->mailer->send($inquiry, $attachment);
-        } catch (Throwable $e) {
-            // Application is already persisted — surface the failure so the visitor can call instead.
-            $this->logger->error('Inquiry mail failed', ['type' => 'karriere', 'inquiry' => $inquiry->getId(), 'error' => $e->getMessage()]);
-
-            return $this->errorPage->respond($request, self::TEMPLATE, 'send_failed', Response::HTTP_INTERNAL_SERVER_ERROR);
+        // Keep the CV next to the row, so a failed mail can be resent with it.
+        if ($attachment !== null) {
+            try {
+                $this->cvs->store($inquiry, $attachment['path']);
+            } catch (Throwable $e) {
+                $this->logger->error('CV could not be stored', ['inquiry' => $inquiry->getId(), 'error' => $e->getMessage()]);
+            }
         }
+
+        // The application is saved now; a mail failure is flagged for a
+        // resend from /admin instead of asking for a duplicate submit.
+        $this->notifier->notify($inquiry);
 
         return $this->redirectToRoute('karriere', ['sent' => 1]);
     }

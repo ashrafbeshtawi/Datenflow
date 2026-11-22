@@ -243,7 +243,7 @@ final class SiteCopy
                     'message' => 'Worum geht es? (optional)',
                     'message_ph' => 'Ein paar Sätze reichen: Was kostet Sie gerade Zeit oder Nerven? Zum Beispiel: „Wir schreiben alle Lieferscheine noch von Hand.“',
                     'submit' => 'Termin buchen',
-                    'thanks' => 'Termin gebucht! Sie erhalten in Kürze eine Bestätigung per E-Mail.',
+                    'thanks' => 'Termin gebucht! Ihr Termin ist fest reserviert. Die Bestätigung per E-Mail kann einen Moment dauern, bitte buchen Sie nicht erneut.',
                 ],
                 'mail' => [
                     'subject' => 'Ihre Terminbestätigung bei Datenflow',
@@ -288,7 +288,6 @@ final class SiteCopy
             'form_errors' => [
                 'validation' => 'Bitte prüfen Sie die markierten Felder.',
                 'rate_limit' => 'Zu viele Versuche, bitte versuchen Sie es später erneut.',
-                'send_failed' => 'Versand fehlgeschlagen. Bitte versuchen Sie es später erneut oder rufen Sie uns an.',
                 'required' => 'Dieses Feld ist ein Pflichtfeld.',
                 'invalid_email' => 'Bitte geben Sie eine gültige E-Mail-Adresse an.',
                 'cv_too_large' => 'Datei zu groß, maximal 8 MB.',
@@ -547,7 +546,7 @@ final class SiteCopy
                     'message' => 'What is it about? (optional)',
                     'message_ph' => 'A few sentences are enough: what costs you time or nerves right now? For example: "We still write all delivery notes by hand."',
                     'submit' => 'Book the call',
-                    'thanks' => 'Booked! You\'ll receive a confirmation by email shortly.',
+                    'thanks' => 'Booked! Your slot is reserved. The confirmation email may take a while, please don\'t book again.',
                 ],
                 'mail' => [
                     'subject' => 'Your booking confirmation at Datenflow',
@@ -592,7 +591,6 @@ final class SiteCopy
             'form_errors' => [
                 'validation' => 'Please check the highlighted fields.',
                 'rate_limit' => 'Too many attempts, please try again later.',
-                'send_failed' => 'Sending failed. Please try again later or give us a call.',
                 'required' => 'This field is required.',
                 'invalid_email' => 'Please enter a valid email address.',
                 'cv_too_large' => 'File too large,8 MB maximum.',

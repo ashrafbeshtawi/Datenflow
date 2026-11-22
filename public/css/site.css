@@ -1296,6 +1296,7 @@ img, svg { max-width: 100%; }
 .badge-steel { background: rgba(176, 138, 66, 0.14); color: var(--gold-deep); }
 .badge-warm { background: rgba(192, 96, 60, 0.16); color: #E8A387; }
 .badge-grey { background: var(--sand); color: var(--ink-body); }
+.badge-alert { background: rgba(192, 60, 60, 0.22); color: #F2A0A0; }
 
 .btn-sm { padding: 0.3rem 0.9rem; font-size: 0.85rem; }
 .btn-danger { background: transparent; color: #E8A387; border-color: #7A4A38; }

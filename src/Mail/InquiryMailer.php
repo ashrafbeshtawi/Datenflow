@@ -29,6 +29,7 @@ class InquiryMailer
     /**
      * Internal notification for every inquiry; bookings additionally get a
      * confirmation mail to the client (in the language they used the site in).
+     * Callers go through InquiryNotifier, which turns a failure into a flag.
      *
      * @param array{path: string, name: string}|null $attachment
      */
@@ -45,10 +46,26 @@ class InquiryMailer
             $email->addPart($invite);
         }
 
-        $this->mailer->send($email);
+        // Both mails are attempted independently, so a failing internal mail
+        // does not swallow the client's confirmation (and vice versa); the
+        // first failure is rethrown afterwards so the caller can flag the row.
+        $failure = null;
+        try {
+            $this->mailer->send($email);
+        } catch (\Throwable $e) {
+            $failure = $e;
+        }
 
         if ($isBooking) {
-            $this->mailer->send($this->buildConfirmation($inquiry, $lang, $meetLink)->addPart($invite));
+            try {
+                $this->mailer->send($this->buildConfirmation($inquiry, $lang, $meetLink)->addPart($invite));
+            } catch (\Throwable $e) {
+                $failure ??= $e;
+            }
+        }
+
+        if ($failure !== null) {
+            throw $failure;
         }
     }
 

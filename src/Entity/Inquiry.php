@@ -7,7 +7,8 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Every form submission (booking, contact, karriere) is persisted before the
- * notification mail goes out, so a lead is never lost to an SMTP hiccup.
+ * notification mail goes out, so a lead is never lost to an SMTP hiccup;
+ * a failed send only flags the row (mail_failed) for a resend from /admin.
  *
  * Bookings carry a starts_at slot; the partial unique index makes double
  * booking impossible at the DB level (cancelled rows free the slot again).
@@ -57,6 +58,10 @@ class Inquiry
 
     #[ORM\Column(length: 20, options: ['default' => self::STATUS_CONFIRMED])]
     private string $status = self::STATUS_CONFIRMED;
+
+    /** Set when the last attempt to send this inquiry's mails failed; the admin can resend. */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $mailFailed = false;
 
     public function __construct(
         string $type,
@@ -131,6 +136,16 @@ class Inquiry
     public function getStatus(): string
     {
         return $this->status;
+    }
+
+    public function isMailFailed(): bool
+    {
+        return $this->mailFailed;
+    }
+
+    public function setMailFailed(bool $failed): void
+    {
+        $this->mailFailed = $failed;
     }
 
     /** Cancelling frees the slot: the partial unique index only covers confirmed rows. */
