@@ -284,7 +284,7 @@ class AdminTest extends WebTestCase
         $client = $this->adminClient();
         $email = uniqid('resend-').'@example.com';
         $inquiry = new Inquiry('karriere', 'Resend Test', $email, 'Hallo', ['cv_datei' => 'lebenslauf.pdf']);
-        $inquiry->setMailFailed(true);
+        $inquiry->setMailSent(false);
         $this->em()->persist($inquiry);
         $this->em()->persist(new InquiryCv($inquiry, 'lebenslauf.pdf', '%PDF-1.4 fake'));
         $this->em()->flush();
@@ -304,7 +304,7 @@ class AdminTest extends WebTestCase
         self::assertSame('lebenslauf.pdf', $mail->getAttachments()[0]->getFilename());
 
         $this->em()->clear();
-        self::assertFalse($this->em()->find(Inquiry::class, $id)->isMailFailed(), 'flag clears after a successful resend');
+        self::assertTrue($this->em()->find(Inquiry::class, $id)->isMailSent(), 'flag clears after a successful resend');
 
         // Deleting the application takes the stored CV with it.
         $client->request('POST', '/admin/inquiry/'.$id.'/delete', ['_token' => $this->csrfToken($client)]);
@@ -317,7 +317,7 @@ class AdminTest extends WebTestCase
     {
         $client = $this->adminClient();
         $inquiry = new Inquiry('karriere', 'Csrf Test', uniqid('csrf-').'@example.com', 'Hallo');
-        $inquiry->setMailFailed(true);
+        $inquiry->setMailSent(false);
         $this->em()->persist($inquiry);
         $this->em()->flush();
 
@@ -326,7 +326,7 @@ class AdminTest extends WebTestCase
         self::assertGreaterThanOrEqual(400, $client->getResponse()->getStatusCode());
         self::assertEmailCount(0);
         $this->em()->clear();
-        self::assertTrue($this->em()->find(Inquiry::class, $inquiry->getId())->isMailFailed());
+        self::assertFalse($this->em()->find(Inquiry::class, $inquiry->getId())->isMailSent());
     }
 
     public function testRescheduleMovesTheBookingAndMailsTheClient(): void

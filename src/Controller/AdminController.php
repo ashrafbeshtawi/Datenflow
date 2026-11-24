@@ -154,7 +154,7 @@ class AdminController extends AbstractController
     {
         $this->assertCsrf($request);
 
-        if (!$inquiry->isMailFailed()) {
+        if ($inquiry->isMailSent()) {
             return $this->redirectToRoute('admin', ['notice' => 'Die Mails dieser Anfrage wurden bereits versendet.']);
         }
 

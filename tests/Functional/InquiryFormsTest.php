@@ -51,7 +51,7 @@ class InquiryFormsTest extends WebTestCase
         self::assertSame($slot, $inquiry->getStartsAt()->format('Y-m-d H:i'));
         self::assertSame('video', $inquiry->getCallType());
         self::assertSame(Inquiry::STATUS_CONFIRMED, $inquiry->getStatus());
-        self::assertFalse($inquiry->isMailFailed());
+        self::assertTrue($inquiry->isMailSent());
     }
 
     /**
@@ -75,7 +75,7 @@ class InquiryFormsTest extends WebTestCase
         $rows = $em->getRepository(Inquiry::class)->findBy(['email' => $email]);
         self::assertCount(1, $rows, 'exactly one booking, no retry needed');
         self::assertSame(Inquiry::STATUS_CONFIRMED, $rows[0]->getStatus());
-        self::assertTrue($rows[0]->isMailFailed(), 'row must be flagged for a resend');
+        self::assertFalse($rows[0]->isMailSent(), 'row must be flagged for a resend');
     }
 
     public function testKarriereApplicationKeepsCvAndIsFlaggedWhenMailFails(): void
@@ -97,7 +97,7 @@ class InquiryFormsTest extends WebTestCase
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $em->clear();
         $inquiry = $this->findInquiry($email);
-        self::assertTrue($inquiry->isMailFailed());
+        self::assertFalse($inquiry->isMailSent());
 
         $cv = $em->find(InquiryCv::class, $inquiry->getId());
         self::assertNotNull($cv, 'CV must be kept for the resend');
@@ -296,7 +296,7 @@ class InquiryFormsTest extends WebTestCase
         $inquiry = $this->findInquiry($email);
         self::assertSame('lebenslauf.pdf', $inquiry->getPayload()['cv_datei']);
         self::assertSame('lebenslauf.pdf', $mail->getAttachments()[0]->getFilename());
-        self::assertFalse($inquiry->isMailFailed());
+        self::assertTrue($inquiry->isMailSent());
     }
 
     public function testKarriereRejectsWrongCvType(): void

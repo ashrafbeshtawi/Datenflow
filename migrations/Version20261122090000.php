@@ -11,16 +11,16 @@ final class Version20261122090000 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Flag inquiries whose mails failed so the admin can resend them';
+        return 'Track whether an inquiry\'s mails went out, so the admin can resend failed ones';
     }
 
     public function up(Schema $schema): void
     {
-        $this->addSql('ALTER TABLE inquiry ADD mail_failed BOOLEAN DEFAULT false NOT NULL');
+        $this->addSql('ALTER TABLE inquiry ADD mail_sent BOOLEAN DEFAULT true NOT NULL');
     }
 
     public function down(Schema $schema): void
     {
-        $this->addSql('ALTER TABLE inquiry DROP mail_failed');
+        $this->addSql('ALTER TABLE inquiry DROP mail_sent');
     }
 }

@@ -34,13 +34,13 @@ class InquiryNotifier
                 ? $this->em->find(Setting::class, Setting::MEET_LINK)?->getValue()
                 : null;
             $this->mailer->send($inquiry, $this->em->find(InquiryCv::class, $inquiry->getId()), $lang, $meetLink);
-            $inquiry->setMailFailed(false);
+            $inquiry->setMailSent(true);
         } catch (Throwable $e) {
             $this->logger->error('Inquiry mail failed', ['type' => $inquiry->getType(), 'inquiry' => $inquiry->getId(), 'error' => $e->getMessage()]);
-            $inquiry->setMailFailed(true);
+            $inquiry->setMailSent(false);
         }
         $this->em->flush();
 
-        return !$inquiry->isMailFailed();
+        return $inquiry->isMailSent();
     }
 }

@@ -14,13 +14,13 @@
     {% else %}
         <span class="badge badge-grey">Bewerbung</span>
     {% endif %}
-    {% if inquiry.mailFailed %}
+    {% if not inquiry.mailSent %}
         <span class="badge badge-alert" title="Bestätigung bzw. interne Benachrichtigung ist nicht rausgegangen"><i class="bi bi-envelope-exclamation"></i> Mail nicht versendet</span>
     {% endif %}
 {% endmacro %}
 
 {% macro resend_form(inquiry) %}
-    {% if inquiry.mailFailed %}
+    {% if not inquiry.mailSent %}
         <form method="post" action="{{ path('admin_resend', {id: inquiry.id}) }}">
             <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
             <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-send"></i> Mail erneut senden</button>
