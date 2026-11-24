@@ -133,6 +133,36 @@ class InquiryMailerTest extends TestCase
         }
     }
 
+    public function testNameWithLineBreaksStaysInsideTheInviteSummary(): void
+    {
+        $inquiry = new Inquiry(
+            'booking',
+            "Max\r\nURL:https://evil.example\nDESCRIPTION:Bitte hier zahlen; danke, \\Team",
+            'maria@example.com',
+            '',
+            ['phone' => '030 1234567'],
+            new \DateTimeImmutable('2026-09-08 14:30'),
+            'phone',
+        );
+
+        $this->mailer->send($inquiry);
+
+        $ics = $this->sent[0]->getAttachments()[0]->getBody();
+        $lines = explode("\r\n", $ics);
+
+        foreach ($lines as $line) {
+            self::assertLessThanOrEqual(75, \strlen($line), 'line longer than 75 octets: '.$line);
+            self::assertDoesNotMatchRegularExpression('/^(URL|DESCRIPTION):/', $line);
+        }
+        self::assertCount(1, preg_grep('/^SUMMARY:/', $lines));
+
+        $unfolded = str_replace("\r\n ", '', $ics);
+        self::assertStringContainsString(
+            'SUMMARY:Erstgespräch Datenflow: Max\nURL:https://evil.example\nDESCRIPTION:Bitte hier zahlen\; danke\, \\\\Team'."\r\n",
+            $unfolded,
+        );
+    }
+
     public function testPhoneBookingConfirmationIsLocalizedAndNamesTheNumber(): void
     {
         $inquiry = new Inquiry(
