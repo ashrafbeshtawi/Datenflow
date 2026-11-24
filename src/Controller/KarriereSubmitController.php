@@ -90,8 +90,9 @@ class KarriereSubmitController extends AbstractController
         }
 
         // The application is saved now; a mail failure is flagged for a
-        // resend from /admin instead of asking for a duplicate submit.
-        $this->notifier->notify($inquiry);
+        // resend from /admin instead of asking for a duplicate submit. The
+        // upload itself is the fallback when storing the CV failed above.
+        $this->notifier->notify($inquiry, fallbackCv: $attachment);
 
         return $this->redirectToRoute('karriere', ['sent' => 1]);
     }

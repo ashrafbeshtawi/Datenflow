@@ -107,6 +107,34 @@ class InquiryFormsTest extends WebTestCase
         }
     }
 
+    /** var/cv missing or not writable must not cost the application mail its CV. */
+    public function testKarriereMailAttachesUploadWhenCvCannotBeStored(): void
+    {
+        $cvs = self::createStub(CvStorage::class);
+        $cvs->method('store')->willThrowException(new \RuntimeException('Cannot create CV directory'));
+        $this->client->disableReboot();
+        static::getContainer()->set(CvStorage::class, $cvs);
+
+        $email = uniqid('karriere-nostore-').'@example.com';
+        $cvPath = sys_get_temp_dir().'/lebenslauf.pdf';
+        file_put_contents($cvPath, "%PDF-1.4\n%fake minimal pdf\n");
+
+        $this->client->request('GET', '/karriere');
+        $this->client->submitForm('Bewerbung senden', [
+            'name' => 'Devi Developer',
+            'email' => $email,
+            'message' => 'Ich baue gern Dinge, die funktionieren.',
+            'cv' => new UploadedFile($cvPath, 'lebenslauf.pdf', 'application/pdf', test: true),
+        ]);
+
+        self::assertResponseRedirects('/karriere?sent=1');
+        self::assertEmailCount(1);
+        $attachments = self::getMailerMessage()->getAttachments();
+        self::assertCount(1, $attachments);
+        self::assertSame('lebenslauf.pdf', $attachments[0]->getFilename());
+        self::assertFalse($this->findInquiry($email)->isMailFailed());
+    }
+
     public function testBookedSlotRendersDisabledAndCannotBeRebooked(): void
     {
         [$crawler, $slot] = $this->openBookingWeek();
