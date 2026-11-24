@@ -3,11 +3,14 @@
 namespace App\Tests\Functional;
 
 use App\Entity\Inquiry;
+use App\Entity\InquiryCv;
+use App\Mail\InquiryMailer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Mailer\Exception\TransportException;
 
 class InquiryFormsTest extends WebTestCase
 {
@@ -48,6 +51,58 @@ class InquiryFormsTest extends WebTestCase
         self::assertSame($slot, $inquiry->getStartsAt()->format('Y-m-d H:i'));
         self::assertSame('video', $inquiry->getCallType());
         self::assertSame(Inquiry::STATUS_CONFIRMED, $inquiry->getStatus());
+        self::assertTrue($inquiry->isMailSent());
+    }
+
+    /**
+     * The slot is booked before any mail goes out, so a mail failure must not
+     * read as "try again": that would make the visitor book a second time.
+     */
+    public function testBookingSucceedsAndIsFlaggedWhenMailFails(): void
+    {
+        $this->useFailingMailer();
+        $email = uniqid('mailfail-').'@example.com';
+
+        $this->submitBooking($email);
+
+        self::assertResponseRedirects('/termin?sent=1');
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('.form-success', 'Termin gebucht');
+        self::assertSelectorTextContains('.form-success', 'fest reserviert');
+
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $em->clear();
+        $rows = $em->getRepository(Inquiry::class)->findBy(['email' => $email]);
+        self::assertCount(1, $rows, 'exactly one booking, no retry needed');
+        self::assertSame(Inquiry::STATUS_CONFIRMED, $rows[0]->getStatus());
+        self::assertFalse($rows[0]->isMailSent(), 'row must be flagged for a resend');
+    }
+
+    public function testKarriereApplicationKeepsCvAndIsFlaggedWhenMailFails(): void
+    {
+        $this->useFailingMailer();
+        $email = uniqid('karriere-fail-').'@example.com';
+        $cvPath = sys_get_temp_dir().'/lebenslauf.pdf';
+        file_put_contents($cvPath, "%PDF-1.4\n%fake minimal pdf\n");
+
+        $this->client->request('GET', '/karriere');
+        $this->client->submitForm('Bewerbung senden', [
+            'name' => 'Devi Developer',
+            'email' => $email,
+            'message' => 'Ich baue gern Dinge, die funktionieren.',
+            'cv' => new UploadedFile($cvPath, 'lebenslauf.pdf', 'application/pdf', test: true),
+        ]);
+
+        self::assertResponseRedirects('/karriere?sent=1');
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $em->clear();
+        $inquiry = $this->findInquiry($email);
+        self::assertFalse($inquiry->isMailSent());
+
+        $cv = $em->find(InquiryCv::class, $inquiry->getId());
+        self::assertNotNull($cv, 'CV must be kept for the resend');
+        self::assertSame('lebenslauf.pdf', $cv->getFileName());
+        self::assertStringStartsWith('%PDF', $cv->getContent());
     }
 
     public function testBookedSlotRendersDisabledAndCannotBeRebooked(): void
@@ -238,7 +293,10 @@ class InquiryFormsTest extends WebTestCase
         self::assertCount(1, $mail->getAttachments());
 
         self::assertResponseRedirects('/karriere?sent=1');
-        self::assertSame('lebenslauf.pdf', $this->findInquiry($email)->getPayload()['cv_datei']);
+        $inquiry = $this->findInquiry($email);
+        self::assertSame('lebenslauf.pdf', $inquiry->getPayload()['cv_datei']);
+        self::assertSame('lebenslauf.pdf', $mail->getAttachments()[0]->getFilename());
+        self::assertTrue($inquiry->isMailSent());
     }
 
     public function testKarriereRejectsWrongCvType(): void
@@ -257,6 +315,19 @@ class InquiryFormsTest extends WebTestCase
         self::assertResponseStatusCodeSame(422);
         self::assertSelectorTextContains('.form-error-summary', 'PDF');
         self::assertEmailCount(0);
+    }
+
+    /**
+     * Every send throws, like an SMTP outage. One kernel for the whole test,
+     * so the replacement survives across requests.
+     */
+    private function useFailingMailer(): void
+    {
+        $mailer = self::createStub(InquiryMailer::class);
+        $mailer->method('send')->willThrowException(new TransportException('SMTP down'));
+
+        $this->client->disableReboot();
+        static::getContainer()->set(InquiryMailer::class, $mailer);
     }
 
     /** Monday of a week comfortably past the 24h lead time and inside the 4-week horizon. */

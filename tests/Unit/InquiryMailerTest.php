@@ -3,8 +3,10 @@
 namespace App\Tests\Unit;
 
 use App\Entity\Inquiry;
+use App\Entity\InquiryCv;
 use App\Mail\InquiryMailer;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Mailer\Exception\TransportException;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 
@@ -32,11 +34,8 @@ class InquiryMailerTest extends TestCase
 
     public function testKarriereInquiryGoesToJobsWithAttachment(): void
     {
-        $cvPath = tempnam(sys_get_temp_dir(), 'cv');
-        file_put_contents($cvPath, '%PDF-1.4 fake');
-
         $inquiry = new Inquiry('karriere', 'Devi Developer', 'devi@example.com', 'Hallo');
-        $this->mailer->send($inquiry, ['path' => $cvPath, 'name' => 'lebenslauf.pdf']);
+        $this->mailer->send($inquiry, new InquiryCv($inquiry, 'lebenslauf.pdf', '%PDF-1.4 fake'));
 
         self::assertCount(1, $this->sent);
         self::assertSame('jobs@test.local', $this->sent[0]->getTo()[0]->getAddress());
@@ -80,6 +79,29 @@ class InquiryMailerTest extends TestCase
             self::assertStringContainsString('URL:https://meet.google.com/jre-kcoc-swk', $ics);
             self::assertStringContainsString('ATTENDEE;RSVP=TRUE:mailto:maria@example.com', $ics);
         }
+    }
+
+    public function testFailingInternalMailStillSendsTheConfirmationThenThrows(): void
+    {
+        $sent = [];
+        $transport = self::createStub(MailerInterface::class);
+        $transport->method('send')->willReturnCallback(function (Email $email) use (&$sent): void {
+            if ($email->getTo()[0]->getAddress() === 'contact@test.local') {
+                throw new TransportException('internal relay down');
+            }
+            $sent[] = $email;
+        });
+        $mailer = new InquiryMailer($transport, 'Datenflow <noreply@test.local>', 'contact@test.local', 'jobs@test.local');
+        $inquiry = new Inquiry('booking', 'Maria Muster', 'maria@example.com', '', [], new \DateTimeImmutable('2026-09-07 10:00'), 'video');
+
+        try {
+            $mailer->send($inquiry, null, 'de', 'https://meet.google.com/jre-kcoc-swk');
+            self::fail('the failure must reach the caller, so the row gets flagged');
+        } catch (TransportException) {
+        }
+
+        self::assertCount(1, $sent);
+        self::assertSame('maria@example.com', $sent[0]->getTo()[0]->getAddress());
     }
 
     public function testRescheduleMailsClientAndInternalWithInviteUpdate(): void

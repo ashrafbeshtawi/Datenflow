@@ -5,21 +5,18 @@ namespace App\Controller;
 use App\Booking\BookingLimits;
 use App\Booking\SlotFinder;
 use App\Entity\Inquiry;
-use App\Entity\Setting;
 use App\Form\FormErrorResponder;
 use App\Form\FormGuard;
 use App\Form\InquiryValidator;
-use App\Mail\InquiryMailer;
+use App\Mail\InquiryNotifier;
 use DateTimeImmutable;
 use DateTimeZone;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Throwable;
 
 class BookingSubmitController extends AbstractController
 {
@@ -27,13 +24,12 @@ class BookingSubmitController extends AbstractController
 
     public function __construct(
         private readonly EntityManagerInterface $em,
-        private readonly InquiryMailer $mailer,
+        private readonly InquiryNotifier $notifier,
         private readonly FormGuard $guard,
         private readonly InquiryValidator $validator,
         private readonly FormErrorResponder $errorPage,
         private readonly SlotFinder $slots,
         private readonly BookingLimits $limits,
-        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -91,15 +87,9 @@ class BookingSubmitController extends AbstractController
         }
         $this->limits->record($request);
 
-        try {
-            $meetLink = $callType === 'video' ? $this->em->find(Setting::class, Setting::MEET_LINK)?->getValue() : null;
-            $this->mailer->send($inquiry, null, PageController::resolveLocale($request), $meetLink);
-        } catch (Throwable $e) {
-            // Booking is already persisted — surface the failure so the visitor can call instead.
-            $this->logger->error('Inquiry mail failed', ['type' => 'booking', 'inquiry' => $inquiry->getId(), 'error' => $e->getMessage()]);
-
-            return $this->respondError($request, 'send_failed', Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        // The slot is booked now. A mail failure is flagged for a resend from
+        // /admin, never shown as "try again": a retry would double-book.
+        $this->notifier->notify($inquiry, PageController::resolveLocale($request));
 
         return $this->redirectToRoute('booking', ['sent' => 1]);
     }

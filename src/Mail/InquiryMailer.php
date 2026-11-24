@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Booking\SlotFinder;
 use App\Content\SiteCopy;
 use App\Entity\Inquiry;
+use App\Entity\InquiryCv;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -29,14 +30,13 @@ class InquiryMailer
     /**
      * Internal notification for every inquiry; bookings additionally get a
      * confirmation mail to the client (in the language they used the site in).
-     *
-     * @param array{path: string, name: string}|null $attachment
+     * Callers go through InquiryNotifier, which turns a failure into a flag.
      */
-    public function send(Inquiry $inquiry, ?array $attachment = null, string $lang = 'de', ?string $meetLink = null): void
+    public function send(Inquiry $inquiry, ?InquiryCv $cv = null, string $lang = 'de', ?string $meetLink = null): void
     {
         $email = $this->buildInternalNotification($inquiry, $meetLink);
-        if ($attachment !== null) {
-            $email->attachFromPath($attachment['path'], $attachment['name']);
+        if ($cv !== null) {
+            $email->attach($cv->getContent(), $cv->getFileName());
         }
 
         $isBooking = $inquiry->getType() === Inquiry::TYPE_BOOKING && $inquiry->getStartsAt() !== null;
@@ -45,10 +45,26 @@ class InquiryMailer
             $email->addPart($invite);
         }
 
-        $this->mailer->send($email);
+        // Both mails are attempted independently, so a failing internal mail
+        // does not swallow the client's confirmation (and vice versa); the
+        // first failure is rethrown afterwards so the caller can flag the row.
+        $failure = null;
+        try {
+            $this->mailer->send($email);
+        } catch (\Throwable $e) {
+            $failure = $e;
+        }
 
         if ($isBooking) {
-            $this->mailer->send($this->buildConfirmation($inquiry, $lang, $meetLink)->addPart($invite));
+            try {
+                $this->mailer->send($this->buildConfirmation($inquiry, $lang, $meetLink)->addPart($invite));
+            } catch (\Throwable $e) {
+                $failure ??= $e;
+            }
+        }
+
+        if ($failure !== null) {
+            throw $failure;
         }
     }
 
