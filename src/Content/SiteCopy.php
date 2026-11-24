@@ -243,7 +243,7 @@ final class SiteCopy
                     'message' => 'Worum geht es? (optional)',
                     'message_ph' => 'Ein paar Sätze reichen: Was kostet Sie gerade Zeit oder Nerven? Zum Beispiel: „Wir schreiben alle Lieferscheine noch von Hand.“',
                     'submit' => 'Termin buchen',
-                    'thanks' => 'Termin gebucht! Ihr Termin ist fest reserviert. Die Bestätigung per E-Mail kann einen Moment dauern, bitte buchen Sie nicht erneut.',
+                    'thanks' => 'Termin gebucht! Ihr Termin ist fest reserviert. Die Bestätigung per E-Mail kann einen Moment dauern.',
                 ],
                 'mail' => [
                     'subject' => 'Ihre Terminbestätigung bei Datenflow',
@@ -546,7 +546,7 @@ final class SiteCopy
                     'message' => 'What is it about? (optional)',
                     'message_ph' => 'A few sentences are enough: what costs you time or nerves right now? For example: "We still write all delivery notes by hand."',
                     'submit' => 'Book the call',
-                    'thanks' => 'Booked! Your slot is reserved. The confirmation email may take a while, please don\'t book again.',
+                    'thanks' => 'Booked! Your slot is reserved. The confirmation email may take a while.',
                 ],
                 'mail' => [
                     'subject' => 'Your booking confirmation at Datenflow',

@@ -68,7 +68,7 @@ class InquiryFormsTest extends WebTestCase
         self::assertResponseRedirects('/termin?sent=1');
         $this->client->followRedirect();
         self::assertSelectorTextContains('.form-success', 'Termin gebucht');
-        self::assertSelectorTextContains('.form-success', 'nicht erneut');
+        self::assertSelectorTextContains('.form-success', 'fest reserviert');
 
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $em->clear();
