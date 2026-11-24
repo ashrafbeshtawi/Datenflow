@@ -143,9 +143,9 @@ class Inquiry
         return $this->mailFailed;
     }
 
-    public function setMailFailed(bool $failed): void
+    public function setMailFailed(bool $isFailed): void
     {
-        $this->mailFailed = $failed;
+        $this->mailFailed = $isFailed;
     }
 
     /** Cancelling frees the slot: the partial unique index only covers confirmed rows. */

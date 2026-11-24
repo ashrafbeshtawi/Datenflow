@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Entity\Inquiry;
+use App\Entity\InquiryCv;
 use App\Entity\Setting;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -20,25 +21,19 @@ class InquiryNotifier
 {
     public function __construct(
         private readonly InquiryMailer $mailer,
-        private readonly CvStorage $cvs,
         private readonly EntityManagerInterface $em,
         private readonly LoggerInterface $logger,
     ) {
     }
 
-    /**
-     * @param array{path: string, name: string}|null $fallbackCv the uploaded CV,
-     *        attached when the stored copy is missing (storing it failed)
-     *
-     * @return bool whether every mail went out
-     */
-    public function notify(Inquiry $inquiry, string $lang = 'de', ?array $fallbackCv = null): bool
+    /** @return bool whether every mail went out */
+    public function notify(Inquiry $inquiry, string $lang = 'de'): bool
     {
         try {
             $meetLink = $inquiry->getCallType() === 'video'
                 ? $this->em->find(Setting::class, Setting::MEET_LINK)?->getValue()
                 : null;
-            $this->mailer->send($inquiry, $this->cvs->attachment($inquiry) ?? $fallbackCv, $lang, $meetLink);
+            $this->mailer->send($inquiry, $this->em->find(InquiryCv::class, $inquiry->getId()), $lang, $meetLink);
             $inquiry->setMailFailed(false);
         } catch (Throwable $e) {
             $this->logger->error('Inquiry mail failed', ['type' => $inquiry->getType(), 'inquiry' => $inquiry->getId(), 'error' => $e->getMessage()]);

@@ -3,6 +3,7 @@
 namespace App\Tests\Unit;
 
 use App\Entity\Inquiry;
+use App\Entity\InquiryCv;
 use App\Mail\InquiryMailer;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Mailer\Exception\TransportException;
@@ -33,11 +34,8 @@ class InquiryMailerTest extends TestCase
 
     public function testKarriereInquiryGoesToJobsWithAttachment(): void
     {
-        $cvPath = tempnam(sys_get_temp_dir(), 'cv');
-        file_put_contents($cvPath, '%PDF-1.4 fake');
-
         $inquiry = new Inquiry('karriere', 'Devi Developer', 'devi@example.com', 'Hallo');
-        $this->mailer->send($inquiry, ['path' => $cvPath, 'name' => 'lebenslauf.pdf']);
+        $this->mailer->send($inquiry, new InquiryCv($inquiry, 'lebenslauf.pdf', '%PDF-1.4 fake'));
 
         self::assertCount(1, $this->sent);
         self::assertSame('jobs@test.local', $this->sent[0]->getTo()[0]->getAddress());

@@ -8,7 +8,6 @@ use App\EventListener\AdminAuthListener;
 use App\Entity\AvailabilityRule;
 use App\Entity\Inquiry;
 use App\Entity\Setting;
-use App\Mail\CvStorage;
 use App\Mail\InquiryMailer;
 use App\Mail\InquiryNotifier;
 use DateTimeImmutable;
@@ -33,7 +32,6 @@ class AdminController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly InquiryMailer $mailer,
         private readonly InquiryNotifier $notifier,
-        private readonly CvStorage $cvs,
         private readonly SlotFinder $slots,
     ) {
     }
@@ -144,10 +142,8 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin', ['notice' => 'Termine bitte stornieren, nicht löschen.']);
         }
 
-        $id = $inquiry->getId();
         $this->em->remove($inquiry);
         $this->em->flush();
-        $this->cvs->delete($id);
 
         return $this->redirectToRoute('admin', ['notice' => 'Nachricht gelöscht.']);
     }

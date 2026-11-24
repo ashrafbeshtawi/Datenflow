@@ -3,7 +3,7 @@
 namespace App\Tests\Functional;
 
 use App\Entity\Inquiry;
-use App\Mail\CvStorage;
+use App\Entity\InquiryCv;
 use App\Mail\InquiryMailer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -94,45 +94,15 @@ class InquiryFormsTest extends WebTestCase
         ]);
 
         self::assertResponseRedirects('/karriere?sent=1');
-        static::getContainer()->get(EntityManagerInterface::class)->clear();
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $em->clear();
         $inquiry = $this->findInquiry($email);
         self::assertTrue($inquiry->isMailFailed());
 
-        $stored = static::getContainer()->get(CvStorage::class)->path($inquiry->getId());
-        try {
-            self::assertFileExists($stored, 'CV must be kept for the resend');
-            self::assertStringStartsWith('%PDF', file_get_contents($stored));
-        } finally {
-            @unlink($stored);
-        }
-    }
-
-    /** var/cv missing or not writable must not cost the application mail its CV. */
-    public function testKarriereMailAttachesUploadWhenCvCannotBeStored(): void
-    {
-        $cvs = self::createStub(CvStorage::class);
-        $cvs->method('store')->willThrowException(new \RuntimeException('Cannot create CV directory'));
-        $this->client->disableReboot();
-        static::getContainer()->set(CvStorage::class, $cvs);
-
-        $email = uniqid('karriere-nostore-').'@example.com';
-        $cvPath = sys_get_temp_dir().'/lebenslauf.pdf';
-        file_put_contents($cvPath, "%PDF-1.4\n%fake minimal pdf\n");
-
-        $this->client->request('GET', '/karriere');
-        $this->client->submitForm('Bewerbung senden', [
-            'name' => 'Devi Developer',
-            'email' => $email,
-            'message' => 'Ich baue gern Dinge, die funktionieren.',
-            'cv' => new UploadedFile($cvPath, 'lebenslauf.pdf', 'application/pdf', test: true),
-        ]);
-
-        self::assertResponseRedirects('/karriere?sent=1');
-        self::assertEmailCount(1);
-        $attachments = self::getMailerMessage()->getAttachments();
-        self::assertCount(1, $attachments);
-        self::assertSame('lebenslauf.pdf', $attachments[0]->getFilename());
-        self::assertFalse($this->findInquiry($email)->isMailFailed());
+        $cv = $em->find(InquiryCv::class, $inquiry->getId());
+        self::assertNotNull($cv, 'CV must be kept for the resend');
+        self::assertSame('lebenslauf.pdf', $cv->getFileName());
+        self::assertStringStartsWith('%PDF', $cv->getContent());
     }
 
     public function testBookedSlotRendersDisabledAndCannotBeRebooked(): void
@@ -327,7 +297,6 @@ class InquiryFormsTest extends WebTestCase
         self::assertSame('lebenslauf.pdf', $inquiry->getPayload()['cv_datei']);
         self::assertSame('lebenslauf.pdf', $mail->getAttachments()[0]->getFilename());
         self::assertFalse($inquiry->isMailFailed());
-        @unlink(static::getContainer()->get(CvStorage::class)->path($inquiry->getId()));
     }
 
     public function testKarriereRejectsWrongCvType(): void
