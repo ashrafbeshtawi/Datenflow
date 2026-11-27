@@ -79,6 +79,13 @@ jobs:
               curl -sf http://localhost:8081/robots.txt | grep -q '^Sitemap: '
               curl -sf http://localhost:8081/sitemap.xml | grep -q '<loc>'
               echo "prod image serves robots.txt and sitemap.xml"
+              # The retention purge: cron is running, and its job line works
+              # with cron's empty environment (env file, www-data, console).
+              docker exec prod-smoke test -f /run/crond.pid
+              job=$(grep -v '^#' docker/php/purge-inquiries.cron | cut -d' ' -f7-)
+              docker exec prod-smoke env -i sh -c "$job"
+              docker logs prod-smoke 2>&1 | grep -q 'Deleted messages:'
+              echo "prod image runs the purge cron job"
               exit 0
             fi
             sleep 2

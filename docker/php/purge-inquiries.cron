@@ -1,0 +1,6 @@
+# Installed as /etc/cron.d/purge-inquiries in the prod image (see Dockerfile).
+# Nightly retention purge promised by the privacy policy. Cron starts jobs with
+# an empty environment, so the container env (DATABASE_URL, PATH ...) is loaded
+# from /run/cron.env, written by the container CMD at boot. The job runs as
+# www-data so var/cache stays writable for Apache; output goes to the container log.
+30 3 * * * root . /run/cron.env; cd /app && setpriv --reuid=www-data --regid=www-data --init-groups bin/console app:purge-inquiries --no-interaction > /proc/1/fd/1 2>&1

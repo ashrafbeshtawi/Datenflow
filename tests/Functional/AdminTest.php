@@ -260,23 +260,30 @@ class AdminTest extends WebTestCase
         }
     }
 
-    public function testMessageCanBeDeletedButAppointmentsCannot(): void
+    public function testMessagesAndPastAppointmentsCanBeDeletedButUpcomingOnesCannot(): void
     {
         $client = $this->adminClient();
         $message = new Inquiry('karriere', 'Delete Test', uniqid('delete-').'@example.com', 'Weg damit');
+        $pastAt = (new \DateTimeImmutable('-2 days'))->setTime(4, random_int(0, 59), random_int(0, 59));
+        $pastBooking = new Inquiry('booking', 'Past Test', uniqid('past-').'@example.com', '', [], $pastAt, 'video');
         $this->em()->persist($message);
+        $this->em()->persist($pastBooking);
         $this->em()->flush();
         [, $booking] = $this->bookFreeSlot('video');
 
-        $client->request('POST', '/admin/inquiry/'.$message->getId().'/delete', ['_token' => $this->csrfToken($client)]);
-        self::assertResponseRedirects();
+        $crawler = $client->request('GET', '/admin');
+        $row = $crawler->filter('#admin-history tr')->reduce(fn ($node) => str_contains($node->text(), $pastBooking->getEmail()));
+        self::assertCount(1, $row->filter('form[action$="/inquiry/'.$pastBooking->getId().'/delete"]'), 'history rows offer a delete button');
 
-        $client->request('POST', '/admin/inquiry/'.$booking->getId().'/delete', ['_token' => $this->csrfToken($client)]);
-        self::assertResponseRedirects();
+        foreach ([$message, $pastBooking, $booking] as $inquiry) {
+            $client->request('POST', '/admin/inquiry/'.$inquiry->getId().'/delete', ['_token' => $this->csrfToken($client)]);
+            self::assertResponseRedirects();
+        }
 
         $this->em()->clear();
         self::assertNull($this->em()->find(Inquiry::class, $message->getId()));
-        self::assertNotNull($this->em()->find(Inquiry::class, $booking->getId()), 'appointments must survive delete attempts');
+        self::assertNull($this->em()->find(Inquiry::class, $pastBooking->getId()), 'past appointments may be deleted');
+        self::assertNotNull($this->em()->find(Inquiry::class, $booking->getId()), 'upcoming appointments must survive delete attempts');
     }
 
     public function testFailedMailIsFlaggedAndResendAttachesTheStoredCv(): void

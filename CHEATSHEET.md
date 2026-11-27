@@ -51,3 +51,8 @@ vendor/bin/phpunit --testsuite E2E
 
 `open http://localhost:8080/admin` — admin panel (form login, credentials = `ADMIN_USER` / `ADMIN_PASSWORD` from .env)
 Manage inquiries (edit/cancel), weekly availability, one-off slot blocks and the Google Meet link.
+
+## Data retention
+
+`php bin/console app:purge-inquiries --dry-run` — count what the retention purge would delete
+`php bin/console app:purge-inquiries` — delete messages/applications 6 months after receipt, bookings 6 months after the call or cancellation, past blocks (prod: cron in the container, nightly 03:30 UTC)

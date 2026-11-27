@@ -87,7 +87,9 @@ class AdminController extends AbstractController
     #[Route('', name: 'admin', methods: ['GET'])]
     public function showDashboard(Request $request): Response
     {
-        $all = $this->em->getRepository(Inquiry::class)->findBy([], ['createdAt' => 'DESC'], 300);
+        // No cap: app:purge-inquiries bounds the table to the retention period,
+        // and every row must stay reachable so it can be deleted on request.
+        $all = $this->em->getRepository(Inquiry::class)->findBy([], ['createdAt' => 'DESC']);
         $grid = $this->slots->buildWeekGrid(null);
 
         return $this->render('admin/dashboard.html.twig', $this->buildBaseContext() + $this->partitionInquiries($all, $this->slots->getCurrentTime()) + [
@@ -137,15 +139,18 @@ class AdminController extends AbstractController
     {
         $this->assertCsrf($request);
 
-        // Appointments are cancelled (mail + history), never deleted.
-        if ($inquiry->getStartsAt() !== null) {
-            return $this->redirectToRoute('admin', ['notice' => 'Termine bitte stornieren, nicht löschen.']);
+        // Upcoming appointments are cancelled (mail + freed slot), never deleted;
+        // past or cancelled ones are history and may go (app:purge-inquiries
+        // removes them after the retention period anyway).
+        if ($this->isUpcoming($inquiry, $this->slots->getCurrentTime())) {
+            return $this->redirectToRoute('admin', ['notice' => 'Kommende Termine bitte stornieren, nicht löschen.']);
         }
 
+        // The stored CV goes with it (inquiry_cv FK is ON DELETE CASCADE).
         $this->em->remove($inquiry);
         $this->em->flush();
 
-        return $this->redirectToRoute('admin', ['notice' => 'Nachricht gelöscht.']);
+        return $this->redirectToRoute('admin', ['notice' => $inquiry->getStartsAt() === null ? 'Nachricht gelöscht.' : 'Termin gelöscht.']);
     }
 
     /** Retries the mails of an inquiry whose first send failed (CV attached again for karriere). */
@@ -294,16 +299,20 @@ class AdminController extends AbstractController
      */
     private function partitionInquiries(array $all, DateTimeImmutable $now): array
     {
-        $upcoming = array_filter($all, fn (Inquiry $i) => $i->getStartsAt() !== null
-            && $i->getStartsAt() >= $now && $i->getStatus() === Inquiry::STATUS_CONFIRMED);
+        $upcoming = array_filter($all, fn (Inquiry $i) => $this->isUpcoming($i, $now));
         usort($upcoming, fn (Inquiry $a, Inquiry $b) => $a->getStartsAt() <=> $b->getStartsAt());
 
         return [
             'upcoming' => $upcoming,
             'messages' => array_filter($all, fn (Inquiry $i) => $i->getStartsAt() === null),
-            'history' => array_filter($all, fn (Inquiry $i) => $i->getStartsAt() !== null
-                && ($i->getStartsAt() < $now || $i->getStatus() !== Inquiry::STATUS_CONFIRMED)),
+            'history' => array_filter($all, fn (Inquiry $i) => $i->getStartsAt() !== null && !$this->isUpcoming($i, $now)),
         ];
+    }
+
+    private function isUpcoming(Inquiry $inquiry, DateTimeImmutable $now): bool
+    {
+        return $inquiry->getStartsAt() !== null && $inquiry->getStartsAt() >= $now
+            && $inquiry->getStatus() === Inquiry::STATUS_CONFIRMED;
     }
 
     /** @return array<int, AvailabilityRule> keyed by ISO weekday, at most one per day */
