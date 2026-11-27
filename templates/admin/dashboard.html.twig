@@ -179,21 +179,28 @@
         <details class="admin-card admin-history">
             <summary><h2><i class="bi bi-archive"></i> Verlauf ({{ history|length }})</h2></summary>
             <div class="slot-scroll">
-                <table class="admin-table">
+                <p class="field-hint">Vergangene und stornierte Termine werden nach sechs Monaten automatisch gelöscht, Nachrichten und Bewerbungen sechs Monate nach Eingang.</p>
+                <table class="admin-table" id="admin-history">
                     <thead>
-                        <tr><th>Termin</th><th>Art</th><th>Name</th><th>E-Mail</th><th>Status</th></tr>
+                        <tr><th>Termin</th><th>Art</th><th>Name</th><th>E-Mail</th><th>Status</th><th class="admin-actions"></th></tr>
                     </thead>
                     <tbody>
-                        {% for inquiry in history|slice(0, 100) %}
+                        {% for inquiry in history %}
                             <tr>
                                 <td>{{ inquiry.startsAt|date('d.m.Y H:i') }}</td>
                                 <td>{{ _self.type_badge(inquiry) }}</td>
                                 <td>{{ inquiry.name }}</td>
                                 <td><a href="mailto:{{ inquiry.email }}">{{ inquiry.email }}</a></td>
                                 <td><span class="status-{{ inquiry.status }}">{{ inquiry.status == 'confirmed' ? 'stattgefunden' : 'storniert' }}</span></td>
+                                <td class="admin-actions">
+                                    <form method="post" action="{{ path('admin_inquiry_delete', {id: inquiry.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('admin') }}">
+                                        <button class="btn btn-danger btn-sm" type="submit">Löschen</button>
+                                    </form>
+                                </td>
                             </tr>
                         {% else %}
-                            <tr><td colspan="5" class="admin-empty">Noch kein Verlauf.</td></tr>
+                            <tr><td colspan="6" class="admin-empty">Noch kein Verlauf.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
